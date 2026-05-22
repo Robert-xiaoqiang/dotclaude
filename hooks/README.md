@@ -11,6 +11,12 @@ needed; keep each platform's scripts under its own folder with natural names.
 | `linux/protect-secrets.sh`   | `PreToolUse` on `Edit\|Write`  | Blocks edits to `.env`, `*.pem`, `*.key`, `credentials`, etc. |
 | `linux/format-after-edit.sh` | `PostToolUse` on `Edit\|Write` | Runs black/prettier/gofmt/rustfmt on the edited file if installed |
 
+## Windows scripts
+
+| Script | Event | Does |
+|--------|-------|------|
+| `windows/protect-secrets.ps1` | `PreToolUse` on `Edit\|Write` | Blocks edits to `.env`, `*.pem`, `*.key`, `credentials`, etc. (PowerShell port of the Linux script) |
+
 ## Wiring them up (per machine)
 
 Scripts here are dormant until referenced from `settings.json` — which is
@@ -33,3 +39,17 @@ on each Linux device:
 ```
 
 Make sure the scripts are executable: `chmod +x ~/.claude/hooks/linux/*.sh`.
+
+On Windows, add this to `%USERPROFILE%\.claude\settings.json` instead (PowerShell
+isn't invoked by the executable bit, so call it explicitly):
+
+```json
+{
+  "hooks": {
+    "PreToolUse": [
+      { "matcher": "Edit|Write",
+        "hooks": [ { "type": "command", "command": "powershell -NoProfile -ExecutionPolicy Bypass -File %USERPROFILE%\\.claude\\hooks\\windows\\protect-secrets.ps1" } ] }
+    ]
+  }
+}
+```
