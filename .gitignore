@@ -1,0 +1,26 @@
+# ~/.claude — public config repo (a.k.a. "dotclaude")
+#
+# Strategy: IGNORE EVERYTHING by default, then allow-list only the
+# portable, secret-free config. ~/.claude's working tree also holds
+# credentials and session state, so a deny-all default is what makes a
+# PUBLIC repo here safe: `git add -A` can never stage anything that
+# isn't explicitly un-ignored below.
+
+# 1) Ignore every top-level entry…
+/*
+
+# 2) …then allow only these portable, secret-free paths:
+!/.gitignore
+!/README.md
+!/skills/
+!/agents/
+!/commands/
+!/hooks/
+
+# Reminder: skills/agents/commands/hooks are allow-listed WHOLESALE —
+# never drop a secret inside them or it WILL be tracked.
+
+# NEVER allow-list these (here as a reminder, already ignored by /*):
+#   .credentials.json   history.jsonl   sessions/   projects/   todos/
+#   telemetry/  statsig/  cache/  shell-snapshots/
+#   settings.json   CLAUDE.md   (deliberately machine-/personal-specific)
