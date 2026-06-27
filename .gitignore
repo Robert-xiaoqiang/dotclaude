@@ -11,6 +11,7 @@
 
 # 2) …then allow only these portable, secret-free paths:
 !/.gitignore
+!/.gitattributes
 !/README.md
 !/skills/
 !/agents/
