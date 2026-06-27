@@ -24,3 +24,8 @@
 #   .credentials.json   history.jsonl   sessions/   projects/   todos/
 #   telemetry/  statsig/  cache/  shell-snapshots/
 #   settings.json   CLAUDE.md   (deliberately machine-/personal-specific)
+
+# Never track Python bytecode or OS cruft, even inside allow-listed dirs
+__pycache__/
+*.py[cod]
+.DS_Store
