@@ -1,7 +1,7 @@
 # Skill: arch-update
 
 ## Purpose
-Keep doc/ARCH.md consistent with the current codebase.
+Keep docs/ARCH.md consistent with the current codebase.
 
 ## When to Use
 - After structural changes
@@ -11,7 +11,7 @@ Keep doc/ARCH.md consistent with the current codebase.
 
 ## Steps
 1. Inspect relevant code changes
-2. Update doc/ARCH.md:
+2. Update docs/ARCH.md:
    - modules and responsibilities
    - data/control flow
    - key abstractions
@@ -20,6 +20,8 @@ Keep doc/ARCH.md consistent with the current codebase.
 - Keep it high-level (not line-by-line code)
 - Reflect actual implementation (not intention)
 - Be concise and structured
+- `docs/ARCH.md` lives in the workspace layout (see `project-workspace-layout`);
+  reports/walkthroughs go in `docs/reports/`, not in ARCH.md
 
 ## Output
 - Confirm ARCH.md updated
