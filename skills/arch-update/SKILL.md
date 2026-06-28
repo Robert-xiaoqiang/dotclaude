@@ -20,7 +20,7 @@ Keep docs/ARCH.md consistent with the current codebase.
 - Keep it high-level (not line-by-line code)
 - Reflect actual implementation (not intention)
 - Be concise and structured
-- `docs/ARCH.md` lives in the workspace layout (see `project-workspace-layout`);
+- `docs/ARCH.md` lives in the workspace layout (see `vibe-workspace-layout`);
   reports/walkthroughs go in `docs/reports/`, not in ARCH.md
 
 ## Output

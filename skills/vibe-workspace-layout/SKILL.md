@@ -1,4 +1,4 @@
-# Skill: project-workspace-layout
+# Skill: vibe-workspace-layout
 
 ## Purpose
 Lay out the **agent-facing workspace** of a project — the docs and cached scripts a
