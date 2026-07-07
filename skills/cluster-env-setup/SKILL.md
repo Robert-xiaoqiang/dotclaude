@@ -62,7 +62,7 @@ A complete example of the mount, rooted at the persistent home (call it `$CPFS_H
 
 Bootstrap and secrets.
 - `env.sh`, the single bootstrap file, sourced by the shell rc and by job scripts.
-- `.secret`, a gitignored secret store, sourced last by `env.sh` so it can override anything above.
+- `.secret`, a gitignored secret store, sourced last by `env.sh` so it can override anything above. Holds exported API keys and tokens, for example OpenAI, OpenRouter, the Hugging Face token, and the wandb API key.
 
 Workspace and data, plain role names.
 - `projects`, code repositories and working trees.
