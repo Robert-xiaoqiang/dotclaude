@@ -25,29 +25,34 @@ interpreter-based.
 
 ## Wiring them up (per machine)
 
-Scripts here are dormant until referenced from `settings.json` — which is
-**not** tracked (it's machine-specific). On a bash machine
-(Linux/macOS/WSL/Git Bash), add this to `~/.claude/settings.json`:
+Scripts here are dormant until referenced from `settings.json` — which is **not**
+tracked (it's machine-specific). The paths below use `$CLAUDE_CONFIG_DIR` so they
+resolve wherever your config dir lives (it defaults to `~/.claude`); the variable
+is exported in your shell, so Claude Code expands it when it runs the hook.
+
+On a bash machine (Linux/macOS/WSL/Git Bash), add this to your `settings.json`
+(the one inside `$CLAUDE_CONFIG_DIR`):
 
 ```json
 {
   "hooks": {
     "PreToolUse": [
       { "matcher": "Edit|Write",
-        "hooks": [ { "type": "command", "command": "$HOME/.claude/hooks/bash/protect-secrets.sh" } ] }
+        "hooks": [ { "type": "command", "command": "$CLAUDE_CONFIG_DIR/hooks/bash/protect-secrets.sh" } ] }
     ],
     "PostToolUse": [
       { "matcher": "Edit|Write",
-        "hooks": [ { "type": "command", "command": "$HOME/.claude/hooks/bash/format-after-edit.sh" } ] }
+        "hooks": [ { "type": "command", "command": "$CLAUDE_CONFIG_DIR/hooks/bash/format-after-edit.sh" } ] }
     ]
   }
 }
 ```
 
-Make sure the scripts are executable: `chmod +x ~/.claude/hooks/bash/*.sh`.
+Make sure the scripts are executable: `chmod +x "$CLAUDE_CONFIG_DIR/hooks/bash/"*.sh`.
 
-For the PowerShell hook, add this to `%USERPROFILE%\.claude\settings.json`
-instead (PowerShell isn't invoked by the executable bit, so call it explicitly):
+For the PowerShell hook, add this to your `settings.json` under
+`%USERPROFILE%\.claude` (or `%CLAUDE_CONFIG_DIR%`, if you set it). PowerShell
+isn't invoked by the executable bit, so call it explicitly:
 
 ```json
 {
