@@ -32,6 +32,10 @@ Some words read as generic AI or corporate filler in a finished document. Prefer
 7. `boasts` becomes has, `in order to` becomes to, and `due to the fact that` becomes because.
 8. `embark`, `realm`, `tapestry`, `ever-evolving`, and `navigate the complexities` get rewritten in plain words.
 9. `substrate`, used as a metaphor, becomes base, foundation, or layer.
+10. `together`, `taken together`, and `collectively`, as a summarizing opener, get cut. State what the evidence shows.
+11. `moving forward` becomes next, or name the actual time.
+12. `landscape`, used as a metaphor, becomes field or area.
+13. `pivotal` becomes key or important, or a plain statement of what it changed.
 
 Technical terms keep their meaning. Words like robust, comprehensive, significant, novel, scalable, and state-of-the-art carry a precise claim in scientific and ML writing, for example robust to outliers, statistically significant, and a comprehensive benchmark. Use them freely when they make a real technical point. Avoid them only when they are vague praise, and never drop a correct technical term just to dodge a filler word.
 
