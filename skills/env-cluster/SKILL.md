@@ -1,4 +1,4 @@
-# Skill: cluster-env-setup
+# Skill: env-cluster
 
 ## Purpose
 My playbook for configuring a usable, persistent working environment when I land in a new compute environment, before running any real work. These are usually containerized cluster nodes where the local filesystem is ephemeral and a shared filesystem is mounted for persistence. It applies to both an interactive session, where I get a shell, and a submitting-based job session, where work runs from a batch script. It records the steps to take, where things should live, and my preferences, so a new environment comes up the same way every time. It is a decision and preference guide, not a copy of any one machine's config.

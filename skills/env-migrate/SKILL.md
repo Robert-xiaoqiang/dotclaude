@@ -1,4 +1,4 @@
-# Skill: migrate-project-dir
+# Skill: env-migrate
 
 ## Purpose
 Rename or move a Claude Code **project folder** without losing its session
@@ -39,17 +39,17 @@ Use the bundled helper. It computes slugs, backs up the store, renames the
 folder + slug store, rewrites embedded paths (BOM-safe, JSON-valid), and prints
 how to resume. Needs only Python 3.
 
-Script path: `~/.claude/skills/migrate-project-dir/migrate_session.py`
+Script path: `~/.claude/skills/env-migrate/migrate_session.py`
 
 1. **Dry run first** (changes nothing — confirm the slug mapping, transcript
    count, and that embedded cwd count drops to 0):
    ```
-   python "~/.claude/skills/migrate-project-dir/migrate_session.py" \
+   python "~/.claude/skills/env-migrate/migrate_session.py" \
        --old "<OLD_ABS_PATH>" --new "<NEW_ABS_PATH>" --dry-run
    ```
 2. **Migrate** (`--yes` skips the prompt; `--claude-dir` if `~/.claude` is elsewhere):
    ```
-   python "~/.claude/skills/migrate-project-dir/migrate_session.py" \
+   python "~/.claude/skills/env-migrate/migrate_session.py" \
        --old "<OLD_ABS_PATH>" --new "<NEW_ABS_PATH>"
    ```
 3. **Resume** from the new path:

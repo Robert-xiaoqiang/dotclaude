@@ -1,4 +1,4 @@
-# Skill: vibe-workspace-layout
+# Skill: layout-workspace
 
 ## Purpose
 Lay out the **agent-facing workspace** of a project — the docs and cached scripts a
@@ -16,8 +16,8 @@ distinct from source code, tests, packaging, and `.gitignore`.
 ## The layout
 ```
 docs/
-  ARCH.md                          # single architecture reference (see arch-update)
-  plans/<YYYY-MM-DD>-<topic>.md     # timestamped task/design plans (see plan-doc)
+  ARCH.md                          # single architecture reference (see docs-arch)
+  plans/<YYYY-MM-DD>-<topic>.md     # timestamped task/design plans (see docs-plan)
   reports/<topic>.md | .html        # walkthroughs/figures that explain the system
 scripts/
   README.md                         # what's here + the convention
@@ -35,7 +35,7 @@ scripts/
   or a scratchpad. Header each script with **what · when · usage**.
 - **Commit reusable scripts; git-ignore machine-specific/secret ones** (e.g. a
   `scripts/migration/` helper with hardcoded local paths).
-- Name everything descriptively (companion: `descriptive-naming-pattern`) — never
+- Name everything descriptively (companion: `naming-descriptive`) — never
   `v1`/`Px`/`tmp`/`final2`.
 - Keep all of this **out of** the package/source/test trees — it is doc-level
   scaffolding, not shipped code.
@@ -51,5 +51,5 @@ sessions.
   git-ignored.
 
 ## Companions
-`plan-doc` (writes `docs/plans/…`) · `arch-update` (maintains `docs/ARCH.md`) ·
-`descriptive-naming-pattern` (how to name) · `git-commit` (commit conventions).
+`docs-plan` (writes `docs/plans/…`) · `docs-arch` (maintains `docs/ARCH.md`) ·
+`naming-descriptive` (how to name) · `git-commit` (commit conventions).

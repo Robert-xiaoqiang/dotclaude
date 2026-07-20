@@ -1,4 +1,4 @@
-# Skill: project-config-naming-pattern
+# Skill: naming-config
 
 ## Purpose
 Apply a consistent naming convention across **model**, **pipeline**,

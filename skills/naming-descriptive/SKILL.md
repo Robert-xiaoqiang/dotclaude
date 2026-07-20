@@ -1,4 +1,4 @@
-# Skill: descriptive-naming-pattern
+# Skill: naming-descriptive
 
 ## Purpose
 Name every *durable* artifact by **what it is** — the design / feature / module
@@ -44,5 +44,5 @@ Sequence IDs carry order but no meaning, and they rot when the roadmap is
 reordered or a phase is dropped. A content-revealing name stays accurate and lets
 the next reader (often future-you) understand the artifact at a glance.
 
-(Companion: see `project-config-naming-pattern` for naming *config files* by a
+(Companion: see `naming-config` for naming *config files* by a
 slot grammar, and `git-commit` for commit-message conventions.)
