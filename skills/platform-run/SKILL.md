@@ -44,13 +44,29 @@ file_mounts: { /data: cpfs }       # logical mounts; the profile resolves to rea
 Non-portable, platform-specific: account / workspace / quota (resource) id / data-source
 ids / container image / region / partition / qos. (Generalizes an ad-hoc `*_clusters.env`.)
 
-## The engine — `<pkg>/platform/`
-- `jobspec.py` — load + validate `task.yaml`, expand `${VAR}`.
-- `profile.py` — load `platforms/<platform>.yaml`.
-- `translate/<platform>.py` — `render(spec, profile) -> (native_artifact, submit_argv)`.
-- `submit.py` — CLI: pick translator by `--platform`; `--dryrun` prints the native artifact
-  without submitting. The Makefile's remote targets and `scripts/platform/<p>.sh` are thin
-  wrappers over this.
+## The engine — three layers, share what's shareable
+Factor by *what actually varies per platform*. Only native submit/status/logs differ; the
+rest is shared. Do NOT let each platform script re-implement parsing, rendering, snapshot,
+or the follow loop (the classic smell — two `dlc.sh`/`eai.sh` that each duplicate everything).
+
+1. **Render (neutral → native) — SHARED, in Python, tested.** `<pkg>/platform/`:
+   `jobspec.py` (load+validate `task.yaml`, expand `${VAR}`), `profile.py` (load
+   `platforms/<platform>.yaml`, else a legacy env fallback), `translate/<platform>.py`
+   (pure `render(spec, profile, *, snapshot, jobname) -> native text`), and `render.py`
+   — one CLI that **dispatches by `--platform`** to the right translator. Golden-file
+   tested; no cluster needed.
+2. **Orchestration (snapshot + follow) — SHARED, in shell.** `scripts/platform/_common.sh`:
+   `snapshot_repo <dest>` (rsync the repo for FS-based platforms), `render_artifact <platform> …`
+   (calls `render.py`), and `follow_loop <jobid>` (poll→terminal, streaming new logs) that
+   calls caller-provided `plat_status`/`plat_logs` hooks.
+3. **Native submit/status/logs — PER-PLATFORM, thin.** `scripts/platform/<platform>.sh`
+   (~40 lines): resolve the profile, `render_artifact`, `snapshot_repo` (or the platform's
+   own code-push), then the native `submit`, and define the `plat_status`/`plat_logs` hooks.
+   Same subcommand contract (`submit|auto|follow|logs|status|stop|jobs|print`) so the
+   Makefile is platform-invariant. `--dryrun` prints the native artifact without submitting.
+
+**Litmus test:** adding a platform touches exactly `translate/<p>.py` (+ a `render.py`
+branch) and a thin `<p>.sh` adapter — never a second spec dialect, snapshot, or follow loop.
 
 ## Field → platform mapping (what each translator does)
 | neutral | DLC job_file | Slurm sbatch | EAI yaml |
