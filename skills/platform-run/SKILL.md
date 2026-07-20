@@ -40,7 +40,7 @@ envs:                              # OS/user env vars
 file_mounts: { /data: cpfs }       # logical mounts; the profile resolves to real ids/paths
 ```
 
-## The platform profile — `platforms/<platform>.yaml`
+## The platform profile — `scripts/platform/<platform>.yaml`
 Non-portable, platform-specific: account / workspace / quota (resource) id / data-source
 ids / container image / region / partition / qos. (Generalizes an ad-hoc `*_clusters.env`.)
 
@@ -51,7 +51,7 @@ or the follow loop (the classic smell — two `dlc.sh`/`eai.sh` that each duplic
 
 1. **Render (neutral → native) — SHARED, in Python, tested.** `<pkg>/platform/`:
    `jobspec.py` (load+validate `task.yaml`, expand `${VAR}`), `profile.py` (load
-   `platforms/<platform>.yaml`, else a legacy env fallback), `translate/<platform>.py`
+   `scripts/platform/<platform>.yaml`, else a legacy env fallback), `translate/<platform>.py`
    (pure `render(spec, profile, *, snapshot, jobname) -> native text`), and `render.py`
    — one CLI that **dispatches by `--platform`** to the right translator. Golden-file
    tested; no cluster needed.
@@ -73,7 +73,7 @@ branch) and a thin `<p>.sh` adapter — never a second spec dialect, snapshot, o
 |---|---|---|---|
 | `num_nodes` | `workers` | `--nodes` | (implicit) |
 | `resources.accelerators` count | `worker_gpu` (+`NPROC_PER_NODE`) | `--gpus-per-node` | `resources.gpu` |
-| `resources.accelerators` type | `worker_gpu_type` | `--gres=gpu:<t>:<n>` | `resources.gpuModel` |
+| `resources.accelerators` type | *omitted* — DLC quotas are GPU-type-locked (`resource_id` pins it); passing `worker_gpu_type` errors `GPUType should be in []`. Advisory only. | `--gres=gpu:<t>:<n>` | `resources.gpuModel` |
 | `resources.cpus` | `worker_cpu` | `--cpus-per-task` | `resources.cpu` |
 | `resources.memory` | `worker_memory=<n>Gi` | `--mem=<n>G` | `resources.mem` |
 | `run` | `command` | script body / `srun` | `command` |
@@ -95,5 +95,5 @@ Bottom row is **from the profile, not the spec.**
 
 ## Companions
 `naming-config` (the launcher's *name* + config triple) · `layout-workspace` (where
-`launcher/` and `platforms/` live) · `env-cluster` (the machine env the profile assumes) ·
+`launcher/` and `scripts/platform/` live) · `env-cluster` (the machine env the profile assumes) ·
 `conventions` (the family index).
