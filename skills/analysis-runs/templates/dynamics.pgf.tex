@@ -1,0 +1,27 @@
+% dynamics.pgf.tex - longitude curve authored directly in LaTeX (pgfplots).
+% Embed style per the analysis-runs skill: no title, terse labels, no baked caption,
+% one colorblind-safe color per run reused across figures. Drop this inside a figure
+% float in the paper; the float supplies \caption and \label.
+%
+% Preamble (once, in the document):
+%   \usepackage{pgfplots}\pgfplotsset{compat=1.18}
+%   \definecolor{runA}{HTML}{0072B2}
+%   \definecolor{runB}{HTML}{D55E00}
+%
+% Data: metrics.csv columns `step,loss` per run, or use \addplot table from metrics.jsonl
+% converted to csv. Keep colors identical to compare_runs.py PALETTE so a run's color is
+% the same whether the figure is made in matplotlib or here.
+\begin{tikzpicture}
+  \begin{axis}[
+      width=6.6cm, height=4.4cm,
+      xlabel={step}, ylabel={loss},
+      tick label style={font=\small}, label style={font=\small},
+      legend style={draw=none, font=\small, at={(0.98,0.98)}, anchor=north east},
+      axis lines=left, no markers, every axis plot/.append style={line width=0.9pt},
+    ]
+    \addplot[runA] table[x=step, y=loss, col sep=comma] {runA/metrics.csv};
+    \addlegendentry{run A}
+    \addplot[runB] table[x=step, y=loss, col sep=comma] {runB/metrics.csv};
+    \addlegendentry{run B}
+  \end{axis}
+\end{tikzpicture}

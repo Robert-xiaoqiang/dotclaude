@@ -1,0 +1,18 @@
+% table.tex - latitude comparison table, booktabs. Embed style: no baked \caption here,
+% the surrounding table float in the paper supplies \caption and \label. compare_runs.py
+% writes exactly this shape to table.tex, so prefer the generated file and hand-edit only
+% the column headers / number formatting.
+%
+% Preamble (once): \usepackage{booktabs}
+%
+% Rule: arms of an ablation differ by one slot (naming-config), so let the row label carry
+% only the slot that changed, not a redundant `_baseline` / `_v2` qualifier.
+\begin{tabular}{lrr}
+  \toprule
+  run & step & acc \\
+  \midrule
+  base        & 2000 & 0.612 \\
+  + lora      & 2000 & 0.640 \\
+  + quantum   & 2000 & 0.657 \\
+  \bottomrule
+\end{tabular}

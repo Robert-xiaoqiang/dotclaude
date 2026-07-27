@@ -50,6 +50,12 @@ sessions.
 - Confirm the doc/script path used and which subdir, and whether it's committed or
   git-ignored.
 
+## Not this skill
+Run outputs (checkpoints, logs, metrics, eval) are a **separate** tree under
+`$OUTPUT_DIR_HOME`, not the agent workspace. Their layout and their resume-vs-derived
+classification live in `layout-output`. Never write run outputs into the project dir.
+
 ## Companions
-`docs-plan` (writes `docs/plans/…`) · `docs-arch` (maintains `docs/ARCH.md`) ·
-`naming-descriptive` (how to name) · `git-commit` (commit conventions).
+`layout-output` (the run-output tree, the sibling `layout-` concern) · `docs-plan` (writes
+`docs/plans/…`) · `docs-arch` (maintains `docs/ARCH.md`) · `naming-descriptive` (how to
+name) · `git-commit` (commit conventions).
