@@ -34,11 +34,15 @@ Classify every artifact with `layout-output` first, then act only on the reclaim
 - **Intermediate checkpoints** strictly older than the kept set. Keep the newest, keep
   `best`, and keep every K-th or the last K if the user wants a ladder for restarts. Thin
   the rest. Never the newest.
-- **Junk**, `*.tmp` / `*.partial` files, zero-byte files, and half-written checkpoint dirs
-  (missing their weights or marker file after a crash).
-- **Bulky derived data** the user confirms is done with, `logs/`, `events.out.tfevents.*`
-  once `metrics.jsonl` holds the curves, and `per_instance/` of a *completed* eval whose
-  `summary.json` exists.
+- **Partial / unresumable runs** that never wrote a checkpoint. A crashed or killed run
+  with only `wandb/`, `events.out.tfevents.*`, and `logs/` has nothing to resume from, so the
+  whole dir is scratch. Confirm it is not a run still working toward its first save.
+- **Junk**, `*.tmp` / `*.partial` files, zero-byte weight files, and half-written checkpoint
+  dirs (missing their weights or marker file after a crash).
+- **Bulky derived data** the user confirms is done with, `wandb/`, `events.out.tfevents.*`,
+  and `logs/` once `metrics.jsonl` holds the curves, and `per_instance/` of a *completed*
+  eval whose `summary.json` exists. Never drop the last record of the curves, so keep
+  tfevents when there is no `metrics.jsonl`.
 
 ## Signals for scoping
 - **The user's instruction** is the strongest signal. "Clear last night's debug runs" scopes
@@ -65,6 +69,28 @@ Classify every artifact with `layout-output` first, then act only on the reclaim
    filesystem, which is an instant rename, not a copy. Verify the runs still load, then the
    user hard-deletes the trash later. Reach for `rm` only when the user declines staging.
 6. **Report** what was staged or removed, the space reclaimed, and where the trash sits.
+
+## Driving the scan (conservative by default, on purpose)
+The bundled `scan_runs.py` errs quiet because a wrong delete costs a retrain, so out of the
+box it reports little. That is expected, not a failure. When it stays silent it prints why,
+a count of runs protected as recently active and the `--include-*` classes it did not use, so
+the fix is to re-run with the flags that match a scope you vouch for. The controls map to the
+exact cases you meet.
+- **Point `--root` at what you mean.** It takes the exact run dir or any parent. Scoping by
+  path is how you vouch for a set, so name the `_bak` you just made or the smoke parent, not
+  the whole output home.
+- **Recent but safe** (a `_bak` or smoke run made this session). The recency guard protects
+  anything touched within `--older-than` days (default 1). Pass `--older-than 0` to consider
+  them, since you already know they are safe.
+- **Smoke / toy / debug runs.** `--include-smoke` proposes the whole run.
+- **Partial, unresumable runs** with no checkpoint (crashed before the first save). These are
+  the wandb and tensorboard scratch you want gone. `--include-partial` proposes the whole dir.
+- **wandb / tensorboard / logs on a run you keep.** `--include-derived` proposes them, and
+  only when `metrics.jsonl` still holds the curves so nothing irreplaceable goes.
+- **A resumable run you want to abandon anyway** (it has a `last` checkpoint, but you have
+  decided not to continue it). The script will not auto-propose deleting a run that has a
+  resume point, by design. That is a judgment call, so name the exact run and say to clear it,
+  and it gets staged whole. The filesystem cannot know you gave up on a run, only you can.
 
 ## Hard rails (do not cross)
 - Two-phase always. Propose, confirm, then act. Never delete on inferred intent alone.

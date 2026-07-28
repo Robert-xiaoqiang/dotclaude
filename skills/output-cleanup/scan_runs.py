@@ -11,14 +11,21 @@ When: the user has asked to reclaim space and you need a safe, reviewable plan f
 Usage:
       # dry-run plan for one project's runs, keep newest+best, thin older intermediates
       python scan_runs.py --root $OUTPUT_DIR_HOME/proj --keep-last 1
-      # also propose whole smoke/toy/debug runs, only those idle for 2+ days
-      python scan_runs.py --root $OUTPUT_DIR_HOME/proj --include-smoke --older-than 2
+      # vouched-for scope you know is safe: include recent runs and every reclaim class
+      python scan_runs.py --root $OUTPUT_DIR_HOME/proj --older-than 0 \
+             --include-smoke --include-partial --include-derived --keep-last 1
       # after reviewing the plan, stage candidates reversibly (rename, not rm)
-      python scan_runs.py --root $OUTPUT_DIR_HOME/proj --keep-last 1 --stage $OUTPUT_DIR_HOME/.trash-20260726
+      python scan_runs.py --root $OUTPUT_DIR_HOME/proj --older-than 0 --include-partial \
+             --include-derived --stage $OUTPUT_DIR_HOME/.trash-20260727
+
+Conservative on purpose. Defaults protect anything touched in the last day (--older-than)
+and skip the whole-run and derived classes until you opt in. The scan prints why it stayed
+silent (recency count + the --include-* it did not use), so re-run with the flags that match
+the scope you vouch for. Point --root at the exact run or the exact parent you mean.
 
 The user hard-deletes the trash dir themselves once the kept runs are verified to load.
 """
-import argparse, os, re, sys, time
+import argparse, errno, os, re, sys, time
 
 CKPT_RE = re.compile(r"(?:step|checkpoint|ckpt|epoch)[_-]?(\d+)", re.I)
 PROTECTED_LINKS = ("best", "last", "final")   # checkpoint symlinks that pin a target
@@ -88,42 +95,72 @@ def looks_smoke(run, ckpts):
     return top and top < SMOKE_MAX_STEP
 
 
-def classify(run, keep_last, recency_s, include_smoke, now):
-    """Return (candidates, protected_notes). candidates = [(path, cls, reason)]."""
+def classify(run, keep_last, recency_s, flags, now):
+    """Return (candidates, protected_notes, skip). candidates = [(path, cls, reason)].
+    skip is a short reason string when the run yielded nothing so main can explain the
+    conservatism, else None."""
     files = set(os.listdir(run))
     ckpts, link_targets = find_checkpoints(run)
     finished = "DONE" in files
+    has_metrics = "metrics.jsonl" in files
     cands, notes = [], []
 
-    # recency guard: a recently touched run may be live, protect it wholesale
+    # recency guard: a recently touched run may be live, protect it wholesale.
+    # Pass --older-than 0 (recency_s == 0) to disable it when you vouch for the scope.
     try:
         idle = now - max((os.path.getmtime(p) for _s, p in ckpts), default=os.path.getmtime(run))
     except OSError:
         idle = 0
     if idle < recency_s:
-        notes.append(f"PROTECT whole run (active {human_time(idle)} ago)")
-        return [], notes
+        notes.append(f"PROTECT whole run (active {human_time(idle)} ago; --older-than 0 to include)")
+        return [], notes, "recency"
 
-    # protected checkpoints: newest, best/last targets
+    # partial run: no checkpoint at all, so nothing to resume. The whole dir (its wandb,
+    # tfevents, logs) is scratch. Opt-in, because "no ckpt yet" can also be a run mid-first-save.
+    if not ckpts:
+        if flags.include_partial:
+            cands.append((run, "partial-run", "no checkpoint: unresumable scratch (whole run)"))
+            return cands, notes, None
+        notes.append("no checkpoint (unresumable); --include-partial to reclaim the whole run")
+
+    # smoke/toy/debug: propose the whole run only when opted in
+    if ckpts and flags.include_smoke and looks_smoke(run, ckpts):
+        cands.append((run, "smoke-run", "smoke/toy/debug: tag or tiny step count (whole run)"))
+        return cands, notes, None
+
+    # protected checkpoints: newest (resume point), best/last targets
     protected = set(link_targets)
     if ckpts:
-        protected.add(ckpts[-1][1])   # newest = resume point
+        protected.add(ckpts[-1][1])
         notes.append(f"PROTECT newest ckpt step {ckpts[-1][0]}")
     for t in link_targets:
         notes.append(f"PROTECT symlink target {os.path.basename(t)}")
-
-    # smoke/toy/debug: propose the whole run only when opted in
-    if include_smoke and looks_smoke(run, ckpts):
-        cands.append((run, "smoke-run", "smoke/toy/debug: tag or tiny step count"))
-        return cands, notes + ["(whole run proposed as smoke; overrides ckpt-level thinning)"]
 
     # thin intermediate checkpoints: keep the last `keep_last` plus protected, drop older
     keep_recent = {p for _s, p in ckpts[-keep_last:]} if keep_last > 0 else set()
     for step, p in ckpts:
         if p in protected or p in keep_recent:
             continue
-        state = "finished run" if finished else "unfinished run, older than newest"
+        state = "finished run" if finished else "older than newest"
         cands.append((p, "intermediate-ckpt", f"superseded step {step} ({state})"))
+
+    # derived (opt-in): wandb / tensorboard / logs. Only when metrics.jsonl keeps the
+    # curves, or the run is unresumable anyway (no ckpt), so a curve record is never the
+    # last casualty of a slimming.
+    if flags.include_derived:
+        if has_metrics or not ckpts:
+            wl = os.path.join(run, "wandb")
+            if os.path.isdir(wl):
+                cands.append((wl, "derived", "wandb local (metrics.jsonl keeps the curves)"))
+            lg = os.path.join(run, "logs")
+            if os.path.isdir(lg):
+                cands.append((lg, "derived", "text logs (metrics.jsonl keeps the curves)"))
+            for dp, _d, fs in os.walk(run):
+                for f in fs:
+                    if "tfevents" in f and not os.path.islink(os.path.join(dp, f)):
+                        cands.append((os.path.join(dp, f), "derived", "tensorboard events (metrics.jsonl keeps the curves)"))
+        else:
+            notes.append("--include-derived skipped: no metrics.jsonl, dropping tfevents would lose the only curve record")
 
     # tmp / junk anywhere in the run
     for dp, _d, fs in os.walk(run):
@@ -142,7 +179,7 @@ def classify(run, keep_last, recency_s, include_smoke, now):
                 cands.append((fp, "tmp-junk", "*.tmp/*.partial/*.lock"))
             elif z and weightlike:
                 cands.append((fp, "tmp-junk", "zero-byte weights file (crash artifact)"))
-    return cands, notes
+    return cands, notes, None
 
 
 def human_time(s):
@@ -159,10 +196,16 @@ def stage_move(path, root, trash):
         die(f"refusing to stage a path outside root: {real}")
     rel = os.path.relpath(real, os.path.realpath(root))
     dest = os.path.join(trash, rel)
-    os.makedirs(os.path.dirname(dest), exist_ok=True)
-    if os.stat(real).st_dev != os.stat(os.path.dirname(dest) or ".").st_dev:
-        die(f"trash is on another filesystem; a rename would become a slow copy: {dest}")
-    os.rename(real, dest)
+    os.makedirs(os.path.dirname(dest) or ".", exist_ok=True)
+    # Attempt the rename; only a genuine cross-device move (EXDEV) is refused. st_dev is
+    # unreliable on overlay/fuse mounts, so let the kernel be the judge rather than pre-checking.
+    try:
+        os.rename(real, dest)
+    except OSError as e:
+        if e.errno == errno.EXDEV:
+            die(f"trash is on another filesystem; a rename would become a slow copy. "
+                f"Pick a --stage dir on the same mount as {os.path.realpath(root)}")
+        raise
     return dest
 
 
@@ -172,6 +215,8 @@ def main():
     ap.add_argument("--keep-last", type=int, default=1, help="intermediate checkpoints to keep per run (newest); best is always kept")
     ap.add_argument("--older-than", type=float, default=1.0, help="only consider runs idle for at least this many days")
     ap.add_argument("--include-smoke", action="store_true", help="also propose whole smoke/toy/debug runs")
+    ap.add_argument("--include-partial", action="store_true", help="also propose whole runs with no checkpoint (unresumable scratch)")
+    ap.add_argument("--include-derived", action="store_true", help="also propose wandb/ , tensorboard events, logs/ (only when metrics.jsonl keeps the curves)")
     ap.add_argument("--stage", metavar="TRASH", help="MOVE candidates into TRASH (reversible rename). Omit for a dry run.")
     a = ap.parse_args()
 
@@ -194,10 +239,12 @@ def main():
 
     now = time.time()
     recency_s = a.older_than * 86400
-    all_cands, total = [], 0
+    all_cands, total, skipped_recency = [], 0, 0
     for dp, dirs, files in os.walk(root):
         if is_run(dp, files):
-            cands, notes = classify(dp, a.keep_last, recency_s, a.include_smoke, now)
+            cands, notes, skip = classify(dp, a.keep_last, recency_s, a, now)
+            if skip == "recency":
+                skipped_recency += 1
             dirs[:] = []  # do not descend into a run's checkpoints as if they were runs
             if cands or notes:
                 print(f"\n# {os.path.relpath(dp, root)}")
@@ -210,6 +257,14 @@ def main():
                     print(f"    CANDIDATE [{cls:16}] {human(sz):>7}  {os.path.relpath(path, root)}  <- {reason}")
 
     print(f"\n# total reclaimable: {human(total)} across {len(all_cands)} items")
+    if skipped_recency and a.older_than > 0:
+        print(f"# {skipped_recency} run(s) protected as recently active (< {a.older_than:g}d). Pass --older-than 0 to include them.")
+    opt = []
+    if not a.include_partial: opt.append("--include-partial (runs with no checkpoint)")
+    if not a.include_smoke:   opt.append("--include-smoke (whole smoke/toy/debug runs)")
+    if not a.include_derived: opt.append("--include-derived (wandb / tensorboard / logs)")
+    if opt:
+        print("# not proposed unless you opt in: " + "; ".join(opt))
     if not a.stage:
         print("# dry run. Review, then re-run with --stage <trash-dir> to move these reversibly.")
         return
