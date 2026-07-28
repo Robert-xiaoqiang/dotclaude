@@ -92,8 +92,12 @@ Bottom row is **from the profile, not the spec.**
 4. Submitting consumes shared quota (outward-facing) — confirm before firing real jobs.
 5. Prefer an existing engine for platforms it supports (SkyPilot drives Slurm/K8s/clouds);
    write a translator only for platforms it doesn't (e.g. DLC, EAI).
+6. The node **GPU driver** is as load-bearing as the image and is selectable per job (DLC
+   `--driver`). Pin it explicitly in the profile beside `worker_image`, and read a CUDA /
+   driver / symbol error as a layer mismatch to diagnose, not an impossible request
+   (`layout-runtime`).
 
 ## Companions
 `naming-config` (the launcher's *name* + config triple) · `layout-workspace` (where
-`launcher/` and `scripts/platform/` live) · `env-cluster` (the machine env the profile assumes) ·
-`conventions` (the family index).
+`launcher/` and `scripts/platform/` live) · `layout-runtime` (the driver/image/venv stack the
+job runs on) · `env-cluster` (the machine env the profile assumes) · `conventions` (the family index).

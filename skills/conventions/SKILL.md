@@ -15,7 +15,7 @@ starting or organizing a project, or when unsure which convention applies.
 | concern | question it answers | skill |
 |---|---|---|
 | **naming** | what do I call this config / file / run? | `naming-config` (model/pipeline/dataset/launcher slot-grammar) · `naming-descriptive` (the general primitive) |
-| **layout** | where does this doc / script / run output live? | `layout-workspace` (`docs/`, `scripts/`, reports/plans, what's committed) · `layout-output` (the run-output tree under `$OUTPUT_DIR_HOME`) |
+| **layout** | where does this doc / script / run output live, and on what runtime? | `layout-workspace` (`docs/`, `scripts/`, reports/plans, what's committed) · `layout-output` (the run-output tree under `$OUTPUT_DIR_HOME`) · `layout-runtime` (the driver × image × venv × storage stack a job runs on) |
 | **docs** | how do I write/maintain the living docs? | `docs-plan` (`docs/plans/<date>-<topic>.md`) · `docs-arch` (`docs/ARCH.md`) |
 | **run-control** | how is a run specified + submitted across platforms? | `platform-run` (neutral `task.yaml` → DLC/Slurm/EAI) |
 | **outputs** | how do I compare runs or reclaim their space? | `output-analysis` (latitude vs longitude, embed-style figures) · `output-cleanup` (resume-safe reclaim) |
@@ -24,9 +24,10 @@ starting or organizing a project, or when unsure which convention applies.
 ## The philosophy (one line each)
 - **naming** — a config's *name* uniquely identifies what runs; two ablation arms differ in
   exactly the slots that describe the change (`naming-config`).
-- **layout** — plans, reports, and re-runnable scripts persist in predictable places out of
-  the source tree (`layout-workspace`), and run outputs live in a separate mechanical tree
-  under `$OUTPUT_DIR_HOME` (`layout-output`).
+- **layout** — plans, reports, and re-runnable scripts persist out of the source tree
+  (`layout-workspace`), run outputs live in a separate mechanical tree under `$OUTPUT_DIR_HOME`
+  (`layout-output`), and a job executes on a layered driver/image/venv/storage stack whose
+  layers must be mutually consistent (`layout-runtime`).
 - **docs** — a project keeps one living architecture ref (`docs-arch`) and dated, actionable
   plans (`docs-plan`).
 - **run-control** — a run is a *platform-neutral* spec rendered per platform; platform IDs
