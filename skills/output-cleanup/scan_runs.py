@@ -95,6 +95,20 @@ def looks_smoke(run, ckpts):
     return top and top < SMOKE_MAX_STEP
 
 
+def prune_nested(cands):
+    """Drop any candidate whose path lives inside another candidate directory. Staging moves
+    the containing dir wholesale, so also listing an inner file would collide on rename
+    (dir-not-empty) and abort the run half-staged."""
+    dir_prefixes = [os.path.realpath(p) + os.sep for p, _c, _r in cands if os.path.isdir(p)]
+    kept = []
+    for p, c, r in cands:
+        rp = os.path.realpath(p)
+        if any(rp.startswith(d) and rp + os.sep != d for d in dir_prefixes):
+            continue
+        kept.append((p, c, r))
+    return kept
+
+
 def classify(run, keep_last, recency_s, flags, now):
     """Return (candidates, protected_notes, skip). candidates = [(path, cls, reason)].
     skip is a short reason string when the run yielded nothing so main can explain the
@@ -179,7 +193,7 @@ def classify(run, keep_last, recency_s, flags, now):
                 cands.append((fp, "tmp-junk", "*.tmp/*.partial/*.lock"))
             elif z and weightlike:
                 cands.append((fp, "tmp-junk", "zero-byte weights file (crash artifact)"))
-    return cands, notes, None
+    return prune_nested(cands), notes, None
 
 
 def human_time(s):
@@ -227,8 +241,6 @@ def main():
         die(f"refusing to scan a top-level path: {root}")
     if out_home and not (root == out_home or root.startswith(out_home + os.sep)):
         die(f"root is not under OUTPUT_DIR_HOME ({out_home}): {root}")
-    if out_home and root == out_home and not a.stage:
-        pass  # scanning the whole output home read-only is fine
     if not os.path.isdir(root):
         die(f"not a directory: {root}")
     if a.stage:

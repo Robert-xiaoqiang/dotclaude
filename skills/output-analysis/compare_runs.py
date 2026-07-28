@@ -100,8 +100,7 @@ def value_at(rows, metric, at):
 
 
 def emit_table(labels, rows_by_run, metric, at, out):
-    header = f"run | step | {metric}"
-    md = [f"| {header.replace(' | ', ' | ')} |", "|" + "---|" * 3]
+    md = [f"| run | step | {metric} |", "|---|---|---|"]
     tex_rows = []
     for lab in labels:
         step, val = value_at(rows_by_run[lab], metric, at)
