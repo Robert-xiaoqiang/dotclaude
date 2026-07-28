@@ -1,4 +1,4 @@
-# Skill: layout-runtime
+# Skill: platform-runtime
 
 ## Purpose
 Reason about a cluster job's runtime as a **layered, partially-independent stack**, GPU driver,
@@ -108,5 +108,5 @@ only the control surface differs.
   submitting shell.
 
 ## Companions
-`platform-run` (neutral spec → native submit) · `env-cluster` (the machine env the profile assumes) ·
+`platform-run` (neutral spec → native submit) · `platform-env` (the machine env the profile assumes) ·
 `layout-output` (output tree) · `naming-config` · `conventions` (the family index). Project memory: `dlc-driver-flag-serving`.

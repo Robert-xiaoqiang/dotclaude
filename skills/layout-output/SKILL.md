@@ -110,6 +110,6 @@ Both downstream skills find runs the same way, so exact paths never need to be h
 
 ## Companions
 `naming-config` (the run path + the launcher triple) · `layout-workspace` (the agent
-workspace tree, the sibling `layout-` concern) · `layout-runtime` (the driver/image/venv/storage
+workspace tree, the sibling `layout-` concern) · `platform-runtime` (the driver/image/venv/storage
 stack a run executes on) · `output-analysis` (compares runs in this tree) · `output-cleanup`
 (safely reclaims this tree) · `conventions` (the family index).
