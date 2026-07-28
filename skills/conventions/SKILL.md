@@ -18,8 +18,7 @@ starting or organizing a project, or when unsure which convention applies.
 | **layout** | where does this doc / script / run output live? | `layout-workspace` (`docs/`, `scripts/`, reports/plans, what's committed) · `layout-output` (the run-output tree under `$OUTPUT_DIR_HOME`) |
 | **docs** | how do I write/maintain the living docs? | `docs-plan` (`docs/plans/<date>-<topic>.md`) · `docs-arch` (`docs/ARCH.md`) |
 | **run-control** | how is a run specified + submitted across platforms? | `platform-run` (neutral `task.yaml` → DLC/Slurm/EAI) |
-| **analysis** | how do I compare runs and build figures / tables? | `analysis-runs` (latitude vs longitude, embed-style figures) |
-| **cleanup** | how do I reclaim run space without breaking resume? | `cleanup-runs` (resume-safe, confirmation-gated) |
+| **outputs** | how do I compare runs or reclaim their space? | `output-analysis` (latitude vs longitude, embed-style figures) · `output-cleanup` (resume-safe reclaim) |
 | **env / ops** | machine setup & project relocation | `env-cluster` (env.sh / cluster env) · `env-migrate` (relocate a project dir) |
 
 ## The philosophy (one line each)
@@ -32,8 +31,8 @@ starting or organizing a project, or when unsure which convention applies.
   plans (`docs-plan`).
 - **run-control** — a run is a *platform-neutral* spec rendered per platform; platform IDs
   live in a separate profile, never the spec (`platform-run`).
-- **analysis / cleanup** — both read the `layout-output` schema: `analysis-runs` compares
-  runs across steps and arms, `cleanup-runs` reclaims space while protecting resume state.
+- **outputs** — the `layout-output` tree is read by `output-analysis` to compare runs across
+  steps and arms, and by `output-cleanup` to reclaim space while protecting resume state.
 
 ## How the concerns connect at a launcher
 A single launcher ties three of them together: `naming-config` fixes its **name** and its

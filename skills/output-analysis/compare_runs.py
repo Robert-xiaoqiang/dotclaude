@@ -5,7 +5,7 @@ What: discover runs under a root (or take explicit run dirs), read each run's
       metrics.jsonl, and emit (1) a comparison table at a chosen step (latitude) as
       markdown + booktabs LaTeX, and (2) a line figure of metric-vs-step (longitude)
       and a bar figure at the chosen step. Figures use the embed style from the
-      analysis-runs skill: no title, no caption, terse labels, vector output, one
+      output-analysis skill: no title, no caption, terse labels, vector output, one
       colorblind-safe color per run reused across figures.
 When: comparing training/eval runs for a paper or report. Read-only on the run tree.
 Usage:

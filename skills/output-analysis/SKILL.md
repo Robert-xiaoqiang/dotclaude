@@ -1,4 +1,4 @@
-# Skill: analysis-runs
+# Skill: output-analysis
 
 ## Purpose
 Given a directory of runs that share the `layout-output` schema, compare them and produce

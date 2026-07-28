@@ -1,4 +1,4 @@
-# Skill: cleanup-runs
+# Skill: output-cleanup
 
 ## Purpose
 Reclaim space in the `layout-output` tree by removing what a run no longer needs, without
@@ -81,5 +81,5 @@ Classify every artifact with `layout-output` first, then act only on the reclaim
 
 ## Companions
 `layout-output` (the schema and the resume-vs-derived classification this enforces) ·
-`naming-config` (the tags that flag smoke / debug runs) · `analysis-runs` (read the metrics
+`naming-config` (the tags that flag smoke / debug runs) · `output-analysis` (read the metrics
 before thinning, so a curve is not lost with its tfevents) · `conventions` (the index).

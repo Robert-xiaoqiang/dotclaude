@@ -6,12 +6,12 @@ logs, metrics, samples, and eval results. This is a third organization, separate
 the project source tree and the agent-facing workspace, and it lives under
 `$OUTPUT_DIR_HOME` (never inside the project dir). This skill fixes the schema and,
 more importantly, the classification of every artifact into *resumable state*,
-*deliverable*, or *derived / junk*. Two downstream skills read this schema, `analysis-runs`
-locates and compares runs, and `cleanup-runs` decides what is safe to delete.
+*deliverable*, or *derived / junk*. Two downstream skills read this schema, `output-analysis`
+locates and compares runs, and `output-cleanup` decides what is safe to delete.
 
 ## When to Use
 - Deciding where a run should write its outputs, or reviewing a launcher's output path.
-- Before comparing runs (`analysis-runs`) or reclaiming space (`cleanup-runs`), to know
+- Before comparing runs (`output-analysis`) or reclaiming space (`output-cleanup`), to know
   what each file means and what must survive.
 - Onboarding a new project, so runs land in a predictable, tool-agnostic shape.
 
@@ -63,7 +63,7 @@ can be shaped to. Names vary per project, so match by role, not by exact spellin
 
 ## Artifact classification (the crux)
 Every file falls into one of four classes. The class, not the filename, decides whether
-`cleanup-runs` may touch it.
+`output-cleanup` may touch it.
 
 - **Identity** (always keep, tiny). `config.yaml`. It names the run and is needed to
   interpret every other file. Deleting it orphans the whole dir.
@@ -79,7 +79,7 @@ Every file falls into one of four classes. The class, not the filename, decides 
   half-written or zero-size checkpoints missing their marker files.
 
 The `metrics.jsonl` is the analysis anchor. Keep it. It is small and it is what
-`analysis-runs` reads for the longitude axis, and it lets you drop the far larger tfevents
+`output-analysis` reads for the longitude axis, and it lets you drop the far larger tfevents
 without losing the curves.
 
 ## Run kinds (how to tell them apart)
@@ -110,5 +110,5 @@ Both downstream skills find runs the same way, so exact paths never need to be h
 
 ## Companions
 `naming-config` (the run path + the launcher triple) · `layout-workspace` (the agent
-workspace tree, the sibling `layout-` concern) · `analysis-runs` (compares runs in this
-tree) · `cleanup-runs` (safely reclaims this tree) · `conventions` (the family index).
+workspace tree, the sibling `layout-` concern) · `output-analysis` (compares runs in this
+tree) · `output-cleanup` (safely reclaims this tree) · `conventions` (the family index).

@@ -6,7 +6,7 @@ What: walk a root under OUTPUT_DIR_HOME, classify each run and each checkpoint i
       (intermediate checkpoint, smoke run, tmp junk), size each candidate, and print a
       plan sorted by reclaim. Read-only by default: it writes nothing unless --stage is
       given, and --stage MOVES candidates into a trash dir (a reversible rename), it never
-      calls rm. Enforces the cleanup-runs hard rails.
+      calls rm. Enforces the output-cleanup hard rails.
 When: the user has asked to reclaim space and you need a safe, reviewable plan first.
 Usage:
       # dry-run plan for one project's runs, keep newest+best, thin older intermediates
