@@ -31,12 +31,19 @@ readable from its path and no user invents a per-run directory.
 
 ## The run path (from naming-config)
 ```
-$OUTPUT_DIR_HOME/<project>/<pipeline.name>/<model.name>/<dataset.name>/<hash>/
+$OUTPUT_DIR_HOME/<project>/<group.name>/.../<hash>/     # one segment per config GROUP, fixed order
+e.g. .../autorsi/grpo/qwen3_4b/healthbench/judge/09ab18d5/
 ```
-Everything up to and including `<hash>` is one **run dir**. The `<hash>` is `config[:8]`,
-so a CLI-overridden run disambiguates itself. Sibling runs that share a
-`<pipeline>/<model>/<dataset>` prefix are the natural comparison set, and the arms of an
-ablation differ only in the slots that name the change (`naming-config` symmetry rule).
+One path segment per config group the project defines, in a fixed order (pipeline, model, dataset,
+then any further axes such as `reward`), then the hash. Everything up to and including `<hash>` is one
+**run dir**. The `<hash>` is `md5(merged config)[:8]` over the **resolved** config, so a run overridden
+on the command line disambiguates itself instead of overwriting the run it came from. Sibling runs
+sharing a prefix are the natural comparison set, and the arms of an ablation differ only in the slots
+that name the change (`naming-config` symmetry rule).
+
+**The run dir is derived, never chosen.** The launcher asks the config system for this path (a
+lightweight CLI that imports the config module only) and writes its own log inside it. A launcher spec
+that carries its own `log:`/`output:` path is a second source of truth and will drift.
 
 ## The reference run layout
 A tool-agnostic schema most frameworks (HF Trainer, Lightning, DeepSpeed, a custom loop)
@@ -44,6 +51,8 @@ can be shaped to. Names vary per project, so match by role, not by exact spellin
 ```
 <run>/
   config.yaml                     # resolved, frozen config: the run's identity
+  trainer_config.json             # the framework config as ACTUALLY resolved, incl. library defaults
+  launch.rank<N>.log              # the entrance's own log, written INSIDE the run it launched
   checkpoints/
     step_0000500/ ... step_0004000/   # step-tagged checkpoints (weights + optimizer + RNG + scheduler)
     best  -> step_0003000              # symlink: best-by-metric
@@ -65,8 +74,11 @@ can be shaped to. Names vary per project, so match by role, not by exact spellin
 Every file falls into one of four classes. The class, not the filename, decides whether
 `output-cleanup` may touch it.
 
-- **Identity** (always keep, tiny). `config.yaml`. It names the run and is needed to
-  interpret every other file. Deleting it orphans the whole dir.
+- **Identity** (always keep, tiny). `config.yaml` and `trainer_config.json`. They name the run and are
+  needed to interpret every other file; deleting them orphans the whole dir. `config.yaml` is what you
+  *asked for*, `trainer_config.json` is what the framework *resolved* — keep both, because the gap
+  between them (fields left at a library default nobody chose) is exactly where silent misconfiguration
+  hides, and it is not reproducible later from a different library version.
 - **Resume state** (keep while a run is unfinished). The `last` checkpoint target with its
   optimizer, scheduler, and RNG state, plus the wandb resume id, plus a partially written
   `eval/<bench>/predictions.jsonl` for an eval still in progress. Losing this forces a
