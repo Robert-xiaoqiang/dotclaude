@@ -18,13 +18,17 @@ this scaffolding distinct from source code, tests, and packaging. Config **names
 ## The layout
 ```
 # ── Experiment-facing: config → launcher → platform (names per naming-config) ──
+# config/ MIRRORS the implementation tree, one level deeper. Read a config path, predict the import
+# path; read a module path, predict where its configs live. The mirror is the layout's core invariant.
 <pkg>/
   config/                            # config lives INSIDE the package, so resolution never
     model/<model_name>.yaml          #   depends on the CWD and ships with an install
-    pipeline/<pipeline_name>.yaml    # one per stage×method (the trainer/loop)
-    dataset/<dataset_name>.yaml      # one per data source (files, splits, loader)
-    reward/<reward_name>.yaml        # add a group per axis your experiments actually vary
-  model/  pipeline/  dataset/        # the code each group's class_path points at
+    pipeline/<pipeline_name>.yaml    #      ⟷  <pkg>/pipeline/<name>.py
+    pipeline/reward/<reward_name>.yaml #    ⟷  <pkg>/pipeline/reward/<name>.py   (nested BECAUSE
+    dataset/<dataset_name>.yaml      #          the code is nested: a reward belongs to the RL pipeline)
+  model/  dataset/                   # the code each group's class_path points at
+  pipeline/                          #   ...and pipeline/ owns reward/, which is why config does too
+    reward/
   platform/                          # PURE-PYTHON translation: jobspec, profile, translate/<p>.py
   utils/config.py                    # the config system (group merge + run-dir derivation)
 launcher/
@@ -54,17 +58,64 @@ it is importable and unit-testable without a shell — that is a language/role s
 second layer (see the anti-patterns).
 
 ## The config → launcher paradigm (the experiment-facing half)
-A config file's **name** is its purpose (`naming-config` slot grammar); its **body** holds
-*every* hyperparameter for that slot. Adding a variant = add one `pipeline/*.yaml`, never
-edit a recipe. The pieces compose:
-- `config/{model,pipeline,dataset}/<name>.yaml` — each a namespaced fragment (`model:`,
-  `pipeline:`, `dataset:`) of knobs. The root `config/<entry>.yaml` lists them under
-  `defaults:` (plus any framework base, e.g. verl's `ppo_trainer`, via a hydra searchpath).
-- `launcher/<name>/task.yaml` — the platform-neutral spec (`platform-run`). Its `run:` is
-  **thin and names-only**: `bash launcher/launch.sh model_name=X pipeline_name=Y dataset_name=Z`.
-  The launcher dir name mirrors the config triple so the run's purpose is obvious.
-- `launcher/launch.sh` (+ `serve_launch.sh`) — the **one** shared entrance: set up
-  env/venv/multinode, then hand the config-name args to the runner (`-m pkg.run "$@"`).
+
+### Why it is shaped this way (five principles)
+The layout is not filing preference; each rule exists to make a class of mistake impossible.
+
+1. **Config is data ABOUT code, and the two trees mirror.** `config/<group>/` sits opposite
+   `<pkg>/<group>/`, one level deeper, at every depth. So a config path predicts an import path and a
+   module path predicts where its configs live — and *nesting is inherited*: a reward's config nests
+   under `config/pipeline/` precisely because the reward's code lives in `<pkg>/pipeline/reward/`. When
+   you cannot decide where a new config belongs, the answer is wherever its implementation already is.
+2. **Selection versus specification.** The config **specifies** (every knob, complete). The launcher
+   **selects** (names, plus the few overrides that define *this* run). A launcher that starts
+   specifying is a config wearing a disguise, and it will not appear in the run's frozen `config.yaml`.
+3. **`class_path` is the only seam.** Config names code to build; it never encodes control flow. The
+   moment a pipeline reads a config value to decide *which* branch to take (`if kind == "opd"`), the
+   arm has leaked into the code and the config stops being a complete description of the run.
+4. **Compose, never duplicate.** N arms are N configs in ONE group, not N copies of a pipeline config.
+   The test is mechanical: if two configs differ in one field, that field is an axis and belongs in its
+   own group (`naming-config`). Duplicates do not stay in sync — the first retune proves it.
+5. **The merged config IS the run.** It is hashed into the run dir and frozen there. Anything that
+   influences a run but is not in it — an env flag, a `mode=`, a hand-edited default — is invisible
+   history, and two materially different runs become indistinguishable after the fact.
+
+### What goes IN a config (the canonical shape)
+Every group config is a single namespaced fragment keyed by its group, with the same four-part body:
+
+```yaml
+<group>:                 # the namespace == the group == the mount point in the merged tree
+  name: <identity>       # THE SELECTOR. Unique across the group's dir; a duplicate is a hard error.
+  class_path: a.b.C      # WHAT to build (a class or a factory function)
+  init_kwargs: {...}     # HOW to build it — every ctor kwarg, explicitly (naming-config rule 2)
+  <group-specific>       # knobs the pipeline reads directly rather than passing to a constructor
+```
+
+`name` + `class_path` + `init_kwargs` is the invariant; the fourth part is where groups differ.
+
+| group | typically also carries | example |
+|---|---|---|
+| **model** | dtype/attention/precision, adapter or backbone selection, generation defaults for API models | `init_kwargs: {path, dtype: bfloat16, attn_implementation: sdpa, trust_remote_code}` · VMS: `init_kwargs: {base_url, model_path, generate_kwargs: {max_tokens, temperature}}` |
+| **dataset** | **per-split** `init_kwargs` (train / validate / test), the metric set, the split's own subset caps | `train.init_kwargs: {files, max_samples, scaffold}` · VMS adds `test.metrics: [{class_path: ...ROUGEMetric, init_kwargs: {}}]` and `metric_key: rouge_l` |
+| **pipeline** | the framework's config as ONE verbatim block, plus loop-level knobs | `trainer_kwargs: {...}` splatted into `GRPOConfig(**kwargs)` · VMS splits it: `accelerator_kwargs`, `data_loader_kwargs`, `adamw_kwargs: {lr, betas, weight_decay, eps}`, `fsdp_kwargs`, plus `num_epochs`, `num_warmup_steps`, `max_val_samples`, `resume_overall_step` |
+| **a nested group** (reward) | whatever that component means, incl. its own service clients | `init_kwargs: {hygiene, clip, max_workers, judge: {base_url, model, max_tokens, timeout}}` |
+
+Two rules about the *framework* block specifically, because it is where configs rot:
+- Pass it **verbatim** (`Trainer(**cfg.pipeline.trainer_kwargs)`). A hand-picked subset silently makes
+  every unnamed field unreachable, and the run then trains on a default nobody chose.
+- **Group it by concern**, VMS-style (`adamw_kwargs`, `data_loader_kwargs`, `fsdp_kwargs`), when the
+  framework takes several distinct config objects; use one flat block when it takes one.
+
+Swapping the trainer class is itself config — `trainer_class_path` plus `trainer_extra_kwargs` — so a
+novel variant is a subclass named in YAML, never a fork of the assembly code.
+
+### How the pieces compose
+- `config/<group>/<name>.yaml` — the fragments above, merged into one tree by the config system.
+- `launcher/<name>/task.yaml` — the platform-neutral spec (`platform-run`). Its `run:` is an argv
+  **list** of `k=v`: the group names plus only the overrides that define this run. The launcher dir
+  name mirrors the selected config names so the run's purpose is readable without opening it.
+- `launcher/launch.sh` — the **one** shared entrance: env/venv/multinode, ask the config system for the
+  run dir, tee the log into it, then hand every argument to the runner (`-m pkg.run "$@"`).
 
 ### Two runner styles — own the loop vs wrap a framework (get this right first)
 The config→launcher shell is the same; what the config *points at* and how you *launch* differ by
