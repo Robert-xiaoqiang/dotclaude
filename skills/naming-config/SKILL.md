@@ -84,10 +84,13 @@ domain. So a group carries **two** placements, and both mean something:
 | **subdir** | ownership | `config/<group>/` | `config/<owner>/<group>/` |
 | **mount path** | scope | `cfg.<group>` | `cfg.<owner>.<group>` |
 
-A nested group still gets its own short selector (`reward_name=judge`) and its own directory — that is
-what keeps N arms one slot apart instead of N near-identical owner configs. It also still contributes
-its own segment to the run path, because that path expresses run *identity* (which arm is this?), not
-the shape of the config tree, and the arms of an ablation must sit side by side to be comparable.
+**Selection follows ownership.** A nested group is named by its OWNER's config (`pipeline: {reward:
+judge}`) and swapped through that same dotted path (`pipeline.reward=judge_hygiene`). It does NOT get a
+`<component>_name=` argument: that would re-assert at the CLI exactly the independence the nesting
+denies, and would let a run name a reward for a pipeline that has no concept of one. It keeps its own
+directory, which is what keeps N arms one slot apart instead of N near-identical owner configs, and it
+still contributes its own segment to the run path — that path expresses run *identity* (which arm is
+this?), not the shape of the config tree, and the arms of an ablation must sit side by side.
 
 Keep the owner's own glob **non-recursive** (`config/pipeline/*.yaml`) so a nested group's directory
 cannot be swallowed by its parent.

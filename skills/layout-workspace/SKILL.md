@@ -59,8 +59,8 @@ second layer (see the anti-patterns).
 
 ## The config → launcher paradigm (the experiment-facing half)
 
-### Why it is shaped this way (five principles)
-The layout is not filing preference; each rule exists to make a class of mistake impossible.
+### Design philosophy (why it is shaped this way)
+The layout is not filing preference; each principle exists to make a class of mistake impossible.
 
 1. **Config is data ABOUT code, and the two trees mirror.** `config/<group>/` sits opposite
    `<pkg>/<group>/`, one level deeper, at every depth. So a config path predicts an import path and a
@@ -98,7 +98,28 @@ Every group config is a single namespaced fragment keyed by its group, with the 
 | **model** | dtype/attention/precision, adapter or backbone selection, generation defaults for API models | `init_kwargs: {path, dtype: bfloat16, attn_implementation: sdpa, trust_remote_code}` · VMS: `init_kwargs: {base_url, model_path, generate_kwargs: {max_tokens, temperature}}` |
 | **dataset** | **per-split** `init_kwargs` (train / validate / test), the metric set, the split's own subset caps | `train.init_kwargs: {files, max_samples, scaffold}` · VMS adds `test.metrics: [{class_path: ...ROUGEMetric, init_kwargs: {}}]` and `metric_key: rouge_l` |
 | **pipeline** | the framework's config as ONE verbatim block, plus loop-level knobs | `trainer_kwargs: {...}` splatted into `GRPOConfig(**kwargs)` · VMS splits it: `accelerator_kwargs`, `data_loader_kwargs`, `adamw_kwargs: {lr, betas, weight_decay, eps}`, `fsdp_kwargs`, plus `num_epochs`, `num_warmup_steps`, `max_val_samples`, `resume_overall_step` |
-| **a nested group** (reward) | whatever that component means, incl. its own service clients | `init_kwargs: {hygiene, clip, max_workers, judge: {base_url, model, max_tokens, timeout}}` |
+
+### Owned components — the second level of the hierarchy
+Not every swappable thing deserves a top-level group. Ask **who owns it**: a component that is
+meaningless without a particular owner belongs *under* that owner, in all three of subdir, mount path,
+and how it is selected.
+
+| owner | component | why owned, not a peer | lives at · mounts at |
+|---|---|---|---|
+| **pipeline** | **reward** | only an RL trainer has one; an eval or SFT pipeline has none | `config/pipeline/reward/judge.yaml` · `pipeline.reward` |
+| **pipeline** | **trainer / inferer engine** | the loop's execution strategy — a trainer subclass, or eval's generation engine; both are *how this pipeline runs*, not independent axes | `pipeline.trainer_class_path` + `trainer_kwargs` / `trainer_extra_kwargs` |
+| **dataset** | **metrics** | a metric scores *this* dataset's outputs; another dataset has different ones, and a metric has no meaning detached from what it measures | `dataset.<split>.metrics: [{class_path, init_kwargs}]` (Visual-Memory-SFT) |
+| **model** | **adapter / PEFT mixin, processor** | wraps or modifies a *specific* model class; a LoRA config without its base model describes nothing | `config/model/adapter/…` · `model.adapter`, `model.processor` |
+
+**Selection follows ownership.** An owned component is named **by its owner's config**
+(`pipeline: {reward: judge}`) and swapped through that same dotted path
+(`pipeline.reward=judge_hygiene`). It never gets its own `<component>_name=` argument, because that
+would re-assert at the CLI the independence the layout just denied — and it would let a run name a
+reward for a pipeline that has no concept of one. Identity is resolved *before* field overrides land, so
+`pipeline.reward=X` and `pipeline.reward.init_kwargs.k=v` compose rather than clobber.
+
+The payoff is the same as for a top-level group: N arms are N small configs in ONE component directory,
+sharing a single owner config, instead of N forked owners that drift apart on the first retune.
 
 Two rules about the *framework* block specifically, because it is where configs rot:
 - Pass it **verbatim** (`Trainer(**cfg.pipeline.trainer_kwargs)`). A hand-picked subset silently makes
