@@ -13,6 +13,11 @@
 !/.gitignore
 !/.gitattributes
 !/README.md
+# Claude Code's own settings: effort level, TUI, theme, prompt toggles. Small,
+# credential-free, and exactly what you want back after a migration.
+# settings.local.json stays out: machine-local by convention, and it carries
+# absolute paths from whichever host wrote it.
+!/settings.json
 !/skills/
 !/agents/
 !/commands/
@@ -24,7 +29,11 @@
 # NEVER allow-list these (here as a reminder, already ignored by /*):
 #   .credentials.json   history.jsonl   sessions/   projects/   todos/
 #   telemetry/  statsig/  cache/  shell-snapshots/
-#   settings.json   CLAUDE.md   (deliberately machine-/personal-specific)
+#   CLAUDE.md   (deliberately machine-/personal-specific)
+# settings.json was on this list until 2026-07-30. Reversed deliberately: its
+# contents are effortLevel, tui, theme and a prompt toggle, which are personal
+# preference rather than machine state, and are exactly what you want back after
+# a migration. settings.local.json keeps the original reasoning and stays out.
 
 # Never track Python bytecode or OS cruft, even inside allow-listed dirs
 __pycache__/
