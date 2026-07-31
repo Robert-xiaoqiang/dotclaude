@@ -82,7 +82,58 @@ domain. So a group carries **two** placements, and both mean something:
 | | encodes | orthogonal axis | owned component |
 |---|---|---|---|
 | **subdir** | ownership | `config/<group>/` | `config/<owner>/<group>/` |
-| **mount path** | scope | `cfg.<group>` | `cfg.<owner>.<group>` |
+| **mount path** | scope — where it LIVES | `cfg.<group>` | `cfg.<owner>.<group>` |
+| **payload mount** | reach — where it APPLIES | usually the same | may be another subtree |
+
+### Where a component LIVES vs where it APPLIES
+
+Those are two questions, and for most components the answer is the same, which is why the distinction
+stays invisible until it bites.
+
+A component that is *instantiated* applies where it lives: a `reward` sits at `cfg.pipeline.reward` and
+something calls `instantiate(cfg.pipeline.reward)`. Living and applying coincide.
+
+A component that is a **preset over another group's fields** does not. A parallelism `backend`
+(DDP/FSDP/DeepSpeed) lives at `cfg.pipeline.backend` — that is its ownership, its scope, and what
+`pipeline.backend=fsdp` selects — but its content is trainer-config fields that must reach
+`cfg.pipeline.trainer.config.init_kwargs`. Nothing is instantiated at `cfg.pipeline.backend` at all.
+
+**Declare it in the GROUP DEFINITION, not in each file.** The group registry already answers "where
+does this fragment mount"; give it a second column for "where does its content apply":
+
+```python
+GROUPS = (
+    # selector,  subdir,             mount path (LIVES),      top_level, in_path, payload path (APPLIES)
+    ("reward",   "pipeline/reward",  ("pipeline","reward"),   False,     True,    None),
+    ("backend",  "pipeline/backend", ("pipeline","backend"),  False,     False,
+     ("pipeline","trainer","config","init_kwargs")),
+)
+```
+
+Then the loader merges each component's content (everything but its identity keys — `name`, and any
+inheritance key) at that path, and the component's own YAML says nothing about plumbing:
+
+```yaml
+backend:
+  name: fsdp
+  fsdp: true
+  fsdp_config: {...}
+```
+
+Resist putting `mount:`/`payload:` meta-keys inside every file. They restate in data what the group
+registry already owns, they must be repeated correctly in each new file of that group, and they read as
+configuration when they are wiring. A reader of `fsdp.yaml` should learn what an FSDP backend IS; where
+it lands is a property of the GROUP, and belongs where the group is defined.
+
+**Precedence is the whole point, and it is easy to get backwards.** A preset must merge **BENEATH** its
+target: an explicit field in the owning config, and argv later still, must always win. Merging it at
+group-resolution time does the opposite, because nested groups resolve *after* their owners — so the
+preset would beat the explicit value. If the merge order and the override order disagree, a config that
+looks like it sets a field does not, and nothing says so.
+
+**Test it, because both failure modes are silent.** Assert (a) the preset reaches the target at all —
+a preset that never arrives leaves the run behaving as the default while the config claims otherwise —
+and (b) an explicit field still beats it.
 
 **Selection follows ownership.** A nested group is named by its OWNER's config (`pipeline: {reward:
 judge}`) and swapped through that same dotted path (`pipeline.reward=judge_hygiene`). It does NOT get a
@@ -104,6 +155,44 @@ that differ by it can look identical on disk. A smoke run is a *named configurat
 (`dataset_name=healthbench_smoke`, the `tag` slot) with its own hashed run dir.
 
 ### Launcher dirs
+
+Two grammars, and which one applies depends on how the project selects a run.
+
+**(a) Group-sequence grammar — use this when the runner selects by `<group>_name=`.** The launcher dir
+name is the sequence of the **top-level, independently-selected** group names, joined by `__`:
+
+```
+{pipeline}__{model}__{dataset}                # one segment per TOP-LEVEL group, in GROUPS order
+```
+
+**An owned component NEVER gets a segment.** A `reward` is not an axis a run picks independently — it
+is part of what an RL pipeline IS. So the pipeline config *embodies* its reward (`pipeline: {reward:
+judge}`), and two arms that differ in reward are two PIPELINE configs, not one launcher with a fourth
+slot. Adding that slot re-asserts in the name exactly the independence the nesting denies, and it
+produces launcher names that claim a run selected four things when the runner only accepts three
+`<group>_name=` selectors.
+
+The test is mechanical: **a launcher segment must correspond to a `<group>_name=` argument the runner
+actually accepts.** If a segment cannot be passed as a selector, it does not belong in the name.
+
+**Avoiding N near-duplicate pipeline configs** is then the real work, and it is a solved problem: give
+pipeline configs a one-line base-merge (`_base_: grpo`) so an arm is a 5-line delta naming its reward,
+not a copy of a 60-field trainer block. Copies drift; the drift is silent; and the anti-pattern list
+below already forbids them.
+
+**The failure this grammar catches.** A launcher that runs N arms cannot be named at all, because the
+grammar names one config chain and N arms are N chains. When you find yourself inventing a segment no
+config group defines (`smoke__qwen3_4b__coevolve`: no `smoke` pipeline, no `coevolve` dataset), the
+name is not the problem — the launcher is. Split it into N launchers.
+
+A pre-flight is not an exception: it is the same arm with the `tag` slot set
+(`dataset_name=healthbench_smoke`) and a short schedule passed as ordinary overrides.
+
+**Run dirs are a different question from launcher names.** The run path expresses run IDENTITY, so an
+owned component DOES contribute a path segment (the arms of an ablation must sit side by side). Launcher
+name and run dir are therefore related but not identical, and only the run dir carries the component.
+
+**(b) Slot grammar — use this when launchers name a model class and its axes directly:**
 
 ```
 {stage}_{technique}[_{variant_axes...}][_{backbone}]_{scale}[_{specialty_tag}]_{dataset}[_{tag}]
@@ -209,6 +298,16 @@ that differ by it can look identical on disk. A smoke run is a *named configurat
   prefix by ROLE (`JUDGE_BASE_URL`) so a misconfiguration is a loud
   mismatch instead of a silently wrong number.
 * Launcher dir name that doesn't tell you which model + dataset will run.
+* **A pipeline module that reaches into another group's subtree to move fields.** That is a payload
+  mount the config system could not express; give the component a declared `mount` instead.
+* **A preset that merges ON TOP of its target.** It silently overrides the explicit field the user
+  wrote, and the config reads as though the explicit field applied.
+* **A launcher whose name contains a segment no config group defines.** It means either the name is
+  invented (say what it selects) or the launcher runs more than one config chain (split it). Both are
+  caught by globbing launcher dirs and resolving each `__`-segment against the group configs.
+* **A launcher that drives N runs.** `smoke_arms.sh judge hygiene scaffold` inside one job is a
+  multi-run script, not a launcher; its name can only lie. Keep such drivers for LOCAL sweeps and give
+  the cluster one launcher per chain.
 
 ## Output
 
