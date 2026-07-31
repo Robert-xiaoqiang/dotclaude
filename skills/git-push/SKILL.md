@@ -7,7 +7,9 @@ Push local commits to the correct remote repository and branch, using an SSH pri
 
 ### SSH key
 - When pushing, use an SSH private key found under `~/.ssh/` (search recursively, including subdirectories like `~/.ssh/sn2github/sn2github`).
-- Discovery: run `find ~/.ssh -type f ! -name "*.pub" ! -name "known_hosts" ! -name "config" ! -name "authorized_keys" 2>/dev/null` to find all private key files.
+- Discovery: run `find ~/.ssh -type f ! -name "*.pub" ! -name "known_hosts*" ! -name "config" ! -name "authorized_keys" 2>/dev/null` to find all private key files.
+- `known_hosts*` with the glob, not `known_hosts`: `ssh-keygen -R` leaves a `known_hosts.old` behind, which the bare name does not exclude. It then shows up as a second "key" and invites picking the wrong one, or reporting "exactly one key" when there are two.
+- If a match looks doubtful, confirm before using it: a private key's first line is `-----BEGIN ... PRIVATE KEY-----`.
 - Invoke git with `GIT_SSH_COMMAND="ssh -i <key_path> -o IdentitiesOnly=yes"` so the correct key is used regardless of ssh-agent state.
 - If multiple keys exist, list them and confirm which to use unless the user has already specified.
 - If exactly one key is found, use it automatically without asking.
