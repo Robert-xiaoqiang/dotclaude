@@ -245,6 +245,81 @@ grader is not a detail, it *is* the metric. An env var may carry the endpoint (a
 relaunch and must not be frozen), but the judge's identity — model name, class_path, decoding — belongs
 in the config.
 
+### The THREE axes a run varies along — and why they are not one list
+
+"sft, peft, rl, eval, ar, nar, mtp" reads like one menu of pipeline kinds. It is three axes wearing one
+coat, and collapsing them is what produces a `config/pipeline/lora.yaml` sitting beside
+`config/pipeline/eval.yaml` — two things that cannot be swapped for one another.
+
+| axis | the question it answers | where it lives | values |
+|---|---|---|---|
+| **the LOOP** | what procedure is executing? | `pipeline` (top-level) | `sft`, `dpo`, `grpo`, `distill`, `eval`, `serve`, `agent` |
+| **the POLICY'S FACTORIZATION** | how does the model define p(y\|x)? | `model.class_path` — the `model_class` slot | `ar` (causal LM), `nar` (mask-predict, CTC), `diffusion` |
+| **the ADAPTATION** | which weights actually move? | `model.adapter` (owned by model) | full, `lora`, `qlora`, `ia3` |
+
+**PEFT is not a pipeline.** LoRA is a way of adapting a model, and you can run SFT, DPO or GRPO with or
+without it — so it is an owned component of `model`, and `sft` + `model.adapter=lora` is the run. Giving
+PEFT its own pipeline forces a fork of the SFT loop that then drifts from it, which is the
+near-duplicate anti-pattern in config form.
+
+**Pipelines sort by their direction relative to the policy**, which is the generalisation of
+trainer-produces / eval-consumes:
+
+| direction | pipelines | reads | writes |
+|---|---|---|---|
+| **producer** | `sft`, `dpo`, `grpo` | data | checkpoints |
+| **consumer** | `eval`, `serve`, `agent` | a checkpoint | scores / a service / trajectories |
+| **both** | `distill` | a TEACHER checkpoint + data | a STUDENT checkpoint |
+
+`distill` is the useful stress test: it consumes a policy and produces one, so it needs *two* model
+slots. The teacher is not a second top-level `model` (a run has one policy under optimisation); it is an
+owned component — `pipeline.teacher` — for the same reason a judge is. Anything that is a model but is
+not the thing being optimised belongs to the pipeline that uses it.
+
+### Is MTP a kind of NAR? No — they are answers to different questions
+
+They look alike because both emit several tokens per forward pass, but that is a *decoding* property,
+and it is not the axis `model_class` encodes:
+
+| | factorization | tokens per forward | what it changes |
+|---|---|---|---|
+| **AR** | left-to-right, p(y_t \| y_<t) | 1 | — |
+| **MTP** | **left-to-right, unchanged** | k, via auxiliary heads | an extra training objective + a decoding accelerator |
+| **NAR** | **not left-to-right** (parallel / iterative refinement) | k | what the model IS |
+
+MTP (DeepSeek-V3, Medusa) keeps the AR factorization on its primary head and adds heads predicting
+t+2, t+3…, usually verified by the main head. NAR (mask-predict, CTC, diffusion LMs) removes the
+sequential conditioning altogether.
+
+So MTP is **AR + auxiliary heads**, not a species of NAR. Filing it under `nar` would put a training
+objective and a decoding trick in the slot that names a *generative model class* — and then
+`model_class` no longer predicts which code runs, which is the invariant the whole mirror depends on.
+Place MTP as a model VARIANT AXIS (`qwen3_mtp4_4b` — four heads) plus whatever loss term the pipeline
+adds, exactly as `naming-config` treats variant axes.
+
+Litmus for any new word someone proposes: **does it change which code the run instantiates, or only
+which values that code reads?** A new class → a `model_class` or a `pipeline`. A new setting → a
+variant axis or an owned component. `nar` builds a different model; `mtp` adds heads to the same one;
+`lora` wraps it; `grpo` is a different loop over it.
+
+### Template: adding a new pipeline kind
+
+```
+1. Which direction is it?      producer / consumer / both   -> decides whether `model` is an
+                                                               input, an output, or both
+2. Code:    <pkg>/pipeline/<kind>/__init__.py   with main(cfg)
+3. Config:  config/pipeline/<kind>.yaml         name + class_path + init_kwargs + loop knobs
+4. Owned components: anything meaningless without this pipeline nests under it
+                     (reward -> RL, judge -> eval, teacher -> distill, tools -> agent)
+5. Launcher: launcher/<kind>__<model>__<dataset>/task.yaml   — names only, plus this run's overrides
+6. Does it consume a policy? Then its `model` is a TRAINED-policy config whose name carries the
+   trainer pipeline name verbatim, and its launcher sits side by side with that trainer's.
+```
+
+Nothing in that list is new machinery: a new pipeline kind is one module, one config, and a launcher.
+If a proposed kind needs a new top-level directory or a launcher-only flag, it is being placed on the
+wrong axis — re-run the litmus above.
+
 ### Future high-level pipelines (agent, serving) slot in the same way
 
 A new top-level pipeline kind — `agent`, `serve` — is another `config/pipeline/<kind>.yaml` mirroring
