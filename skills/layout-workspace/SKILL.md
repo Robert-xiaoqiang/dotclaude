@@ -168,6 +168,91 @@ empty `model/` wrapper modules for symmetry; put code only where you actually ow
 = your "pipeline", a custom dataset class, a policy wrapper when you add one), and let the rest be
 override fragments. Match the launch to the engine, not to a habit.
 
+### Trainer pipelines PRODUCE a policy; eval pipelines CONSUME one
+
+The two halves of a research loop share the same three top-level groups, and the direction of the
+arrow is what tells you where an artifact belongs:
+
+| | pipeline | model | dataset | produces | consumes |
+|---|---|---|---|---|---|
+| **trainer** | `grpo`, `coevolve`, `sft` | the INITIAL policy | train split | checkpoints | data |
+| **eval** | `eval` | the TRAINED policy | val split / bench | scores | checkpoints |
+
+**A checkpoint trained by a different trainer is a different MODEL.** That is the rule that decides
+launcher identity, and it follows from `model` being top-level: it is orthogonal to every pipeline
+precisely because training produces one and eval consumes one. So evaluating N arms is N launchers —
+`eval__<model>__<dataset>` — each naming a different `config/model/<policy>.yaml` whose `path` pins the
+checkpoint. The eval pipeline, dataset and decoding are byte-identical across them; only the policy
+moves, and the launcher name says which.
+
+The failure this prevents, seen in practice: passing the checkpoint as a submit-time override
+(`--set pipeline.eval.checkpoint=...`) so that ONE launcher serves every arm. Six evals then appear on
+the cluster under one name, indistinguishable in the console, **and** the policy's identity never
+reaches the run's frozen `config.yaml` — the same "invisible history" a `mode=` flag creates. The tell
+is a second home for something a group already owns: the policy path belongs to `model`, so an
+eval-side `checkpoint:` field is a duplicate source of truth by construction.
+
+What legitimately stays an override is a value the (pipeline, model, dataset) triple genuinely cannot
+express — sweeping checkpoint STEPS *within* one arm, where all three are unchanged. Distinguish those
+submissions at the PLATFORM layer (a job name derived from the overrides), never by inventing launcher
+segments.
+
+**Model-config provenance.** A trained-policy config records where weights came from, so its `path`
+carries the training run's own config hash. Read one and you can find the run that produced it; that
+is the model group doing the job `naming-config` gives its `backbone` slot — weights loaded from a
+source are a user-visible event and the name says so.
+
+#### The eval launcher name must correspond STRICTLY to the trainer launcher
+
+An eval launcher sits **side by side** with the trainer that produced its policy, and the name says so
+without opening either file:
+
+```
+train:   launcher/coevolve_evorubric__qwen3_4b__healthbench/     # {pipeline}__{model}__{dataset}
+eval:    launcher/eval__qwen3_4b_coevolve_evorubric__healthbench/ # eval__{base}_{PIPELINE}__{dataset}
+                          ^^^^^^^^^^^^^^^^^^ the trainer pipeline name, VERBATIM
+```
+
+**The trained-policy model name is `{base_model}_{trainer_pipeline_name}`, copied verbatim — never
+abbreviated.** `qwen3_4b_coevolve_evorubric`, not `qwen3_evorubric_4b`. The compressed form reads
+perfectly well, which is exactly why it is dangerous: `evorubric` matches no config in the repo, so the
+link between an eval and the run it evaluates degrades into a coincidence of wording that a reader has
+to reconstruct by guesswork. Verbatim means the name resolves mechanically — infix → pipeline config →
+trainer launcher — and a check can enforce it. Two assertions worth having in CI: the infix IS a
+pipeline config name, and `launcher/<infix>__<model>__<dataset>/` exists.
+
+Note what does NOT get appended: a reward slot. If two arms share a pipeline and differ only in reward,
+they are already two PIPELINE configs (`grpo`, `grpo_asymmetric_opd`) because reward is an owned
+component the pipeline names — so the infix stays exactly one pipeline name in every case.
+
+**What legitimately stays a CLI override**, because the (pipeline, model, dataset) triple genuinely
+cannot express it: which checkpoint STEP of that one run to score — `final`, `best`, or a number. Same
+trainer, same policy lineage, same eval; only the snapshot moves. Distinguish those submissions at the
+platform layer (derive the job name from the override), never by minting launcher segments.
+
+### Eval is a CHAINED call, and every model in the chain must be config
+
+An eval pipeline usually runs more than one model: a **policy** generates and a **judge/grader** scores
+(and an agentic pipeline may chain more). Only the policy is the top-level `model` group. The scorer is
+an OWNED component of whatever does the scoring — `pipeline.reward.judge` for RL, `pipeline.eval.judge`
+for eval — because a judge is meaningless detached from the thing it scores, exactly like a metric
+detached from its dataset.
+
+The rule that matters: **every model in the chain is named in config, none arrives from the
+environment.** A judge configured only through `$JUDGE_BASE_URL` does not appear in the frozen
+`config.yaml`, so two eval runs scored by different graders are indistinguishable on disk — and the
+grader is not a detail, it *is* the metric. An env var may carry the endpoint (a pod IP changes every
+relaunch and must not be frozen), but the judge's identity — model name, class_path, decoding — belongs
+in the config.
+
+### Future high-level pipelines (agent, serving) slot in the same way
+
+A new top-level pipeline kind — `agent`, `serve` — is another `config/pipeline/<kind>.yaml` mirroring
+`<pkg>/pipeline/<kind>/`, not a new top-level tree. It keeps the same three groups (an agent has a
+policy, and it has data), and whatever is meaningless without it (a tool registry, an environment, a
+judge) nests underneath as an owned component. The test is unchanged: orthogonal to every pipeline →
+top-level group; meaningless without one owner → nested under that owner.
+
 ## Rules
 - **Hyperparameters live in `config/`, never in a launcher or a recipe script.** The task.yaml
   `run:` and the shared entrance carry config **names** + env, plus at most the handful of overrides
