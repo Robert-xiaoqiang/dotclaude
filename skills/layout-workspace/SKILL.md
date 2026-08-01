@@ -254,8 +254,27 @@ coat, and collapsing them is what produces a `config/pipeline/lora.yaml` sitting
 | axis | the question it answers | where it lives | values |
 |---|---|---|---|
 | **the LOOP** | what procedure is executing? | `pipeline` (top-level) | `sft`, `dpo`, `grpo`, `distill`, `eval`, `serve`, `agent` |
-| **the POLICY'S FACTORIZATION** | how does the model define p(y\|x)? | `model.class_path` — the `model_class` slot | `ar` (causal LM), `nar` (mask-predict, CTC), `diffusion` |
+| **the POLICY'S FACTORIZATION** | how does the model define p(y\|x)? | `model_class` (names CODE) + it constrains the loop | `qwen3` / `ar` (causal), `mdm` (masked diffusion), `lora_mdm` |
 | **the ADAPTATION** | which weights actually move? | `model.adapter` (owned by model) | full, `lora`, `qlora`, `ia3` |
+
+**`ar` / `nar` / `diffusion` are CATEGORIES, not slot values.** You never instantiate "an NAR" — you
+instantiate an MDM, a CTC model, a Mask-Predict model. `model_class` must name code, because the whole
+config↔code mirror rests on a config path predicting an import path. QDiffMDM gets this right: its
+classes are `ar`, `mdm`, `lora_mdm`, `fused_quantum_lora_mdm` — each a module you can point at. The
+category is what you REASON with; the class is what you BUILD.
+
+**And the factorization is not confined to the model — it propagates into the pipeline whenever the
+loop's math depends on it.** An MDM's SFT objective is a diffusion ELBO over masked positions under a
+noise schedule; an AR's is next-token cross-entropy. Same STAGE, different LOOP — so QDiffMDM has
+`sft_ar` and `sft_mdm` as separate pipeline modules, and its pipeline grammar is `{stage}_{flavour}`.
+That is not duplication: it is two different objectives that happen to share a stage name.
+
+So the three axes are not fully orthogonal. Model and dataset are orthogonal to every pipeline;
+FACTORIZATION is the axis that gates which (pipeline, model) pairs are even valid. A GRPO rollout
+assumes left-to-right generation with per-token logprobs — under a diffusion model the "logprob of a
+completion" is a bound, not a product of conditionals, so `grpo` + `mdm` is a research problem, not a
+config combination. When a pipeline's math is factorization-specific, say so in its name; when it is
+not (`eval` over any policy that can generate), keep one pipeline.
 
 **PEFT is not a pipeline.** LoRA is a way of adapting a model, and you can run SFT, DPO or GRPO with or
 without it — so it is an owned component of `model`, and `sft` + `model.adapter=lora` is the run. Giving
@@ -296,6 +315,12 @@ objective and a decoding trick in the slot that names a *generative model class*
 `model_class` no longer predicts which code runs, which is the invariant the whole mirror depends on.
 Place MTP as a model VARIANT AXIS (`qwen3_mtp4_4b` — four heads) plus whatever loss term the pipeline
 adds, exactly as `naming-config` treats variant axes.
+
+The same test placed against MDM gives the opposite answer, which is what makes it a test rather than a
+preference: **MDM changes the factorization**, so it is its own `model_class` AND it forks the loop
+(`sft_mdm`), while **MTP keeps the factorization**, so it is a variant axis on an existing class and
+adds a loss term to the existing loop. "Emits k tokens per forward" is true of both and decides
+neither.
 
 Litmus for any new word someone proposes: **does it change which code the run instantiates, or only
 which values that code reads?** A new class → a `model_class` or a `pipeline`. A new setting → a
