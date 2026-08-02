@@ -29,6 +29,48 @@ misses target on its first attempt, or a fix that needs an hour of documentation
 Stop only at the *Autonomy boundary* below. When you hit one, first finish every independent thing that
 remains possible, then record the blocker precisely enough to be actioned in one reply.
 
+## Direction: what kind of answer is wanted
+An objective says *what to work on*. A **direction** says *what kind of result counts*, and the user
+almost always gives one. Read it before writing the plan, because it sets the success criteria, the
+shape of the stages, how compute is spent, and what evidence ends the campaign.
+
+| direction | the question | what closes it | compute shape |
+|---|---|---|---|
+| **insight** | why is this happening, and what does it change? | a claim that survived a kill attempt **and** decides the next move | many cheap probes, few large runs |
+| **grind** | can the number go up, and does the gain survive? | a gain over baseline exceeding seed variance, on the full bench | few configs, full scale, repeated seeds |
+| **ablation** | which part is responsible? | a complete table, arms one slot apart, including the remove-it-entirely arm | N arms at identical budget |
+| **design** | can this be built and made to work? | it runs at the intended scale and meets spec | ladder-heavy: unit → smoke → full |
+| **formulation** | is there a cleaner or more general statement? | **measured** parity or better against the incumbent, at lower complexity or wider scope | paired runs against the incumbent |
+
+Two of these are routinely misread, so state them plainly.
+
+**Insight is in service of the next move.** The deliverable is not understanding for its own sake, it is
+a finding that changes what you do next. A true claim that leaves the plan unchanged is trivia, so every
+insight is recorded together with the decision it unblocks. If nothing follows from it, keep digging.
+
+**An elegant or novel formulation still needs empirical validation.** Elegance is a claim about
+generality or simplicity, and claims are settled by paired runs against the thing being replaced, never
+by argument. Show parity first, then the simplification. A formulation with no runs attached is a
+proposal, not a result, and it does not close the stage.
+
+Directions combine and sequence — design, then ablate, then grind. Write the sequence into `plan.md` and
+give each its own stage with its own closing evidence, because a stage that inherits the previous
+stage's success criterion silently changes direction.
+
+**If the user gave no direction, infer one**, write it in `plan.md` marked INFERRED, and say so in the
+first journal entry. An unstated direction defaults to grind, which is usually not what was wanted.
+
+### Direction drift
+**Every direction decays into grind if unguarded**, because raising a number is the most legible thing
+an agent can do and it always looks like progress. An insight campaign that returns a leaderboard, an
+ablation that returns a tuned config, or a formulation that returns only a benchmark score has failed
+even when the number went up.
+
+Ask every cycle: *does the next action produce the kind of evidence this direction closes on?* If not,
+you have drifted. Changing direction needs user approval, since the direction is part of the objective
+and not a tactic. Detail per direction, with the failure modes specific to each, is in
+`references/directions.md`.
+
 ## Where the campaign state lives
 A campaign is **a plan that outgrew one file**, so it stays where plans live and becomes a directory:
 
@@ -138,6 +180,8 @@ Blocked on one thing is not blocked on everything. Park it, do the rest, and lea
 `state.md` under *Blockers*.
 
 ## Rules
+- **Serve the direction, not the metric.** Produce the kind of evidence the direction closes on. A
+  rising number does not close an insight, an ablation, or a formulation.
 - **Verify before trusting, always.** The ledger, a "successful" job, a plausible number, and a
   finished-looking eval each need one concrete check against a file on disk.
 - **Never fabricate or interpolate a result.** A number in `experiments.md` traces to a
@@ -163,6 +207,7 @@ Blocked on one thing is not blocked on everything. Park it, do the rest, and lea
 ## Going deeper
 | read | when |
 |---|---|
+| `references/directions.md` | starting a campaign or a new stage: what evidence closes this kind of work |
 | `references/monitoring.md` | a job is running: cadence, what to inspect, and the silent failures |
 | `references/failure-recovery.md` | something broke: classify, find the cause, budget the retries |
 | `references/evaluation-integrity.md` | before trusting any number, and before every final eval |

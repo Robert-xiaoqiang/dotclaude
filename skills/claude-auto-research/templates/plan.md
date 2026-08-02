@@ -8,12 +8,27 @@ Approved <YYYY-MM-DD>. Status: active | complete | abandoned
 ## Objective
 <One paragraph. What must be true at the end, in terms someone can check.>
 
-## Success criteria
-| criterion | metric | baseline | target | how measured |
-|---|---|---|---|---|
-| <primary> | <metric@bench> | <value, cite the run or paper> | <value> | <full bench, N seeds, decoding> |
+## Direction
+**<insight | grind | ablation | design | formulation>** — <as given by the user, quoted if they said it>
 
-State the primary metric explicitly. A campaign with two primary metrics has no decision rule when they
+Mark INFERRED if the user did not state one, and say what you inferred it from.
+
+- **What closes this campaign:** <the direction's evidence, from `references/directions.md`>
+- **What does NOT close it:** <the tempting substitute, usually a better number>
+
+If the campaign sequences directions, list them as stages below, each with its own closing evidence.
+A stage that inherits the previous stage's criterion has silently changed direction.
+
+## Success criteria
+Write these in the direction's currency. A grind is closed by a number, an insight by a claim that
+changed the plan, an ablation by a complete table, a design by a working system at scale, a formulation
+by measured parity plus a countable simplification.
+
+| criterion | measured as | baseline / incumbent | target | how measured |
+|---|---|---|---|---|
+| <primary> | <metric@bench, or the claim, or the table> | <value, cite the run or paper> | <value> | <full bench, N seeds, decoding> |
+
+State the primary criterion explicitly. A campaign with two primaries has no decision rule when they
 disagree.
 
 ## Baselines and comparisons

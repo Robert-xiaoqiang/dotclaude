@@ -6,7 +6,14 @@ Campaign <YYYY-MM-DD> to <YYYY-MM-DD>. Plan: `./plan.md`
 > not work. Every number carries its scope and its run dir, so any claim can be checked in one command.
 
 ## Outcome
-<Two or three sentences. Did the objective succeed, partially succeed, or fail, and on what evidence.>
+Direction: **<insight | grind | ablation | design | formulation>**
+
+<Two or three sentences answering the question that direction asks, not a different one. An insight
+campaign leads with the claim and the decision it drove. A grind leads with the number, its variance and
+its scope. An ablation leads with the attribution. A design leads with what works and at what scale. A
+formulation leads with the reformulation and its measured parity.>
+
+<Then: did it succeed, partially succeed, or fail, and on what evidence.>
 
 ## Results
 | arm | metric | result | scope | seeds | vs baseline | vs target | run dir |
