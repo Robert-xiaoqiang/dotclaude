@@ -31,9 +31,20 @@ without a particular owner belongs *under* it — in subdir, mount path, and sel
 |---|---|---|
 | pipeline | **reward** | only an RL trainer has one |
 | pipeline | **trainer / inferer engine** | the loop's execution strategy, not an independent axis |
-| pipeline | **judge, teacher, tools** | meaningless detached from the loop that uses them |
+| pipeline | **judge, teacher** | a model, but not the one being optimised |
+| pipeline | **agent** | a whole sub-structure: it owns a model and a tool set of its own |
+| agent | **model, tool, memory** | the nesting recurses — an agent's model is the agent's, not the run's |
 | dataset | **metrics** | a metric scores *this* dataset's outputs |
 | model | **adapter / PEFT, processor** | wraps a *specific* model class |
+
+**Owned components nest arbitrarily deep**, because they mirror code that nests arbitrarily deep:
+`config/pipeline/agent/model/<name>.yaml` opposite `<pkg>/pipeline/agent/model/<name>.py`, mounting at
+`pipeline.agent.model`. The depth is never a judgement call — it is whatever the implementation already
+does.
+
+**A run has exactly one top-level `model`: the policy it optimises or evaluates.** Every other model in
+the run belongs to whatever uses it. If you find yourself wanting a second top-level model slot, the
+second one is owned, and the owner tells you where it goes.
 
 **Selection follows ownership.** An owned component is named by its owner's config
 (`pipeline: {reward: judge}`) and swapped through that path (`pipeline.reward=judge_hygiene`). It never

@@ -20,16 +20,22 @@ follow `layout-output`. This skill is the map that ties launcher → config → 
 # config/ MIRRORS the implementation tree, one level deeper. Read a config path, predict the import
 # path; read a module path, predict where its configs live. The mirror is the layout's core invariant.
 <pkg>/
-  config/                            # config lives INSIDE the package, so resolution never
-    model/<model_name>.yaml          #   depends on the CWD and ships with an install
-    pipeline/<pipeline_name>.yaml    #      ⟷  <pkg>/pipeline/<name>.py
-    pipeline/reward/<reward_name>.yaml #    ⟷  <pkg>/pipeline/reward/<name>.py   (nested BECAUSE
-    dataset/<dataset_name>.yaml      #          the code is nested: a reward belongs to the RL pipeline)
-  model/  dataset/                   # the code each group's class_path points at
-  pipeline/                          #   ...and pipeline/ owns reward/, which is why config does too
+  config/                              # config lives INSIDE the package, so resolution never
+    model/<model_name>.yaml            #   depends on the CWD and ships with an install
+    dataset/<dataset_name>.yaml        #      ⟷  <pkg>/dataset/<name>.py
+    pipeline/<pipeline_name>.yaml      #      ⟷  <pkg>/pipeline/<name>.py
+    pipeline/reward/<reward_name>.yaml #      ⟷  <pkg>/pipeline/reward/<name>.py   (nested BECAUSE
+    pipeline/agent/<agent_name>.yaml   #          the code is nested: a reward belongs to the RL
+    pipeline/agent/model/<name>.yaml   #          pipeline, an agent's model belongs to the agent)
+    pipeline/agent/tool/<tool_name>.yaml
+  model/  dataset/                     # TOP-LEVEL groups: orthogonal to every pipeline
+  pipeline/                            #   ...owns reward/ and agent/, which is why config does too
     reward/
-  platform/                          # PURE-PYTHON translation: jobspec, profile, translate/<p>.py
-  utils/config.py                    # the config system (group merge + run-dir derivation)
+    agent/
+      model/  tool/                    # an agent owns ITS model and tools — the nesting RECURSES,
+                                       #   and config mirrors it at every depth
+  platform/                            # PURE-PYTHON translation: jobspec, profile, translate/<p>.py
+  utils/config.py                      # the config system (group merge + run-dir derivation)
 launcher/
   launch.sh                          # ONE shared in-pod entrance for EVERY pipeline (env → runner)
   <launcher-name>/task.yaml          # neutral run spec; run: is an argv LIST of k=v, no shell string
@@ -60,8 +66,14 @@ Each exists to make a class of mistake impossible.
 
 1. **Config is data ABOUT code, and the two trees mirror.** `config/<group>/` sits opposite
    `<pkg>/<group>/`, one level deeper, at every depth — and *nesting is inherited*: a reward's config
-   nests under `config/pipeline/` precisely because its code lives in `<pkg>/pipeline/reward/`. When
-   you cannot decide where a new config belongs, the answer is wherever its implementation already is.
+   nests under `config/pipeline/` precisely because its code lives in `<pkg>/pipeline/reward/`. The
+   recursion has no floor: an agent owns a model and a tool set, so those nest under the agent, which
+   nests under the pipeline. When you cannot decide where a new config belongs, the answer is wherever
+   its implementation already is.
+   **An owned model is not the top-level `model` group.** Top-level `model` is the one policy the run
+   optimises or evaluates. An agent's internal model, a judge, a teacher — each is a model owned by the
+   thing that uses it, and lives under that owner. Two model slots in one run means one of them is
+   owned; see `references/config-anatomy.md`.
 2. **Selection versus specification.** The config **specifies** (every knob, complete). The launcher
    **selects** (names, plus the few overrides that define *this* run). A launcher that starts
    specifying is a config in disguise, and it will not appear in the run's frozen `config.yaml`.
