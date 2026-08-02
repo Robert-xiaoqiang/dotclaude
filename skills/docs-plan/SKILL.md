@@ -13,6 +13,12 @@ Create or update structured task plans in docs/plans/.
 1. Create or update:
    docs/plans/YYYY-MM-DD-<topic>.md
 
+   A plan that grows stages, a job ledger, and its own experiment record becomes a
+   **directory** at the same path, keeping the same `<date>-<topic>` name:
+   `docs/plans/YYYY-MM-DD-<topic>/plan.md` plus its siblings. That is the only
+   sanctioned second form, and `claude-auto-research` owns what goes inside it.
+   Do not promote a plan to a directory before it needs one.
+
 2. Structure:
    - Goal
    - Context
@@ -36,6 +42,9 @@ Create or update structured task plans in docs/plans/.
 - Ensure plan is actionable and verifiable
 - Plans live under `docs/plans/` per `layout-workspace`; name the topic
   descriptively (`layout-workspace` companion: `naming-descriptive`)
+- A long-horizon campaign is a plan, not a new location. Its state lives in the
+  plan directory above, never at the repo root and never under `$OUTPUT_DIR_HOME`
+  (see `claude-auto-research`)
 
 ## Output
 - Confirm plan file path

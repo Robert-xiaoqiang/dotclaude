@@ -19,6 +19,7 @@ starting or organizing a project, or when unsure which convention applies.
 | **docs** | how do I write/maintain the living docs? | `docs-plan` (`docs/plans/<date>-<topic>.md`) · `docs-arch` (`docs/ARCH.md`) |
 | **platform** | how do I set up, submit to, and match the runtime of a compute platform? | `platform-env` (env.sh / cluster setup) · `platform-run` (neutral `task.yaml` → DLC/Slurm/EAI) · `platform-runtime` (driver × image × venv × storage stack) |
 | **outputs** | how do I compare runs or reclaim their space? | `output-analysis` (latitude vs longitude, embed-style figures) · `output-cleanup` (resume-safe reclaim) |
+| **campaign** | how do I run all of the above unattended for days, and resume after a context reset? | `claude-auto-research` (the plan-plus-ledger in `docs/plans/<date>-<topic>/`, and the autonomy boundary) |
 
 ## The philosophy (one line each)
 - **naming** — a config's *name* uniquely identifies what runs; two ablation arms differ in
@@ -34,6 +35,9 @@ starting or organizing a project, or when unsure which convention applies.
   and venv (`platform-runtime`).
 - **outputs** — the `layout-output` tree is read by `output-analysis` to compare runs across
   steps and arms, and by `output-cleanup` to reclaim space while protecting resume state.
+- **campaign** — an objective too long for one session persists as a plan *directory* whose
+  ledger indexes the output tree, so a cold session resumes from the repo alone
+  (`claude-auto-research`). The ledger never becomes a second source of truth.
 
 ## How the concerns connect at a launcher
 A single launcher ties three of them together: `naming-config` fixes its **name** and its
