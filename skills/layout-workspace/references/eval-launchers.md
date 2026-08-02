@@ -44,6 +44,12 @@ Two assertions worth having in CI: the infix IS a pipeline config name, and
 No reward slot gets appended. Two arms sharing a pipeline and differing only in reward are already two
 PIPELINE configs, because reward is an owned component, so the infix stays exactly one pipeline name.
 
+**A launcher name and a run dir are different questions.** The launcher name lists the groups a run
+*selects*, so an owned component never earns a segment. The run path expresses run *identity*, so an
+owned component DOES contribute one, because the arms of an ablation must sit side by side. They are
+related but not identical, and only the run dir carries the component. The grammar for both belongs to
+`naming-config`; this file only covers the trainer↔eval correspondence.
+
 **What legitimately stays a CLI override** is a value the (pipeline, model, dataset) triple genuinely
 cannot express: which checkpoint STEP of that one run to score. Same trainer, same lineage, same eval,
 only the snapshot moves. Distinguish those submissions at the platform layer by deriving the job name

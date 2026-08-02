@@ -46,6 +46,13 @@ does.
 the run belongs to whatever uses it. If you find yourself wanting a second top-level model slot, the
 second one is owned, and the owner tells you where it goes.
 
+**Where a component lives is not always where its content applies.** A component that gets instantiated
+applies where it lives. A component that is a *preset over another group's fields* does not: it lives at
+its own mount point but its content has to reach the target group's subtree, and the merge must land
+*beneath* the target so an explicit field still wins. Declare that second path in the group registry,
+never as meta-keys inside each file. `naming-config` owns this rule in full, under "Where a component
+LIVES vs where it APPLIES".
+
 **Selection follows ownership.** An owned component is named by its owner's config
 (`pipeline: {reward: judge}`) and swapped through that path (`pipeline.reward=judge_hygiene`). It never
 gets its own `<component>_name=` argument: that would re-assert at the CLI the independence the layout

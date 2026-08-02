@@ -85,6 +85,17 @@ domain. So a group carries **two** placements, and both mean something:
 | **mount path** | scope — where it LIVES | `cfg.<group>` | `cfg.<owner>.<group>` |
 | **payload mount** | reach — where it APPLIES | usually the same | may be another subtree |
 
+**Ownership chains, so `<owner>` may itself be owned.** An agent owns a model and a tool set while
+being owned by the pipeline that runs it, giving `config/pipeline/agent/model/` mounting at
+`cfg.pipeline.agent.model`. There is no depth limit and no judgement call: the config tree mirrors the
+code tree at every level, so the nesting is whatever the implementation already does
+(`layout-workspace`).
+
+**A run has exactly one TOP-LEVEL `model`** — the policy it optimises or evaluates. An agent's model, a
+judge, a distillation teacher are all models, and all of them are *owned*: they take the model slot
+grammar for their file name but live under the thing that uses them, never beside the policy. Wanting a
+second top-level `model` is the signal that one of the two is owned.
+
 ### Where a component LIVES vs where it APPLIES
 
 Those are two questions, and for most components the answer is the same, which is why the distinction
@@ -318,7 +329,21 @@ When invoked:
 - Confirm the audit script (or its absence + the need to add one).
 - Brief summary of the chosen name + path.
 
-## References
-- Project example: `/home/toolkit/QDiffMDM/doc/ARCH.md` §"Naming
-  conventions" — full instantiation of this pattern for a quantum-MDM /
-  LoRA codebase.
+## Division of labour with `layout-workspace`
+
+The two are one paradigm split by question, and neither should restate the other:
+
+| question | skill |
+|---|---|
+| what is this config **called**, and what does a launcher dir name mean? | **this skill** |
+| **where** does the file live, and what does the tree look like? | `layout-workspace` |
+| what goes **inside** a config, and what may a component own? | `layout-workspace/references/config-anatomy.md` |
+| where do run **outputs** land? | `layout-output` |
+
+Rule 6 below is the seam: it is a *name* (so it lives here) that determines a *path* (so
+`layout-output` consumes it).
+
+## Companions
+`layout-workspace` (where these files live — the paired skill for the experiment-facing half) ·
+`naming-descriptive` (the general naming primitive this specialises) · `layout-output` (the run tree
+rule 6 derives) · `platform-run` (the launcher's neutral spec) · `conventions` (the family index).
