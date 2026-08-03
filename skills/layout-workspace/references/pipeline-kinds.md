@@ -44,6 +44,41 @@ So the axes are not fully orthogonal: model and dataset are orthogonal to every 
 factorization gates which (pipeline, model) pairs are even valid. When a pipeline's math is
 factorization-specific, say so in its name; when it is not, keep one pipeline.
 
+## What determines the FAMILY: rollout source x what the objective consumes
+
+The train-side families are not a taste list. Two questions fix them:
+
+| family | rollout source | what the objective consumes |
+|---|---|---|
+| `sft` | a FIXED dataset | the given target tokens (cross-entropy) |
+| `distill` | EITHER (see below) | a TEACHER's per-token distribution (KL / JSD / CE) |
+| `rl` | ON-POLICY, sampled from the policy | a SCALAR reward per sequence (policy gradient, GRPO) |
+
+**`distill` splits again on where its samples come from**, because that is a different loop, not a
+flag: `distill/offpolicy/` consumes a fixed corpus of teacher outputs (an SFT-shaped loop with a
+teacher-provided target), while `distill/onpolicy/` samples from the STUDENT and asks the teacher to
+score those tokens. Same family, two bases — hence `distill_offpolicy` and `distill_onpolicy`, and a
+guided self-distillation arm is `distill_onpolicy_rubric`. Do not compress this to `opd`: the config
+name must walk to the code, and there is no `pipeline/opd/`.
+
+The same subdivision is expected of the other families as they grow — `rl/grpo/` vs `rl/ppo/`,
+`sft/full.py` vs `sft/peft.py`. A family root is a directory precisely so its methods can be siblings.
+
+On-policy distillation is the one people misfile. It samples on-policy like RL, so it looks
+like RL — but it has no reward, no advantage and no group; the signal is dense and per-token, coming
+from a second distribution rather than a scalar. Filing it under `rl` would put it on a base class
+built around rollout -> reward -> advantage, none of which it uses. Filing it under `sft` would claim
+its data is fixed, which is the one thing on-policy means it is not.
+
+The discriminating question, in order: **is the data fixed or sampled from the model being trained?**
+then **does the objective consume a scalar or a distribution?**
+
+A method whose teacher is a frozen copy of the student is still `opd` — self-distillation is a
+statement about where the teacher's WEIGHTS come from, not about the loop. Put that in the method slot
+(`opd_self`) and what the teacher sees that the student does not in the variant slot
+(`opd_self_rubric`, `opd_self_memory`). Two arms that differ only in the guidance are then one slot
+apart by construction, which is exactly the asymmetric with/without diagnostic.
+
 ## The name encodes the TAXONOMY, not the method's title
 
 ```
@@ -99,10 +134,63 @@ Three rules keep the hierarchy real rather than decorative:
    conditions and a divergence"; it must not know that one condition happens to be rubric-conditioned,
    or a later teacher-student / with-memory-vs-without arm cannot reuse it. The ASYMMETRY is the
    abstraction; what fills the two conditions is the subclass's business.
-3. **Config NAME mirrors the code PATH**: `rl_coevolve_infogain.yaml` ↔ `pipeline/rl/coevolve.py`.
-   Config files stay flat in `config/pipeline/` because that glob is deliberately non-recursive (so the
-   owned-component dirs are not swallowed), so state plainly that here the mirror runs name→path, not
-   path→path. A reader must not be left assuming `config/pipeline/rl/` exists.
+3. **Config NAME mirrors the code PATH, segment for segment.** Replace `/` with `_` and you have the
+   config name; split the name on `_` and you have the directory walk:
+
+   ```
+   pipeline/rl/grpo/__init__.py            rl_grpo
+   pipeline/rl/grpo/dualrole.py            rl_grpo_dualrole
+   pipeline/distill/onpolicy/__init__.py   distill_onpolicy
+   pipeline/distill/onpolicy/rubric.py     distill_onpolicy_rubric
+   pipeline/distill/offpolicy/__init__.py  distill_offpolicy
+   pipeline/sft/full.py                    sft_full
+   ```
+
+   This is why an abbreviation is not a free choice. If the code lives in `distill/offpolicy/`, the
+   config is `distill_offpolicy` — NOT `opd`, however standard the acronym is in the literature. A name
+   that does not walk to its own implementation makes the mirror a thing you have to remember instead
+   of a thing you can derive, and the first person to guess wrong finds nothing.
+
+   Config files stay FLAT in `config/pipeline/` (that glob is deliberately non-recursive so the
+   owned-component dirs are not swallowed), so the mirror runs name→path, not path→path. Say so; do not
+   leave a reader assuming `config/pipeline/rl/` exists.
+
+4. **A segment with NO code names an owned component's selection.** Not every segment adds a module.
+   `rl_grpo_dualrole_infogain` is three lines — `_base_`, `name`, `reward: rubric_infogain` — and has
+   no implementation of its own, because its contribution lives in the REWARD it selects. That is
+   correct, not a defect: the alternative is a fourth launcher segment for an axis the runner has no
+   selector for. The rule is only that such a segment must name a real component selection (a reward, a
+   memory backend, an adapter) and must not smuggle in a second change. Read a name as:
+   *walk the segments that have code, then read the rest as component selections.*
+
+## Every group has its own abstraction, not just `pipeline`
+
+The inheritance story is not a pipeline privilege. Each top-level group and each owned component has a
+family root, subclasses that add one thing, and a polymorphic seam the runner dispatches through.
+
+| group | family root | subclasses add | polymorphic seam |
+|---|---|---|---|
+| **pipeline** | `rl_grpo`, `opd_self`, `eval_ar` | a schedule, a guidance, a decoding | `pipeline.class_path` -> `main(cfg)` |
+| **model** | the base policy | trained weights, an adapter, extra heads | `model.class_path` -> a policy object |
+| **dataset** | the corpus loader | a split, a subset, a scaffold transform | `dataset.<split>.class_path` |
+| **reward** (owned by rl) | the judge | a rubric rule, a memory backend | `reward.class_path` -> a callable |
+| **memory** (owned by reward) | the store INTERFACE | exact-match vs associative | `memory_class` |
+| **agent** | the loop | a tool set, a stopping rule | `pipeline.class_path` + owned `tools` |
+
+Two rules make these real rather than decorative:
+
+1. **An interface that two implementations share must be DECLARED, not implied.** Two memory backends
+   that both happen to provide `admit / hist / grading_set / merge / report` are a duck-typed contract
+   nobody wrote down: the second one is authored by reading the first, and every shared rule (the EMA
+   cold start, the eviction policy, the count-weighted merge) gets written twice and drifts. Declare
+   the base, and a third backend inherits the rules instead of re-deriving them.
+2. **The seam is a `class_path`, so the code never branches on which implementation is live.** A
+   pipeline that reads a config value to decide which memory or which reward it has is the arm leaking
+   into the code (see the anti-patterns). Dispatch, do not branch.
+
+The corollary for names: since every group inherits, every group's names obey the same
+name-is-the-chain rule (`naming-config`). `qwen3_4b_rl_grpo` is a trained-policy subclass of
+`qwen3_4b`; the segment says which trainer produced it.
 
 ## The litmus for any new word
 

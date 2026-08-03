@@ -87,6 +87,59 @@ Each exists to make a class of mistake impossible.
    influences a run but is not in it — an env flag, a `mode=`, a hand-edited default — is invisible
    history, and two materially different runs become indistinguishable after the fact.
 
+## When the repo holds BOTH a harness and the thing under test
+
+A research repo often grows two things at once: a **harness** that measures (a benchmark, an arena, an
+eval suite) and a **subject** that is measured (your system). They feel like one project because you
+built both, and they get written as one package. That is a mistake with a specific, diagnosable shape.
+
+**The tell:** a competitor, baseline or third-party implementation has to import YOUR system's package
+in order to be measured by your harness. The thing being compared now depends on one of the
+competitors, so the harness cannot be used, published, or trusted independently of the subject.
+
+**The fix is two packages and a one-way dependency:**
+
+```
+<harness>/                 measures. Knows NOTHING about how any subject works.
+  protocol.py              the interface under test — the contract, dependency-free
+  registry.py              name -> builder
+  bench/                   benchmarks are DATA, not pipelines (see pipeline-kinds.md)
+  pipeline/eval/           the consumer loop
+  model/                   interfaces the harness CONSUMES, plus the backends it needs to run alone
+<subject>/                 implements <harness>.protocol and exposes nothing else publicly
+  core/                    what every internal component shares
+  <component>/             one directory per swappable internal part
+  pipeline/{build,train}/  the PRODUCER loops that make this subject's artifacts
+baselines/                 OTHER implementations. Each imports <harness> and bridges to it.
+  <name>/                  one per third-party system being compared
+```
+
+`<subject> → <harness>` and `baseline → <harness>`, never the reverse, and never subject ↔ baseline.
+
+**Implementations live OUTSIDE the harness, including the baselines.** It is tempting to file
+competitors under the harness on the grounds that they exist only to be compared — that is how the
+first draft of this section read, and it is wrong. A harness that contains implementations cannot be
+used, shipped, or trusted without them, which is the standalone property the split exists to buy. The
+harness defines the interface; **every system, yours and theirs alike, writes its own bridge to it.**
+Systems register into the harness's registry; the harness imports none of them.
+
+Three consequences worth stating, because each is a rule people break:
+
+1. **The contract module must stay dependency-free.** If `protocol.py` imports the harness's own
+   datasets or its LLM client, then implementing the interface drags in the bench, and you have the
+   original coupling wearing a new import path.
+2. **A shared instrument does not live in either one.** An LLM client used by the subject's writer AND
+   the harness's judge belongs to neither; put it in its own small package. Filing it under the harness
+   makes an offline build depend on the benchmark — the same category error as (1).
+3. **Prove the split with a conformance suite, not a directory listing.** The harness ships a
+   parameterised test that every registered implementation must pass, and CI runs it across all of
+   them. Moving files proves nothing; an implementation that only compiles against the subject's
+   internals is caught the moment it must satisfy the contract on its own.
+
+**Do not split before there are two implementations.** One system and one bench in one package is fine
+and is not premature to leave alone; the split earns its cost at the second implementation, which is
+also when the coupling first does damage.
+
 ## Rules
 - **Hyperparameters live in `config/`, never in a launcher or a recipe script.** A wall of `key=value`
   overrides means the defaults belong in a group config and only the delta stays in the launcher.

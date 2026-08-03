@@ -91,10 +91,87 @@ being owned by the pipeline that runs it, giving `config/pipeline/agent/model/` 
 code tree at every level, so the nesting is whatever the implementation already does
 (`layout-workspace`).
 
-**A run has exactly one TOP-LEVEL `model`** — the policy it optimises or evaluates. An agent's model, a
-judge, a distillation teacher are all models, and all of them are *owned*: they take the model slot
-grammar for their file name but live under the thing that uses them, never beside the policy. Wanting a
-second top-level `model` is the signal that one of the two is owned.
+**A run has exactly one SUBJECT: the thing it optimises or evaluates.** That group is top-level; every
+other candidate is an *instrument*, and an instrument belongs to whatever uses it.
+
+In a model-training repo the subject is always `model`, which is why this rule is usually written as
+"one top-level `model`". That phrasing over-fits. The subject is whatever the research is *about*:
+
+| repo | subject | instruments (each owned by its user) |
+|---|---|---|
+| LLM training | `model` | `pipeline.judge`, `pipeline.teacher`, `agent.model` |
+| memory / RAG research | `memory` | `agent.model` (the reader), `memory.writer`, `bench.judge` |
+| retrieval research | `retriever` | `bench.judge`, the corpus encoder |
+| agent-scaffold research | `agent` | `agent.model`, `agent.tool`, `bench.judge` |
+
+**The subject can change with the pipeline's DIRECTION, in the same repo.** An eval run over a memory
+system optimises nothing, so `memory` is the subject and every model is an instrument. A run that
+trains an adapter over that same memory has `model` as its subject and the memory becomes an input.
+Two directions, two subjects, two launcher grammars — see *Launcher dirs* below.
+
+**The instrument test, which is mechanical:** ask *what would this run still be about if I swapped
+this?* Swapping the reader in a memory benchmark still measures the memory, so the reader is an
+instrument. Swapping the memory changes what is measured, so the memory is the subject. Anything that
+survives the swap is owned, and it is owned by whatever calls it — never by the run.
+
+**Every model in a run is one of these two things, and there is no third.** A judge, a teacher, an
+answerer and an ingest-time extractor are all models, and none of them is the subject unless the run
+is about it. Wanting a second top-level model slot is the signal that one of the two is an instrument.
+
+### One component library, several owners
+
+Instruments of the same KIND share one directory even when they mount in different places. Three roles
+— a reader under `agent`, a writer under `memory`, a judge under `bench` — are all *models*, drawn from
+one pool. Giving each role its own directory triplicates every endpoint file, and they drift on the
+first port change.
+
+So the group's **subdir is its kind** and the **mount path is its role**, and one selector may resolve
+to several mounts:
+
+```python
+GROUPS = (
+    # selector, subdir,  mount (LIVES),        top_level, in_path
+    ("model",   "model", ("agent", "model"),   False,     True),   # the reader
+    ("writer",  "model", ("memory", "writer"), False,     True),   # ingest-time extractor
+    ("judge",   "model", ("bench", "judge"),   False,     False),  # the grader
+)
+```
+
+The file declares what it IS (`model: {name: qwen2_5_7b_vllm, class_path: …}`); the registry decides
+where it LANDS. A reader of `qwen2_5_7b_vllm.yaml` should learn what that endpoint is, not which of
+three roles some run will use it for.
+
+Two rules keep this honest:
+- **Name the file for the component, never for the role.** `qwen2_5_7b_vllm.yaml`, never
+  `reader_7b.yaml` — the same file is a reader in one run and a judge in the next.
+- **Selection still follows ownership.** `agent.model=…`, `memory.writer=…`, `bench.judge=…`. A shared
+  library does not earn a `model_name=` selector, because it is still not an independent axis.
+
+**Where the library LIVES, when its owners span packages.** The mirror still holds — `config/model/`
+sits opposite `<pkg>/model/` — but which `<pkg>`? Do not reach for a new package. Ask instead:
+
+> **Which package is already a dependency of the other, and can the dependee still do its own job
+> without the library?**
+
+The library belongs in the package the others already import. Adding a third package to "keep it
+neutral" buys nothing when a dependency edge already exists, and it fragments a repo that a reader has
+to hold in their head.
+
+The deciding question is what each package must be able to do ALONE. A benchmark harness has to score,
+and scoring calls a model — so a harness that cannot instantiate a model without importing one of the
+systems it measures is not standalone, and the library goes in the harness. The subject then uses it
+across the edge it already depends on. Reverse those and the harness ends up importing a competitor,
+which is the failure `layout-workspace` names.
+
+**Interfaces go with the consumer that defines them; implementations go with whoever provides them; the
+two meet at `class_path`.** An interface is part of the contract a harness publishes, so it lives there
+even when every implementation lives elsewhere — and because config names implementations by
+`class_path`, the harness never needs a static import of any of them. That is the same seam the memory
+protocol uses, applied to models.
+
+Name it for what it CONTAINS, never for the domain it serves. A directory of LLM client wrappers is
+`model` or `llmbackend`, not `memllm` — the latter reads as a memory-augmented model or a training
+entry point, and a reader who guesses wrong looks for a trainer that does not exist.
 
 ### Where a component LIVES vs where it APPLIES
 
@@ -176,6 +253,31 @@ name is the sequence of the **top-level, independently-selected** group names, j
 {pipeline}__{model}__{dataset}                # one segment per TOP-LEVEL group, in GROUPS order
 ```
 
+**There is one grammar PER PIPELINE FAMILY, not one per repo.** Which groups are top-level follows from
+the subject, and the subject follows from the pipeline's direction, so a producer and a consumer in the
+same repo have different grammars. Writing one grammar for the whole repo is how a consumer's roles get
+welded onto every run:
+
+```
+eval_bench__{agent}__{memory}__{bench}__{dataset}   consumer · subject = memory · scores
+build_memory__{memory}__{dataset}                   producer · subject = memory · a built store
+train_adapter__{model}__{memory}__{dataset}         producer · subject = model  · a checkpoint
+```
+
+`agent` and `bench` appear only in the eval grammar because only an evaluation has an answerer and a
+grader. A training launcher that names a reader is describing a run that cannot exist — and if the
+grammar forces it to, the name has stopped being checkable.
+
+**The failure this catches, stated plainly because it is easy to commit:** picking ONE grammar and
+applying it everywhere. Every run then carries the dominant family's roles, the config tree grows slots
+that half the pipelines must leave empty, and the harness's concerns and the subject's concerns become
+indistinguishable in the name. The fix is not a shorter name; it is one grammar per family, derived
+from that family's subject.
+
+Mechanically: the run-dir deriver already emits one segment per `in_path` group **present**, so per-
+family grammars need no new machinery — only that a group stop being mandatory when its family does
+not have one.
+
 **An owned component NEVER gets a segment.** A `reward` is not an axis a run picks independently — it
 is part of what an RL pipeline IS. So the pipeline config *embodies* its reward (`pipeline: {reward:
 judge}`), and two arms that differ in reward are two PIPELINE configs, not one launcher with a fourth
@@ -219,6 +321,38 @@ name and run dir are therefore related but not identical, and only the run dir c
   smell — fix the launcher.
 * The launcher name = a single string from which the run's purpose is
   obvious; no need to read its `config.yaml`.
+
+## The name IS the inheritance chain
+
+When a config declares `_base_`, its name must be **the base's name plus exactly one segment**:
+
+```
+rl_grpo                                  _base_: —            (family root)
+rl_grpo_scaffold                         _base_: rl_grpo
+rl_grpo_dualrole                         _base_: rl_grpo
+rl_grpo_dualrole_infogain                _base_: rl_grpo_dualrole
+rl_grpo_dualrole_infogain_kvmem          _base_: rl_grpo_dualrole_infogain
+```
+
+Read a name and you know its parent, what it adds, and what it reuses — without opening the file.
+The rule is mechanically checkable, which is the point: `name == base_name + "_" + one_segment`.
+
+**The failure it catches is not hypothetical.** A config named `..._infogain_kvmem` was found carrying
+`_base_: ..._dualrole` — skipping `_infogain` and re-declaring the reward it should have inherited. The
+name advertised a two-step chain the config did not have, so a reader (and a diff) would believe the
+arm was one slot from `_infogain` when it was actually a fork of their common parent. Nothing failed
+loudly; it just meant "one config slot apart", the claim the whole ablation rests on, was untrue.
+
+Corollaries:
+
+* **One segment per delta.** If a config adds two things at once, either it needs an intermediate
+  parent, or the two belong together as one named concept. `_infogain_kvmem` is legitimate only when
+  `_infogain` exists as its parent.
+* **The segment names the AXIS that changed**, not the arm. `_kvmem` says the memory backend moved;
+  it must not also silently move the reward.
+* **A family root has no `_base_` and no inherited segment.** `rl_grpo` is a root; `rl_dualrole` is not
+  a root, because its algorithm is GRPO — writing it as a root hides that it duplicates the parent's
+  recipe rather than inheriting it.
 
 ## Hard rules
 
