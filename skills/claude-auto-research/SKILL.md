@@ -37,12 +37,29 @@ shape of the stages, how compute is spent, and what evidence ends the campaign.
 | direction | the question | what closes it | compute shape |
 |---|---|---|---|
 | **insight** | why is this happening, and what does it change? | a claim that survived a kill attempt **and** decides the next move | many cheap probes, few large runs |
-| **grind** | can the number go up, and does the gain survive? | a gain over baseline exceeding seed variance, on the full bench | few configs, full scale, repeated seeds |
+| **grind** | can the number go up, and does the gain survive? | a gain over baseline that is not explained by run-to-run variance, on the full bench | few configs, full scale; **one seed per arm by default** |
 | **ablation** | which part is responsible? | a complete table, arms one slot apart, including the remove-it-entirely arm | N arms at identical budget |
 | **design** | can this be built and made to work? | it runs at the intended scale and meets spec | ladder-heavy: unit → smoke → full |
 | **formulation** | is there a cleaner or more general statement? | **measured** parity or better against the incumbent, at lower complexity or wider scope | paired runs against the incumbent |
 
 Two of these are routinely misread, so state them plainly.
+
+**One seed per arm is the default; replication is a decision you justify.** Seeds are not free and
+they are not evidence by themselves — N seeds of a config you were going to abandon anyway is N times
+the waste. Run one, look at it, and spend more only when the *decision* actually turns on separating
+the result from noise. Three cases earn a second seed, and they are recognizable before you spend it:
+
+* **The margin is near the noise floor.** You need a prior estimate of run-to-run spread to say this,
+  so measure it ONCE per substrate and reuse it. Do not import a spread measured at another model
+  size — it can be off by 4x, which turns "inside the noise" into "7 sigma" or the reverse.
+* **The outcome is bimodal.** If a config sometimes works and sometimes does not, one seed reports a
+  coin flip as a finding, and both faces are publishable-sounding. A single run showing a large gain
+  where the mechanism admits an all-or-nothing failure is the highest-risk single result there is.
+* **It is the headline.** The claim a report is built on gets replicated; screening arms do not.
+
+Everything else — sweeps, screening, "does this even run", arms you expect to reject — is one seed.
+When you do report a single-seed result, say it is single-seed in the same sentence as the number,
+because a mean with no n invites a confidence that was never measured.
 
 **Insight is in service of the next move.** The deliverable is not understanding for its own sake, it is
 a finding that changes what you do next. A true claim that leaves the plan unchanged is trivia, so every
