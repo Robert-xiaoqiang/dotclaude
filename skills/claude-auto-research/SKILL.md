@@ -44,22 +44,21 @@ shape of the stages, how compute is spent, and what evidence ends the campaign.
 
 Two of these are routinely misread, so state them plainly.
 
-**One seed per arm is the default; replication is a decision you justify.** Seeds are not free and
-they are not evidence by themselves — N seeds of a config you were going to abandon anyway is N times
-the waste. Run one, look at it, and spend more only when the *decision* actually turns on separating
-the result from noise. Three cases earn a second seed, and they are recognizable before you spend it:
+**One seed per arm. Replication is not a default you may reach for.** Seeds are not evidence by
+themselves, and N seeds of a config you were going to abandon anyway is N times the waste. Run one,
+look at it, decide.
 
-* **The margin is near the noise floor.** You need a prior estimate of run-to-run spread to say this,
-  so measure it ONCE per substrate and reuse it. Do not import a spread measured at another model
-  size — it can be off by 4x, which turns "inside the noise" into "7 sigma" or the reverse.
-* **The outcome is bimodal.** If a config sometimes works and sometimes does not, one seed reports a
-  coin flip as a finding, and both faces are publishable-sounding. A single run showing a large gain
-  where the mechanism admits an all-or-nothing failure is the highest-risk single result there is.
-* **It is the headline.** The claim a report is built on gets replicated; screening arms do not.
+Do NOT spend seeds to characterize a phenomenon you have already seen once — measuring how *often*
+something happens is a different, later question from whether it happens at all, and it is the user's
+call to fund it, not yours. If a result looks bimodal or noisy, that is a reason to go find the
+*mechanism* (instrument it, read the code, check the init), not a licence to buy a sample size. The
+mechanism is usually cheaper than the statistics and always more useful: a bimodal outcome traced to
+an initialization defect is a fix, while the same outcome measured to +-15% is still just a coin flip
+with error bars.
 
-Everything else — sweeps, screening, "does this even run", arms you expect to reject — is one seed.
-When you do report a single-seed result, say it is single-seed in the same sentence as the number,
-because a mean with no n invites a confidence that was never measured.
+Replicate only when the user asks, or when a single number is about to be published as the headline
+claim. Say "single seed" in the same sentence as any number you report, so nobody infers a confidence
+that was never measured.
 
 **Insight is in service of the next move.** The deliverable is not understanding for its own sake, it is
 a finding that changes what you do next. A true claim that leaves the plan unchanged is trivia, so every
