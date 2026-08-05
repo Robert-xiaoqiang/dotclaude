@@ -217,3 +217,96 @@ that `model_class` predicts which code runs.
 A new kind is one module, one config, one launcher. If it seems to need a new top-level directory or a
 launcher-only flag, it is on the wrong axis — re-run the litmus. A high-level kind such as `agent` or
 `serve` is no exception: same three groups, with whatever is meaningless without it nested underneath.
+
+---
+
+# Composition: components and assemblies
+
+## The principle, before any example
+
+A taxonomy answers *what kind of thing is this*. It does not answer *what is this made of*. Those are
+different questions, and a tree can only encode the first — so a codebase organised by taxonomy alone
+strands every shared part at whatever depth first needed it.
+
+**A part becomes a COMPONENT the moment a second thing needs it.** Not when it looks reusable, not
+when it is elegant — when a second consumer exists. Before that it is an implementation detail of one
+thing and belongs inside it.
+
+Two forces, and they pull in different directions:
+
+| | expresses | mechanism | answers |
+|---|---|---|---|
+| **taxonomy** (nesting) | what kind of thing this is | directory depth | where do I look for it |
+| **composition** (assembly) | what this is made of | a named part, selected | what is it made of |
+
+Nesting alone forces *walk-in*: to vary one part you descend into the subfamily that owns it, and a
+part two subfamilies share has no home above either. The symptom is unmistakable —
+**a module importing sideways across the tree, or the same file existing twice at two depths.** Both
+say the same thing: this is a component wearing a location.
+
+## The rule
+
+1. **Components live above the things that use them**, in their own directory, grouped by the axis
+   they vary (`components/reward/`, `components/memory/`, not `components/for_grpo/`).
+2. **A component is selected by name, never by inheritance path.** If picking a different one means
+   editing a class hierarchy, it is not yet a component.
+3. **An assembly is what runs, and the assembly is what gets a name.** A component alone is not
+   runnable and takes no run name — no entry point, no config group of its own at top level.
+4. **The assembled name records its components**, in a fixed slot order, so the name and the parts
+   determine each other. See `naming-config`.
+5. **Prefer selection to subclassing; use a mixin when the part changes BEHAVIOUR rather than DATA.**
+   A reward is data-shaped and swaps by name. A trainer that adds a loss term is behaviour-shaped and
+   composes as a mixin. Both are components; only the mechanism differs.
+
+## Where this shows up (it is not an RL idea)
+
+| domain | atoms | assembly |
+|---|---|---|
+| **RL pipeline** | reward · memory · instrument · trainer base | `rl_grpo_dualrole_rlcer_statemem` |
+| **VL model** | vision encoder · aligner · projector · LM backbone | one model config naming all four |
+| **agent** | prompt sections (role · tools · format · few-shot) | an assembled system prompt |
+| **data** | atomic corpora, each with its own loader and licence | a named mixture with weights |
+
+The VL case is the clearest test of rule 1: an encoder is shared by every model that uses it, so it
+cannot live inside one of them. The agent case is the clearest test of rule 4: a prompt assembled from
+sections must be reproducible from its section list, or the run is not reproducible at all.
+
+## Worked example: how it went wrong, and what it cost
+
+AutoRSI grew `pipeline/rl/grpo/dualrole/` and put THREE components inside it:
+
+    dualrole/reward.py        a reward — while pipeline/rl/reward/ already existed
+    dualrole/memory_assoc.py  a memory backend
+    dualrole/memory_text.py   a second memory backend
+
+Nothing about a reward or a memory is specific to playing two roles. They landed there because the
+taxonomy offered no shelf above `dualrole/`, and the cost was visible in three ways: two reward
+directories that a reader has to reconcile, memory backends invisible to any other arm, and a state
+matrix instrument that was first written INSIDE one arm — where it would have measured that arm with
+one implementation and its baseline with another, making the comparison meaningless.
+
+The fix was to name the axes and lift the parts:
+
+    pipeline/components/tracing.py   the instrument   (behaviour -> mixin, default OFF)
+    pipeline/components/memory.py    the EMA memory   (behaviour -> mixin)
+    pipeline/rl/reward/              rewards          (data -> selected by name)
+
+and let pipelines assemble them:
+
+    class StateMemoryDualRoleTrainer(DualRoleTrainer, StateMemoryTrainer)   # two roles + memory
+
+**Read the MRO as the assembly order.** `DualRoleTrainer` first means the role schedule owns the
+step and the memory composes underneath it; reversed, the memory's `compute_loss` shadows the role
+alternation and the arm silently becomes single-role — training fine, reporting plausible numbers, and
+not being the arm its name claims. An assembly's order is part of its meaning, so state it in the
+class docstring rather than leaving it to MRO trivia.
+
+## The test to apply
+
+> Would a second pipeline want this part, unchanged?
+
+Yes -> it is a component; lift it and select it by name.
+No  -> it is an implementation detail; leave it where it is.
+
+Answer this when the second consumer appears, not before. Lifting on the first speculative consumer
+produces a `components/` full of parts with one user and a name chosen for a use case that never came.

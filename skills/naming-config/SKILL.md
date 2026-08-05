@@ -481,3 +481,65 @@ Rule 6 below is the seam: it is a *name* (so it lives here) that determines a *p
 `layout-workspace` (where these files live — the paired skill for the experiment-facing half) ·
 `naming-descriptive` (the general naming primitive this specialises) · `layout-output` (the run tree
 rule 6 derives) · `platform-run` (the launcher's neutral spec) · `conventions` (the family index).
+
+## Assembled names: the name IS the component list
+
+### The principle
+
+When a thing is built from interchangeable parts, its name must let a reader recover which parts —
+and, given the parts, predict the name. That is a bijection, and it is what makes an assembly
+reproducible from its name alone.
+
+```
+{base}[_{component}]...        each segment names ONE component that differs from the base
+```
+
+Three rules make it a bijection rather than a habit:
+
+1. **One segment per component that DIFFERS from the base.** A component left at its default
+   contributes nothing — absence of a segment IS the default, exactly as absence of a variant slot is
+   the baseline (rule 1 above). `_default`, `_none`, `_plain` are all wrong.
+2. **Fixed slot ORDER, from the outermost structural choice inward.** `rl_grpo_dualrole_rlcer_statemem`
+   reads: family `rl`, method `grpo`, structure `dualrole`, reward `rlcer`, trainer component
+   `statemem`. Sorting segments alphabetically, or by when they were added, destroys the bijection.
+3. **A component never takes a run name of its own.** It has no entry point and cannot run, so it gets
+   no launcher and no top-level config group. Only assemblies run, and only assemblies are named.
+
+### What is NOT a segment
+
+**Instrumentation.** Measuring does not change what an arm is, so it must never appear in a name. It
+is a toggle with a schedule, default off, set by the launcher:
+
+```yaml
+# config default                              # launcher turns it on
+snapshot_every: 0                             - pipeline.trainer.init_kwargs.snapshot_every=1
+```
+
+An arm named `rl_grpo_trace` is the error this prevents: every arm carries the instrument, so the
+segment describes no difference between arms, and the same experiment acquires two names depending on
+whether anyone was watching. Schedule such a toggle in the unit the experiment reasons in — OPTIMIZER
+steps, not micro-batches — so changing gradient accumulation does not silently change what was
+recorded.
+
+### The same grammar, elsewhere
+
+| domain | assembled name | recovers |
+|---|---|---|
+| VL model | `vlm_siglip_mlp2_qwen3_8b` | encoder · projector · backbone · scale |
+| data mixture | `mix_slimpajama_starcoder_2to1` | atoms and their ratio |
+| agent | `agent_react_tools_fewshot` | prompt sections, in assembly order |
+| RL arm | `rl_grpo_dualrole_rlcer_statemem` | structure · reward · trainer component |
+
+If a name cannot be read back into its parts, either a component is missing a slot or a slot is
+carrying two components. Both are naming bugs, and both surface later as two runs that cannot be told
+apart on disk.
+
+### Anti-patterns specific to assemblies
+
+* **A segment for a component that did not change** — inflates every name and breaks rule 1.
+* **A segment naming the instrument** (`_trace`, `_logged`, `_debug`) rather than the method.
+* **Reordered segments between siblings** (`a_x_y` beside `a_y_x`) — the pair no longer reads as one
+  slot apart, and an ablation table built from the names is silently wrong.
+* **A component with its own launcher.** If it can be launched it is an assembly; give it a base.
+* **Assembly order left implicit.** With mixins the MRO *is* the assembly order and it changes
+  behaviour, so state it where the assembly is defined — not in a commit message.
