@@ -142,7 +142,9 @@ also when the coupling first does damage.
 
 ## Rules
 - **Hyperparameters live in `config/`, never in a launcher or a recipe script.** A wall of `key=value`
-  overrides means the defaults belong in a group config and only the delta stays in the launcher.
+  overrides means the defaults belong in a group config and only the delta stays in the launcher. But
+  a long submit line is a *symptom*, not a verdict: classify each token before moving anything, because
+  two of the four kinds are correct exactly where they are. See `references/overrides.md`.
 - **The framework's config is passed VERBATIM, never whitelisted.** A `build_config()` that hand-picks
   fields makes every field it forgot unreachable from YAML *and* CLI, and the run silently uses a
   default nobody chose. Dump the fully-resolved framework config into the run dir.
@@ -187,6 +189,7 @@ question is theirs:
 | `references/runner-styles.md` | starting a project: do you own the loop, or wrap a framework? |
 | `references/pipeline-kinds.md` | adding a pipeline kind, or placing a term like `lora` / `nar` / `mtp` |
 | `references/eval-launchers.md` | naming an eval launcher, or wiring a judge |
+| `references/overrides.md` | a launcher's `run:` grew a wall of `a.b.c=value` |
 
 ## Not this skill
 Run outputs (checkpoints, logs, metrics, eval) are a **separate** tree under `$OUTPUT_DIR_HOME`, not
