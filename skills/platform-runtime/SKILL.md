@@ -65,8 +65,10 @@ The shell you submit from is its own instance, with its own driver, image, and n
 different stack from the jobs it launches. So:
 - **Do not run a job's venv in the submitting shell.** If the shell's driver is older than the
   venv's CUDA, the driver rejects it. Reading a venv's *metadata* (dist-info Version) is fine,
-  importing or running is not. On our DSW the shell is R470 / cu128 / py3.11 and cannot run a
-  cu130 or cu129 venv.
+  importing or running is not. Whether a given shell *can* run a given venv is a fact about that
+  shell's driver and image, so re-read it rather than remembering it. Consolidating the interactive
+  box onto the same image and driver as the batch clusters removes the asymmetry entirely, and is
+  worth doing precisely because it makes a local test mean something.
 - **The submitting shell usually cannot reach a job's service port.** Pods and compute nodes sit
   on the cluster network, isolated from the login instance (an instant `HTTP 000` on DLC, and
   commonly the same from a Slurm login node). A trainer job reaches a serving job by its pod or
