@@ -16,7 +16,7 @@ starting or organizing a project, or when unsure which convention applies.
 |---|---|---|
 | **naming** | what do I call this config / file / run? | `naming-config` (model/pipeline/dataset/launcher slot-grammar) · `naming-descriptive` (the general primitive) |
 | **layout** | where does this doc / script / run output live? | `layout-workspace` (`docs/`, `scripts/`, reports/plans, what's committed) · `layout-output` (the run-output tree under `$OUTPUT_DIR_HOME`) |
-| **docs** | how do I write/maintain the living docs? | `docs-plan` (`docs/plans/<date>-<topic>.md`) · `docs-arch` (`docs/ARCH.md`) |
+| **docs** | how do I write/maintain the living docs? | `docs-plan` (`docs/plans/<date>-<topic>.md`) · `docs-arch` (`docs/ARCH.md`) · `docs-weekly` (the staged Chinese+English weekly report) |
 | **platform** | how do I set up, submit to, and match the runtime of a compute platform? | `platform-env` (env.sh / cluster setup) · `platform-run` (neutral `task.yaml` → DLC/Slurm/EAI) · `platform-runtime` (driver × image × venv × storage stack) |
 | **outputs** | how do I compare runs or reclaim their space? | `output-analysis` (latitude vs longitude, embed-style figures) · `output-cleanup` (resume-safe reclaim) |
 | **campaign** | how do I run all of the above unattended for days, and resume after a context reset? | `claude-auto-research` (the plan-plus-ledger in `docs/plans/<date>-<topic>/`, and the autonomy boundary) |
@@ -27,8 +27,9 @@ starting or organizing a project, or when unsure which convention applies.
 - **layout** — plans, reports, and re-runnable scripts persist out of the source tree
   (`layout-workspace`), and run outputs live in a separate mechanical tree under
   `$OUTPUT_DIR_HOME` (`layout-output`).
-- **docs** — a project keeps one living architecture ref (`docs-arch`) and dated, actionable
-  plans (`docs-plan`).
+- **docs** — a project keeps one living architecture ref (`docs-arch`), dated actionable plans
+  (`docs-plan`), and a weekly report that carries the argument rather than logging the week
+  (`docs-weekly`).
 - **platform** — working on a compute platform means setting up a persistent env on it
   (`platform-env`), submitting a platform-neutral run spec that is rendered per scheduler with
   IDs kept in a profile (`platform-run`), and matching the job's runtime stack of driver, image,
