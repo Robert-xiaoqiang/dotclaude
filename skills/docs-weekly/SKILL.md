@@ -171,14 +171,16 @@ Emit a placeholder plus a spec the generator can act on:
 > x 轴 step｜y 轴 d∠（子空间漂移）｜曲线 = 4 条 arm，legend 用 arm 名｜灰带 = shuffle null
 ```
 
-Rules, from `output-analysis`:
-- **Not self-contained.** No title, no baked caption, terse axis labels. The surrounding text is the
-  caption, so a figure repeating it wastes ink.
-- **Parallel runs merge into one figure** with a legend keyed by arm name, never one figure per arm.
-  Two arms one config slot apart belong on the same axes or the comparison is not visible.
-- Longitude (over steps) and latitude (across arms at one step) are different figures. Do not mix.
-- Generate with `output-analysis` when the runs are in the `layout-output` tree, otherwise a small
-  script beside the report.
+**Figure content and style are owned by `docs-figure`.** Read it before generating. The rules that bite
+most often in a weekly report:
+- **Nothing on the image that the report already says.** No headline claim, no explanatory sentence, no
+  bullets copied out of the text. The report is the caption.
+- **Parallel arms merge into one figure** with a legend keyed by arm name, never one figure per arm.
+- Longitude (over steps) and latitude (across arms at one step) are different figures.
+- One generator per figure, isolated in a `figures/` directory beside the report.
+
+Generate with `output-analysis` when the runs are in the `layout-output` tree, otherwise a small script
+or `.tex` beside the report.
 
 ---
 
@@ -307,6 +309,6 @@ judge solidity before any number arrives:
    what is still unknown?
 
 ## Companions
-`writing-style` (punctuation and word choice in the authored doc) · `output-analysis` (the figures this
-report embeds) · `docs-plan` (the actionable plan a report's next-week section points at) ·
+`writing-style` (punctuation and word choice in the authored doc) · `docs-figure` (what the embedded
+figures may contain) · `output-analysis` (comparing the runs behind them) · `docs-plan` (the actionable plan a report's next-week section points at) ·
 `layout-workspace` (where reports live) · `conventions` (the family index).

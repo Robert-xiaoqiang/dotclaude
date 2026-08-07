@@ -52,25 +52,15 @@ grid. For longitude, plot each run on its own step grid.
 - **Individual vs merged.** Default to one figure per metric. Merge into a small multi-panel
   only when the user wants a single float in the paper.
 
-## Figure style (embed, not standalone)
-These figures go inside another document, so the document supplies the title and caption,
-not the image.
-- No `title` and no `suptitle`. No caption text baked into the image.
-- Terse axis labels (`step`, `loss`, `acc`), not sentences. Let the paper's caption carry
-  the detail.
-- Vector output, `pdf` for LaTeX `includegraphics` and `pgf` when you want the paper's fonts.
-  Match the document font size, roughly 8 to 10 pt at final width.
-- Legend inside the axes, no frame, only when there is more than one line. Prefer labeling
-  lines directly when it is cleaner.
-- A constrained, colorblind-safe palette (Okabe-Ito). One color per run, fixed across all
-  figures. `tight_layout` or a tight bbox so there is no border slack.
-- No gridlines unless they aid reading, no chart junk, no 3D, no dual y-axis.
+## Figure style
+**Owned by `docs-figure`.** Read it before emitting anything: the figure is not self-contained, so no
+title, no baked caption, no claim or explanation printed on the image, terse labels, one colour per run
+fixed across every figure, vector output, and the null drawn as a band. Arms one config slot apart go on
+**one** axes with a legend.
 
-The bundled `compare_runs.py` applies this style and emits the table plus the line and bar
-figures. `templates/dynamics.pgf.tex` and `templates/table.tex` are the TikZ / pgfplots and
-booktabs equivalents for when the figure or table is authored directly in LaTeX. For a
-richer or interactive chart, the `dataviz` skill has the palette and mark rules, but its
-default is a standalone dashboard, so strip the title and caption to match this embed style.
+The bundled `compare_runs.py` already applies that style and emits the table plus the line and bar
+figures. `templates/dynamics.pgf.tex` and `templates/table.tex` are the pgfplots / booktabs equivalents
+when the figure or table is authored directly in LaTeX.
 
 ## Where the analysis itself lives
 The analysis is a durable artifact, so it follows `layout-workspace`. The regeneration
@@ -85,10 +75,11 @@ only copy in a chat scratchpad, because the point is to rerun the figure when a 
    triples needs the user to say why.
 3. Align on steps and state gaps. No silent interpolation.
 4. One color per run, reused across every figure.
-5. Embed style. No title, no baked caption, terse labels, vector output.
+5. Embed style per `docs-figure`. No title, no caption, no claim on the image.
 6. Emit a rerunnable script, not just an inline one-off.
 
 ## Companions
 `layout-output` (the run schema this reads) · `naming-config` (how runs are labeled and
 paired) · `layout-workspace` (where the script and report live) · `writing-style` (prose
-around the tables) · `dataviz` (palette and marks for richer charts) · `conventions` (index).
+around the tables) · `docs-figure` (what a figure may contain, and the renderer rules) · `dataviz`
+(palette and marks for richer charts) · `conventions` (index).
