@@ -1,17 +1,54 @@
 # Skill: docs-weekly
 
 ## Purpose
-Write the **weekly research report** in this project's established style: Chinese main text with
-English core concepts, assembled in **stages** from whatever inputs exist that week. The report is a
-deliverable a human reads in a meeting, so it must carry the argument, not a list of what happened.
+Write the **weekly research report**: prose in one chosen language with technical vocabulary always in
+English, assembled in **stages** from whatever inputs exist that week. The report is a deliverable a
+human reads in a meeting, so it must carry the argument, not a list of what happened.
 
 ## When to Use
 - "写周报", "build this week's report", "finish the weekly report".
 - A draft weekly exists and needs to be brought to style, or a missing section written.
 - Any dated `BrainStorm/<MMDD>/` or `docs/reports/` weekly deliverable.
 
-Not for: plan docs (`docs-plan`), architecture refs (`docs-arch`), or English method specs, which stay
-in English.
+Not for: plan docs (`docs-plan`), architecture refs (`docs-arch`), or method specs, which follow their
+own language.
+
+---
+
+## Language: one skill, one argument
+
+Invoke `/docs-weekly` for the default, `/docs-weekly en` for English. **Do not create a second skill for
+the second language.** Two copies of a recipe drift, the drift is silent, and it is the same failure
+`naming-config` forbids for near-duplicate configs: the fix is a parameter, not a fork.
+
+Resolution order, first match wins:
+1. explicit argument — `zh` | `en`
+2. the language of the draft being revised, when one exists
+3. default — `zh`
+
+### What the toggle changes: prose only
+
+| | `zh` | `en` |
+|---|---|---|
+| body prose, headings, table cells | Chinese | English |
+| **technical vocabulary** | **English, unchanged** | **English, unchanged** |
+| numbers, symbols, equations | identical | identical |
+| section order and content | identical | identical |
+
+**The term list is invariant across modes, and that invariance is the whole anti-drift device.** A term
+of art is English in both modes, so there is nothing to translate in either direction and the common
+failure has no surface to occur on. `rubric` stays `rubric` in a Chinese sentence and in an English one.
+
+### Language hygiene, checked before returning
+
+1. **One language per document.** Not per section, not per paragraph. A single English paragraph in a
+   `zh` report is the bug this section exists to prevent.
+2. **Never translate a term of art**, in either direction. If the reader will meet the word in a paper,
+   it stays as the paper writes it.
+3. **Punctuation follows the prose language.** `zh` uses `，。、（）——`; `en` uses `,.()`. Mixed
+   punctuation is the earliest visible symptom of drift, so scan for it.
+4. **Self-check:** after drafting, scan the body for sentences in the other language and for the other
+   language's punctuation inside prose. Fix before returning, do not hand back a mixed document.
 
 ---
 
@@ -31,14 +68,14 @@ The report is conditional. Check which inputs exist, emit only those sections, i
 
 | # | input available that week | section produced | what it must contain |
 |---|---|---|---|
-| 1 | *always* | **挑战 / 回顾** | last week's finding restated in one paragraph + the number that motivates this week |
-| 2 | a formulation, notation, or math change | **形式化（Formulation）** | the objects, the equation, and **why this formulation addresses the measured phenomenon** |
-| 3 | new measurements, an analysis subdir, cached verdicts | **新证据（Evidence）** | numbers with their measurement basis, and what changed the design |
-| 4 | paper links, PDFs, a literature sweep | **相关工作 / 定位** | a mapping table (dimension × existing work), and **which cell is empty** |
-| 5 | a codebase change | **实现与观测** | what is implemented and verified vs what is not, as two explicit lists |
-| 6 | run outputs | **结果（Results）** | tables and figure placeholders (§figures) |
-| 7 | *always* | **测评计划（Evaluation Plan）** | one row per premise, and the experiment that would falsify it |
-| 8 | *always* | **诚实清单 + 下周计划** | what is missing, what is assumed, what is next |
+| 1 | *always* | **挑战 / 回顾** · Challenge | last week's finding restated in one paragraph + the number that motivates this week |
+| 2 | a formulation, notation, or math change | **形式化** · Formulation | the objects, the equation, and **why this formulation addresses the measured phenomenon** |
+| 3 | new measurements, an analysis subdir, cached verdicts | **新证据** · Evidence | numbers with their measurement basis, and what changed the design |
+| 4 | paper links, PDFs, a literature sweep | **相关工作 / 定位** · Positioning | a mapping table (dimension × existing work), and **which cell is empty** |
+| 5 | a codebase change | **实现与观测** · Implementation | what is implemented and verified vs what is not, as two explicit lists |
+| 6 | run outputs | **结果** · Results | tables and figure placeholders (§figures) |
+| 7 | *always* | **测评计划** · Evaluation Plan | one row per premise, and the experiment that would falsify it |
+| 8 | *always* | **诚实清单 + 下周** · Honest list + Next | what is missing, what is assumed, what is next |
 
 **Sections 2 and 4 are where the argument lives.** A report that has 3, 5 and 6 but not 2 and 4 is a
 status update, and the reader cannot tell whether the week moved the thesis.
@@ -47,22 +84,33 @@ status update, and the reader cannot tell whether the week moved the thesis.
 
 ## Style
 
-### Language mix
-- **Main text Chinese. Core concepts English**, unbolded, in their field-standard form: `rubric`,
-  `reward`, `policy`, `rollout`, `GRPO`, `advantage`, `Blind / Spurious / Inversion`, `harness`,
-  `criterion`, `curriculum`. Do not translate a term the reader will meet again in a paper.
-- **Natural Chinese, never translationese.** Read each sentence aloud. If it is an English sentence
-  with Chinese words substituted, rewrite it. Common tells: 「基于…的…」stacking, 「进行了…」for a verb
-  that exists, 「其」as a possessive, subject-verb distance of half a line.
-- Never write a heading or sentence that only exists to introduce the next one.
+### Vocabulary, both modes
+Technical terms stay English and unbolded, in their field-standard form: `rubric`, `reward`, `policy`,
+`rollout`, `GRPO`, `advantage`, `Blind / Spurious / Inversion`, `harness`, `criterion`, `curriculum`.
+Do not translate a term the reader will meet again in a paper.
+
+### `zh` mode
+**Natural Chinese, never translationese.** Read each sentence aloud. If it is an English sentence with
+Chinese words substituted, rewrite it. Common tells: 「基于…的…」stacking, 「进行了…」for a verb that
+already exists, 「其」as a possessive, subject and verb half a line apart.
+
+### `en` mode
+Plain declarative English under `writing-style`: no em-dashes, no semicolons, no lists unless asked.
+The failure here is the mirror image, English that reads as translated Chinese, usually from keeping
+the Chinese clause order or a topic-comment opener.
+
+### Both modes
+Never write a heading or sentence that only exists to introduce the next one.
 
 ### Headings
 ```
-## 1. 挑战（Challenge）：上周 diagnosis 的回顾
-### 1.2 主要结果
+zh   ## 1. 挑战（Challenge）：上周 diagnosis 的回顾
+     ### 1.2 主要结果
+en   ## 1. Challenge: what last week's diagnosis established
+     ### 1.2 Main result
 ```
-Numbered from **1**, never 0. Top level carries a Chinese name, the English term in parentheses when
-the concept is a term of art, then a colon and what the section actually argues.
+Numbered from **1**, never 0. The heading names the section and then says what it argues. In `zh`, put
+the English term of art in parentheses after the Chinese name on the top level only.
 
 ### Body
 - Bullets use `+` at top level, `-` then `*` nested. Not `*` at top level.
@@ -71,7 +119,8 @@ the concept is a term of art, then a colon and what the section actually argues.
   (`├`, `└`) for a decomposition that sums to a parent row.
 - Every number carries its basis: `62.1%`（按回答对统计，330 对，良构过滤后）. A number without a
   denominator is not a result.
-- No em-dashes (`—`) in authored prose. Use a comma, parentheses, or two sentences (`writing-style`).
+- `en`: no em-dashes (`writing-style`). `zh`: the paired 破折号「——」is correct Chinese punctuation and
+  is used freely, but a lone `—` never is.
 
 ### What to cut
 Passive constructions where the actor matters, 「可以看出」/「值得注意的是」openers, and any sentence
@@ -110,31 +159,40 @@ This section fails most often, so it has its own recipe. Four moves, in order:
 1. **The objects.** State the space, its indices, and their bounds, paired (`t ≤ T`, `i ≤ I`). A
    reader must be able to write down the shape.
 2. **The equation.** One boxed statement of what is being optimised or measured.
-3. **为什么这个形式化能解释已量到的现象.** Map each measured failure mode onto a term. This is the
+3. **为什么这个形式化能解释已量到的现象** / *why it explains what was measured.* Map each measured failure mode onto a term. This is the
    part that makes it a formulation rather than notation: if a measured phenomenon has no term, the
    formulation is incomplete and the report should say so.
-4. **它带来什么新的可做的事.** What action or estimator becomes available that was not before.
+4. **它带来什么新的可做的事** / *what it makes possible.* What action or estimator becomes available that was not before.
 
 A formulation section that does 1 and 2 but not 3 is notation, and a reader is right to ask what it
 bought.
 
 ---
 
-## The non-parametric / parametric section
+## The mechanism-ladder section
 
-When the week's argument is "we should learn this", the report must earn it module by module:
+Use whenever the week's argument has the form *"this component should be X"* — learned, automated,
+adaptive, parameterised, whatever the project's X is. The claim is only as good as the rung below it.
 
-| module | non-parametric 实现（现有工作） | 缺什么 | parametric 版本 | 参数化买到什么 |
+| component | existing mechanism + citation | what is missing | new mechanism | what it buys |
 |---|---|---|---|---|
 
-- **Fill the non-parametric column with real citations**, not "a heuristic". If an existing work
-  already does the module, say so and name it. That is what makes the empty cell credible.
-- **The empty cell is the contribution.** Name which module has no existing non-parametric answer,
-  and why the reason it is missing is structural rather than an oversight.
-- **Parametric must beat the rule, not the absence.** State the rule-based sibling each learned
-  component is measured against. "Learned beats nothing" is not a result.
+Four rules make it an argument rather than a table:
 
----
+1. **Decompose into components a reader can check independently.** If a component cannot be swapped on
+   its own, it is not a rung, and the ladder cannot be climbed one step at a time.
+2. **Every occupied rung names a real implementation with a citation.** "A heuristic" is not a rung. The
+   credibility of the empty cell comes entirely from how solid the filled ones are.
+3. **The empty rung is the contribution, and its emptiness needs a reason.** Say why nothing occupies it
+   — a structural obstacle, not an oversight. "Nobody tried" is weak; "the credit-assignment unit makes
+   it unlearnable at their sample size" is an argument.
+4. **The new rung must beat the rung below it, not the absence of one.** Name the simple mechanism each
+   new component is measured against. Beating nothing is not a result, and a ladder whose middle rung is
+   a strawman the authors wrote themselves is worse than no ladder.
+
+Read the "existing implementation" column top to bottom: it should describe a complete, runnable system
+with none of the week's new machinery. That configuration is the floor, and it is what makes the claim
+falsifiable.
 
 ## The Evaluation Plan section
 
@@ -160,6 +218,8 @@ with no falsifying experiment is a belief, and the report should label it as one
 - **Restating the plan as achievement.** What is implemented and what is not are two lists, and the
   second one is the useful one.
 - **Numbering from 0.**
+- **A mixed-language document**, or a term of art translated into the prose language.
+- **A ladder whose lower rungs are strawmen the report invented**, rather than published mechanisms.
 
 ---
 
