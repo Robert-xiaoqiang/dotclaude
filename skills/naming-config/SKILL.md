@@ -263,7 +263,30 @@ answer differs by run kind — which is the distinction that keeps a headline re
 | launcher kind | overrides | why |
 |---|---|---|
 | **full run** (the result) | **none** — only `<group>_name=` selectors | the recipe must be reconstructable from the four config names alone |
-| **smoke / local / resume** | as many as it needs, **written into the launcher file** | it is a named, committed variant of the full run, not an ad-hoc invocation |
+| **smoke / resume** | as many as it needs, **written into the launcher file** | it is a named, committed variant of the full run, not an ad-hoc invocation |
+| **`_local`** | only when the BOX forces a different code path | otherwise it does not exist — see below |
+
+**`_local` is usually NOT a launcher, because WHERE a run happens is a verb, not a file.** Local is a
+first-class platform family: `make run LAUNCHER=<arm>_smoke --gpus 2` executes the SAME `task.yaml` the
+cluster uses. The local platform declares `resources`, `num_nodes`, `file_mounts`, `workdir`, `setup`
+and `max_minutes` REMOTE-ONLY, drops them, names the dropped keys in its banner, and sets
+`NPROC_PER_NODE` from the cards it actually took rather than from a `resources:` line describing a
+cluster node. So a second file for "the same thing, on my box" duplicates a launcher to change nothing
+a launcher owns.
+
+The recipe does move with the card count, and that is fine for a smoke:
+
+    8 GPUs: 8 x 4 x 4 / 8 = 16 prompts/gradient   (the full run's figure)
+    2 GPUs: 2 x 4 x 4 / 8 =  4
+    1 GPU : 1 x 4 x 4 / 8 =  2
+
+A smoke asks "does this path execute", not "does this recipe train", so 2 is a fine answer to the
+question being asked.
+
+**Write `<arm>_local` only when the box forces a different CODE PATH**, not a smaller number. The
+concrete case: a card with too little free memory cannot hold the policy and a colocated vLLM engine
+together, so local needs `use_vllm=false` — which is HF generate, a genuinely different generation
+path, not a knob. That is a named variant like any other and earns its file. "Fewer GPUs" does not.
 
 **A full-run launcher is three or four `name=` tokens and nothing else.** Every number it trains on
 lives in a config file that a reader can open, and the frozen `config.yaml` in the run dir is then a
