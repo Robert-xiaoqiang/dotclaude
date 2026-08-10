@@ -7,6 +7,19 @@ codebase that uses a config-driven runner (OmegaConf, Hydra, Pydantic
 configs, YAML registries, etc.). Keeps file names, class paths, and
 output dirs aligned so a config name uniquely identifies what runs.
 
+## Contents
+- [When to Use](#when-to-use)
+- [Core principle](#core-principle)
+- [Slot grammars](#slot-grammars)
+- [The name IS the inheritance chain](#the-name-is-the-inheritance-chain)
+- [Assembled names: the name IS the component list](#assembled-names-the-name-is-the-component-list)
+- [Hard rules](#hard-rules)
+- [Steps when adding / reviewing a config](#steps-when-adding-reviewing-a-config)
+- [Anti-patterns](#anti-patterns)
+- [Output](#output)
+- [Division of labour with `layout-workspace`](#division-of-labour-with-layout-workspace)
+- [Companions](#companions)
+
 ## When to Use
 - Adding a new model variant, pipeline stage, dataset, or launcher
 - Renaming an existing config (refactor)
@@ -242,6 +255,39 @@ output root is a config masquerading as a flag: it is invisible in the run's `co
 that differ by it can look identical on disk. A smoke run is a *named configuration*
 (`dataset_name=healthbench_smoke`, the `tag` slot) with its own hashed run dir.
 
+### How many overrides a launcher may carry depends on what KIND of run it is
+
+The rule above says what an override may BE. This says how many belong in a launcher at all, and the
+answer differs by run kind — which is the distinction that keeps a headline result readable.
+
+| launcher kind | overrides | why |
+|---|---|---|
+| **full run** (the result) | **none** — only `<group>_name=` selectors | the recipe must be reconstructable from the four config names alone |
+| **smoke / local / resume** | as many as it needs, **written into the launcher file** | it is a named, committed variant of the full run, not an ad-hoc invocation |
+
+**A full-run launcher is three or four `name=` tokens and nothing else.** Every number it trains on
+lives in a config file that a reader can open, and the frozen `config.yaml` in the run dir is then a
+complete account of the run. The moment a full-run launcher carries
+`pipeline.trainer.config.init_kwargs.learning_rate=1e-6`, the arm's recipe is split across two places
+and the config name stops predicting what ran. If a full run needs a value the base config does not
+have, that value belongs in **its own pipeline config** — which is what `_base_` is for.
+
+*Worked example.* A scaffold arm on two nodes needs `grad_accum: 2` to keep prompts-per-gradient at 16.
+Putting that on the launcher's argv hides a recipe change behind a node count. Putting it in
+`rl_grpo_scaffold.yaml` makes it readable — and then reveals the real question, which is whether the
+arm still differs from its baseline by exactly one slot. It does not, so the right answer was one node
+and zero overrides.
+
+**A smoke or local launcher is the opposite, and that is not a double standard.** It exists to exercise
+a path cheaply, so it legitimately pins `dataset_name=<...>_smoke`, a short `max_steps`, a smaller node
+count, extra tracing. Those overrides go **in the launcher file, committed** — never typed at the
+command line — for the same reason the full run has none: the variant must be reproducible by name.
+`make job LAUNCHER=<arm>_smoke` and nothing else.
+
+So the progression is: **edit the launcher file → submit by launcher name → the platform command is
+printed for the record.** What you type is always just the launcher; what varies lives in a file that
+is diffable, reviewable, and frozen into `config.yaml` alongside everything else.
+
 ### Launcher dirs
 
 Two grammars, and which one applies depends on how the project selects a run.
@@ -353,6 +399,68 @@ Corollaries:
 * **A family root has no `_base_` and no inherited segment.** `rl_grpo` is a root; `rl_dualrole` is not
   a root, because its algorithm is GRPO — writing it as a root hides that it duplicates the parent's
   recipe rather than inheriting it.
+
+## Assembled names: the name IS the component list
+
+### The principle
+
+When a thing is built from interchangeable parts, its name must let a reader recover which parts —
+and, given the parts, predict the name. That is a bijection, and it is what makes an assembly
+reproducible from its name alone.
+
+```
+{base}[_{component}]...        each segment names ONE component that differs from the base
+```
+
+Three rules make it a bijection rather than a habit:
+
+1. **One segment per component that DIFFERS from the base.** A component left at its default
+   contributes nothing — absence of a segment IS the default, exactly as absence of a variant slot is
+   the baseline (rule 1 above). `_default`, `_none`, `_plain` are all wrong.
+2. **Fixed slot ORDER, from the outermost structural choice inward.** `rl_grpo_dualrole_rlcer_statemem`
+   reads: family `rl`, method `grpo`, structure `dualrole`, reward `rlcer`, trainer component
+   `statemem`. Sorting segments alphabetically, or by when they were added, destroys the bijection.
+3. **A component never takes a run name of its own.** It has no entry point and cannot run, so it gets
+   no launcher and no top-level config group. Only assemblies run, and only assemblies are named.
+
+### What is NOT a segment
+
+**Instrumentation.** Measuring does not change what an arm is, so it must never appear in a name. It
+is a toggle with a schedule, default off, set by the launcher:
+
+```yaml
+# config default                              # launcher turns it on
+snapshot_every: 0                             - pipeline.trainer.init_kwargs.snapshot_every=1
+```
+
+An arm named `rl_grpo_trace` is the error this prevents: every arm carries the instrument, so the
+segment describes no difference between arms, and the same experiment acquires two names depending on
+whether anyone was watching. Schedule such a toggle in the unit the experiment reasons in — OPTIMIZER
+steps, not micro-batches — so changing gradient accumulation does not silently change what was
+recorded.
+
+### The same grammar, elsewhere
+
+| domain | assembled name | recovers |
+|---|---|---|
+| VL model | `vlm_siglip_mlp2_qwen3_8b` | encoder · projector · backbone · scale |
+| data mixture | `mix_slimpajama_starcoder_2to1` | atoms and their ratio |
+| agent | `agent_react_tools_fewshot` | prompt sections, in assembly order |
+| RL arm | `rl_grpo_dualrole_rlcer_statemem` | structure · reward · trainer component |
+
+If a name cannot be read back into its parts, either a component is missing a slot or a slot is
+carrying two components. Both are naming bugs, and both surface later as two runs that cannot be told
+apart on disk.
+
+### Assembly-specific anti-patterns
+
+* **A segment for a component that did not change** — inflates every name and breaks rule 1.
+* **A segment naming the instrument** (`_trace`, `_logged`, `_debug`) rather than the method.
+* **Reordered segments between siblings** (`a_x_y` beside `a_y_x`) — the pair no longer reads as one
+  slot apart, and an ablation table built from the names is silently wrong.
+* **A component with its own launcher.** If it can be launched it is an assembly; give it a base.
+* **Assembly order left implicit.** With mixins the MRO *is* the assembly order and it changes
+  behaviour, so state it where the assembly is defined — not in a commit message.
 
 ## Hard rules
 
@@ -481,65 +589,3 @@ Rule 6 below is the seam: it is a *name* (so it lives here) that determines a *p
 `layout-workspace` (where these files live — the paired skill for the experiment-facing half) ·
 `naming-descriptive` (the general naming primitive this specialises) · `layout-output` (the run tree
 rule 6 derives) · `platform-run` (the launcher's neutral spec) · `conventions` (the family index).
-
-## Assembled names: the name IS the component list
-
-### The principle
-
-When a thing is built from interchangeable parts, its name must let a reader recover which parts —
-and, given the parts, predict the name. That is a bijection, and it is what makes an assembly
-reproducible from its name alone.
-
-```
-{base}[_{component}]...        each segment names ONE component that differs from the base
-```
-
-Three rules make it a bijection rather than a habit:
-
-1. **One segment per component that DIFFERS from the base.** A component left at its default
-   contributes nothing — absence of a segment IS the default, exactly as absence of a variant slot is
-   the baseline (rule 1 above). `_default`, `_none`, `_plain` are all wrong.
-2. **Fixed slot ORDER, from the outermost structural choice inward.** `rl_grpo_dualrole_rlcer_statemem`
-   reads: family `rl`, method `grpo`, structure `dualrole`, reward `rlcer`, trainer component
-   `statemem`. Sorting segments alphabetically, or by when they were added, destroys the bijection.
-3. **A component never takes a run name of its own.** It has no entry point and cannot run, so it gets
-   no launcher and no top-level config group. Only assemblies run, and only assemblies are named.
-
-### What is NOT a segment
-
-**Instrumentation.** Measuring does not change what an arm is, so it must never appear in a name. It
-is a toggle with a schedule, default off, set by the launcher:
-
-```yaml
-# config default                              # launcher turns it on
-snapshot_every: 0                             - pipeline.trainer.init_kwargs.snapshot_every=1
-```
-
-An arm named `rl_grpo_trace` is the error this prevents: every arm carries the instrument, so the
-segment describes no difference between arms, and the same experiment acquires two names depending on
-whether anyone was watching. Schedule such a toggle in the unit the experiment reasons in — OPTIMIZER
-steps, not micro-batches — so changing gradient accumulation does not silently change what was
-recorded.
-
-### The same grammar, elsewhere
-
-| domain | assembled name | recovers |
-|---|---|---|
-| VL model | `vlm_siglip_mlp2_qwen3_8b` | encoder · projector · backbone · scale |
-| data mixture | `mix_slimpajama_starcoder_2to1` | atoms and their ratio |
-| agent | `agent_react_tools_fewshot` | prompt sections, in assembly order |
-| RL arm | `rl_grpo_dualrole_rlcer_statemem` | structure · reward · trainer component |
-
-If a name cannot be read back into its parts, either a component is missing a slot or a slot is
-carrying two components. Both are naming bugs, and both surface later as two runs that cannot be told
-apart on disk.
-
-### Anti-patterns specific to assemblies
-
-* **A segment for a component that did not change** — inflates every name and breaks rule 1.
-* **A segment naming the instrument** (`_trace`, `_logged`, `_debug`) rather than the method.
-* **Reordered segments between siblings** (`a_x_y` beside `a_y_x`) — the pair no longer reads as one
-  slot apart, and an ablation table built from the names is silently wrong.
-* **A component with its own launcher.** If it can be launched it is an assembly; give it a base.
-* **Assembly order left implicit.** With mixins the MRO *is* the assembly order and it changes
-  behaviour, so state it where the assembly is defined — not in a commit message.
