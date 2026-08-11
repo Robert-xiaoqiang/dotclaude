@@ -75,11 +75,29 @@ commands as part of the tool, so the far side is a script to run rather than a m
 Order matters: bootstrap env, then the package manager, then interpreters, then per-project
 venvs, then control-plane tooling.
 
-## Reference implementation
-`$CPFS_HOME/snippets/migrate-cpfs-home.sh` in the dotfile repo implements this skill:
-`audit` (classify + measure + estimate, changes nothing), `migrate` (rsync the MUST+SHOULD
-tiers), `reinstall` (print the far-side rebuild commands). The tier lists are data at the top
-of the file, so adapting it to a different home is editing three arrays.
+## The scripts
+Both live in `scripts/` beside this file, deliberately. They were loose in a `snippets/` dir,
+which gave a reader the *what* with none of the *when* or *why*: a migration script without its
+rationale is a command you have to reverse-engineer before trusting. Skill and implementation
+travel together, so one clone gets both.
+
+`scripts/migrate-cpfs-home.sh` — the general tool. `audit` classifies, measures and estimates,
+changing nothing. `migrate` rsyncs the MUST and SHOULD tiers. `reinstall` prints the far-side
+rebuild commands. The tier lists are three arrays at the top, so retargeting it to a different
+home is editing data, not logic.
+
+`scripts/migrate-claude-state.sh` — the narrower, earlier case: relocating Claude Code's own
+state (sessions, plugins, login) off a volatile home onto the persistent mount, which is what
+makes `--resume` survive a node dying. Worth reading before the general tool, because it is a
+concrete instance of the same tier logic with one directory's specifics worked out, including
+which files inside it are safe to rewrite and which must be copied verbatim.
+
+## Bootstrap order on the far side
+Install the agent FIRST. Everything else in the SKIP tier is easier to rebuild with the agent
+present than without it, since the reinstall commands, the skills describing them, and the
+judgement about what broke all arrive together. Concretely: env bootstrap, then the package
+manager, then the agent CLI, then interpreters, then per-project venvs, then control-plane
+tooling. `reinstall` emits them in that order.
 
 ## Companions
 `platform-env` (landing on a new environment, the inverse of this) · `platform-runtime` (the
