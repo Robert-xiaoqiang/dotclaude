@@ -96,7 +96,7 @@ When a location on the mount replaces an old dir in the ephemeral home, retire t
 - Current shells keep the old environment until re-sourced. Only new shells and new nodes pick up env-file changes, so validate a change by sourcing the env file in a throwaway subshell, not by trusting the running shell.
 - The env file must survive a non-interactive job shell. No `set -e`, guard tty-only bits, safe to source twice.
 - Runtime things do not belong on a network filesystem. Keep sockets and pids local.
-- git config precedence bites. `~/.gitconfig` shadows the XDG git config, and git writes `--global` into `~/.gitconfig` when it exists. Move identity to the XDG path and remove `~/.gitconfig`.
+- git config precedence bites, and worse than the obvious way. `~/.gitconfig` shadows the XDG git config, but git also ignores `XDG_CONFIG_HOME` entirely for a FIRST write: its rule is use `~/.gitconfig` if it exists, else the XDG file only if THAT already exists, else create `~/.gitconfig`. Verified on git 2.43 with `XDG_CONFIG_HOME` set correctly and the XDG file absent, it still created `~/.gitconfig`, so on a fresh node every `--global` setting silently lands on the volatile home. Removing `~/.gitconfig` is not enough. Export `GIT_CONFIG_GLOBAL` to name the file outright, which fixes reads and writes unconditionally.
 - Some things stay volatile on purpose, such as ssh keys and image-based cloud credentials, and get recreated on a fresh node.
 - A tool that respects `XDG_DATA_HOME` but not `XDG_CONFIG_HOME`, or the reverse, splits its files across the mount and local. Check both.
 
@@ -108,3 +108,9 @@ When a location on the mount replaces an old dir in the ephemeral home, retire t
 - Retire replaced dirs with a reversible top-level `.premigrate`.
 - tmux with mouse on, resurrect and continuum, and prefer an OSC 52 terminal.
 - Write docs without em-dashes or semicolons, per my writing-style skill.
+
+## Companions
+`platform-migrate` (leaving an environment, the inverse of this: what is actually worth moving
+to the next mount, and why file count rather than size decides how long it takes) ·
+`platform-runtime` (the driver, image, venv and storage stack a job runs on) · `platform-run`
+(submitting a neutral run spec to a scheduler).

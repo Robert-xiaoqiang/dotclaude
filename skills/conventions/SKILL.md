@@ -17,7 +17,7 @@ starting or organizing a project, or when unsure which convention applies.
 | **naming** | what do I call this config / file / run? | `naming-config` (model/pipeline/dataset/launcher slot-grammar) · `naming-descriptive` (the general primitive) |
 | **layout** | where does this doc / script / run output live? | `layout-workspace` (`docs/`, `scripts/`, reports/plans, what's committed) · `layout-output` (the run-output tree under `$OUTPUT_DIR_HOME`) |
 | **docs** | how do I write/maintain the living docs? | `docs-plan` (`docs/plans/<date>-<topic>.md`) · `docs-arch` (`docs/ARCH.md`) · `docs-weekly` (the staged Chinese+English weekly report) |
-| **platform** | how do I set up, submit to, and match the runtime of a compute platform? | `platform-env` (env.sh / cluster setup) · `platform-run` (neutral `task.yaml` → DLC/Slurm/EAI) · `platform-runtime` (driver × image × venv × storage stack) |
+| **platform** | how do I set up, submit to, and match the runtime of a compute platform? | `platform-env` (env.sh / cluster setup) · `platform-run` (neutral `task.yaml` → DLC/Slurm/EAI) · `platform-runtime` (driver × image × venv × storage stack) · `platform-migrate` (moving a persistent home to another mount) |
 | **outputs** | how do I compare runs or reclaim their space? | `output-analysis` (latitude vs longitude) · `output-cleanup` (resume-safe reclaim) |
 | **figures** | what may a figure contain, and how do I render it? | `docs-figure` (TikZ / Mermaid / HTML / matplotlib, embed-not-standalone) |
 | **campaign** | how do I run all of the above unattended for days, and resume after a context reset? | `claude-auto-research` (the plan-plus-ledger in `docs/plans/<date>-<topic>/`, and the autonomy boundary) |
@@ -34,7 +34,9 @@ starting or organizing a project, or when unsure which convention applies.
 - **platform** — working on a compute platform means setting up a persistent env on it
   (`platform-env`), submitting a platform-neutral run spec that is rendered per scheduler with
   IDs kept in a profile (`platform-run`), and matching the job's runtime stack of driver, image,
-  and venv (`platform-runtime`).
+  and venv (`platform-runtime`). Leaving one again is `platform-migrate`, where the lesson is
+  that file count rather than size predicts transfer time, and that the exclusions matter more
+  than the copy.
 - **outputs** — the `layout-output` tree is read by `output-analysis` to compare runs across
   steps and arms, and by `output-cleanup` to reclaim space while protecting resume state.
 - **campaign** — an objective too long for one session persists as a plan *directory* whose
