@@ -36,7 +36,15 @@ DRY=0
 
 # ---- the tiers -------------------------------------------------------------
 # MUST: irreplaceable. Nothing regenerates these; losing them loses work.
-MUST=(output_dir .claude .ssh.persistent .secret env.sh home.sh)
+#   The four repo-metadata entries are here because $CPFS_HOME is ITSELF a git
+#   checkout, the dotfile repo. Omitting them once produced a tree where env.sh and
+#   home.sh were present but nothing was tracked, and the absent .gitignore was the
+#   real damage rather than the absent .git: that file is a deny-all allow-list, so
+#   without it the repository root presents .secret, the ssh private key and
+#   .bash_history as ordinary untracked files, one `git add -A` from being published.
+#   Copy the guard along with the thing it guards.
+MUST=(output_dir .claude .ssh.persistent .secret env.sh home.sh
+      .git .gitignore .gitmodules README.md)
 # SHOULD: cheap to copy and annoying to rebuild, but not irreplaceable.
 #   projects/ is in git, but copying preserves uncommitted work and remotes.
 SHOULD=(projects datasets .config .local snippets .bash_history .codex .qoder)
@@ -145,6 +153,23 @@ cmd_reinstall() {
 
 export CPFS_HOME=$DST
 . "\$CPFS_HOME/env.sh"
+
+# --- nc, FIRST, because git over ssh is dead without it ---------------------
+# The ssh ProxyCommand names \$DEVTOOLS_HOME/bin/nc by absolute path, and devtools/ is
+# a SKIP tier, so on the far side that binary does not exist and every git push fails
+# in a way that reads like a rejected key rather than a missing tunnel.
+#
+# This looks circular and is not: the clone needs ssh, ssh needs nc, nc needs the
+# network, the network needs the proxy. The archive is reachable DIRECTLY, so apt
+# needs neither the proxy nor git, and that is where the circle breaks. The proxy
+# variables are unset explicitly because env.sh has already exported them and would
+# otherwise send apt through a tunnel that is not up yet.
+mkdir -p "\$DEVTOOLS_HOME/bin" && cd /tmp \\
+  && env -u http_proxy -u https_proxy -u all_proxy \\
+       -u HTTP_PROXY -u HTTPS_PROXY -u ALL_PROXY apt-get download netcat-openbsd \\
+  && dpkg-deb -x netcat-openbsd*.deb x \\
+  && install -m 755 x/bin/nc.openbsd "\$DEVTOOLS_HOME/bin/nc"
+
 bash "\$CPFS_HOME/home.sh" --boot     # bashrc hook, ssh keys, git hooks
 
 # --- node, ONLY because the agent needs npm --------------------------------
@@ -178,6 +203,22 @@ bash "\$PROJECTS_HOME/MemPalace/MemCodex/install.sh"
 # skylaunch control plane (pure python, needed by every make job/run):
 uv venv --python 3.12 "\$UV_VENVS_DIR/skylaunch"
 uv pip install --python "\$UV_VENVS_DIR/skylaunch/bin/python" -e "\$PROJECTS_HOME/skylaunch"
+
+# --- the proxy: binary, credentials, then start ----------------------------
+# .config/ IS copied, so acl.conf and server.conf survive and the proxy comes back
+# with no editing. On a box that did NOT inherit them, server.conf is the one file
+# no repo can carry, since it holds the SS password and the VLESS UUID:
+#   install -m 600 "\$DEVTOOLS_HOME/sing-box/server.conf.template" \\
+#                  "\$XDG_CONFIG_HOME/sing-box/server.conf"    # then fill it in
+# The sing-box binary itself is a download from the upstream release page into
+# \$DEVTOOLS_HOME/sing-box/sing-box, mode 755.
+sbproxy start && sbproxy status
+
+# --- TeX Live: scheme-full, ~45 min, no prompts -----------------------------
+# instopt_adjustpath 0 because env.sh owns PATH, and docfiles off to halve the size.
+# TEXDIR must match \$TEXLIVE_HOME or env.sh puts the wrong bin dir on PATH.
+#   curl -sL https://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz | tar xz
+#   ./install-tl-*/install-tl -profile <profile>
 
 # --- caches: no action, they refill on demand ------------------------------
 # hf_home, triton_home, nltk_data, wandb_local, .trash
