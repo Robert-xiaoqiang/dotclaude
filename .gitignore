@@ -29,8 +29,14 @@ __pycache__/
 *.py[cod]
 !/README.md
 # Reminder: skills/agents/commands/hooks are allow-listed WHOLESALE —
-!/settings.json
-# settings.json was on this list until 2026-07-30. Reversed deliberately: its
+# settings.json is NOT tracked, and has flip-flopped three times: tracked
+# 2026-07-30, untracked again, then re-tracked by accident on 2026-08-11 while
+# adding includeCoAuthoredBy. Settled: it is machine-local. It mixes a portable
+# preference (includeCoAuthoredBy) with per-machine state (model, effortLevel,
+# tui, theme) that differs by host and gets rewritten by /model and /effort, so
+# tracking it means every session churns the repo. Portable behaviour belongs in
+# a skill or a hook (hooks/git/commit-msg enforces the trailer rule
+# independently of this file), not in a settings blob.
 # settings.local.json stays out: machine-local by convention, and it carries
 !/skills/
 # Strategy: IGNORE EVERYTHING by default, then allow-list only the
