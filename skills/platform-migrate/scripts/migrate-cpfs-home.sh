@@ -36,18 +36,32 @@ DRY=0
 
 # ---- the tiers -------------------------------------------------------------
 # MUST: irreplaceable. Nothing regenerates these; losing them loses work.
-#   The four repo-metadata entries are here because $CPFS_HOME is ITSELF a git
-#   checkout, the dotfile repo. Omitting them once produced a tree where env.sh and
-#   home.sh were present but nothing was tracked, and the absent .gitignore was the
-#   real damage rather than the absent .git: that file is a deny-all allow-list, so
-#   without it the repository root presents .secret, the ssh private key and
-#   .bash_history as ordinary untracked files, one `git add -A` from being published.
-#   Copy the guard along with the thing it guards.
-MUST=(output_dir .claude .ssh.persistent .secret env.sh home.sh
-      .git .gitignore .gitmodules README.md)
+#   env.sh and home.sh are tracked in the dotfile repo, so strictly a clone would
+#   bring them back, but they stay here because they are the bootstrap: sourcing
+#   env.sh is step one of the far-side recipe, and needing them before a clone is
+#   possible is exactly when "recoverable from the remote" is worth nothing.
+MUST=(output_dir .claude .ssh.persistent .secret env.sh home.sh)
 # SHOULD: cheap to copy and annoying to rebuild, but not irreplaceable.
 #   projects/ is in git, but copying preserves uncommitted work and remotes.
-SHOULD=(projects datasets .config .local snippets .bash_history .codex .qoder)
+#
+#   The four repo-metadata entries are here for that identical reason, and NOT in
+#   MUST, which is where they were first put by mistake. $CPFS_HOME is itself a git
+#   checkout, and .gitignore, .gitmodules and README.md are all TRACKED, so a clone
+#   reproduces them byte for byte: nothing about them is irreplaceable. They are
+#   copied anyway because .git here is under half a megabyte across 57 files, which
+#   is free at any transfer rate, and copying preserves uncommitted edits and the
+#   remote wiring rather than resetting to whatever was last pushed.
+#
+#   The hazard is in the path where they are NOT copied, and it is worth knowing
+#   before choosing it. `git clone` refuses a populated directory, so recovery means
+#   cloning --no-checkout elsewhere and moving .git in on top of the existing tree.
+#   In the window between that move and restoring .gitignore, the repository root
+#   presents .secret, the ssh private key and .bash_history as ordinary untracked
+#   files, because that file is a deny-all allow-list and it is the only thing
+#   standing between them and a `git add -A`. So restore .gitignore FIRST, before
+#   touching the index at all.
+SHOULD=(projects datasets .config .local snippets .bash_history .codex .qoder
+        .git .gitignore .gitmodules README.md)
 # SKIP: reconstructible, or actively wrong to copy. Reason given per entry.
 SKIP_uv_home="711k files (~1.6h) AND arrives broken: pyvenv.cfg hardcodes the
               interpreter path, so every venv points at the OLD prefix. Rebuild
