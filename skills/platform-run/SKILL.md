@@ -37,12 +37,41 @@ run: |                             # the job command(s); rank/world env injected
 envs:                              # OS/user env vars
   HF_ENDPOINT: https://hf-mirror.com
   OUTPUT_DIR: ${OUTPUT_DIR_HOME}/<project>
-file_mounts: { /data: cpfs }       # logical mounts; the profile resolves to real ids/paths
+file_mounts: { /data: cpfs }       # ADVISORY only — see the note below
+mode: batch                        # batch | interactive; picks the backend verb set
+runtime: serving                   # optional NAMED stack from the profile's `runtimes:`
+workdir: .                         # optional
+platform:                          # THE ESCAPE HATCH, namespaced by family
+  pai:   { gpu_type: A100-80G, driver: "" }
+  slurm: { partition: gpu-long }
 ```
 
-## The platform profile — `scripts/platform/<platform>.yaml`
-Non-portable, platform-specific: account / workspace / quota (resource) id / data-source
-ids / container image / region / partition / qos. (Generalizes an ad-hoc `*_clusters.env`.)
+`platform:` is namespaced by family on purpose. `platform.pai.driver` reads as "PAI-specific,
+portable nowhere", which is honest, where a bare top-level `driver:` reads as a property of the
+task, which is a lie. A spec may carry blocks for several families at once and each ignores the
+others, so adding a platform never edits an existing spec. Prefer not to use it: anything true
+of every task in a project belongs in that project's `platform/<family>.yaml`, and anything true
+of a whole cluster belongs in the shared stack. It is for the one task that differs.
+
+**`file_mounts` is advisory and read by no translator.** Mounts come from the profile's
+`data_sources`, because which datasets exist is a property of the cluster, not of a task. It
+survives as documentation of intent, so do not expect editing it to change what gets mounted.
+
+Anything outside the allowed set is rejected rather than silently dropped — a typo in a spec
+should stop the launch, not reach a job file nobody reads.
+
+## The platform profile — the shared stack
+Non-portable, platform-specific: account / workspace / quota (resource) id / data-source ids /
+container image / driver / region / partition / qos. In skylaunch this is
+`skylaunch/platforms/<family>/stacks.yaml`, one file shared by every project, with a project's
+own `platform/<family>.yaml` layered over it only where it genuinely differs.
+
+Two things belong here that a task must never carry. **Mounts**, per above. And **image
+identity**, which on PAI means two fields for one image: a catalog `image_id` (what the console
+calls an "Alibaba Cloud Image") and the full registry `worker_image` address. They must name the
+same image, because the two modes select differently — DSW validates an id against the catalog,
+while an unresolvable *address* is accepted as a "custom image" and fails only at pull time,
+once the pod is already gone. A check that they agree is worth having.
 
 ## The engine — three layers, share what's shareable
 Factor by *what actually varies per platform*. Only native submit/status/logs differ; the
@@ -78,10 +107,15 @@ branch) and a thin `<p>.sh` adapter — never a second spec dialect, snapshot, o
 | `resources.memory` | `worker_memory=<n>Gi` | `--mem=<n>G` | `resources.mem` |
 | `run` | `command` | script body / `srun` | `command` |
 | `envs` | `envs=k=v,…` | `export` / `--export` | `environmentVars:[k=v]` |
-| `file_mounts` | `data_sources=<ids>` | bind / shared FS | `--data ac.user:/path` |
-| (account/quota/image) | `workspace_id`,`resource_id`,`worker_image` | `--account`,`--partition` | `account`,`--image` |
+| `file_mounts` | *ignored* — mounts come from the profile's `data_sources` | bind / shared FS | `--data ac.user:/path` |
+| `runtime` | selects a named stack from the profile's `runtimes:` | (n/a) | (n/a) |
+| `platform.<family>` | merged last, over everything | same | same |
+| (account/quota/image/driver) | `workspace_id`,`resource_id`,`worker_image`,`--driver` | `--account`,`--partition` | `account`,`--image` |
 
-Bottom row is **from the profile, not the spec.**
+Bottom row is **from the profile, not the spec.** Precedence, lowest to highest: shared stack,
+project override, cluster entry, named `runtime`, then the task's own `platform.<family>`.
+`envs` merge in that order too, so a cluster can carry fabric tunables (`NCCL_IB_*`) that a
+single task may still override.
 
 ## Rules
 1. The neutral `task.yaml` contains **zero** platform IDs. If you're tempted to put a
@@ -97,7 +131,26 @@ Bottom row is **from the profile, not the spec.**
    driver / symbol error as a layer mismatch to diagnose, not an impossible request
    (`platform-runtime`).
 
+## The implementation: skylaunch
+This skill is the *contract*; `$PROJECTS_HOME/skylaunch` (github.com/Robert-xiaoqiang/skylaunch)
+is the implementation, and the two are meant to stay consistent. Read the code as the ground
+truth when they disagree, then fix whichever is wrong — this file has drifted from it before.
+
+The map, for orientation: `core/spec.py` holds the allowed field set and the validation that
+rejects anything else, `core/profile.py` the layer merge described above, `core/mode.py` the
+batch/interactive verb vocabulary, and `platforms/<family>/` one backend per mode
+(`pai/dlc.py`, `pai/dsw.py`) over a single shared `stacks.yaml`. `scripts/checks/interface.py`
+renders every real project `task.yaml` against every cluster with no scheduler needed, which is
+the golden-file test rule below made executable.
+
+Both modes read one stack on purpose: a DSW box and a DLC job on the same cluster share its
+workspace, quota, mounts, image and driver, so debugging interactively on the box you will later
+submit to actually proves something. When they diverge, that guarantee is silently gone —
+`skylaunch drift` exists to catch exactly that, since nothing re-reads the stack during a
+long-lived instance's life.
+
 ## Companions
 `naming-config` (the launcher's *name* + config triple) · `layout-workspace` (where
 `launcher/` and `scripts/platform/` live) · `platform-runtime` (the driver/image/venv stack the
-job runs on) · `platform-env` (the machine env the profile assumes) · `conventions` (the family index).
+job runs on) · `platform-env` (the machine env the profile assumes) · `platform-migrate` (moving
+the persistent home the profile points at) · `conventions` (the family index).
