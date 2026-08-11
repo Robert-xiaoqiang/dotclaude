@@ -30,7 +30,6 @@ __pycache__/
 !/README.md
 # Reminder: skills/agents/commands/hooks are allow-listed WHOLESALE —
 !/settings.json
-settings.json
 # settings.json was on this list until 2026-07-30. Reversed deliberately: its
 # settings.local.json stays out: machine-local by convention, and it carries
 !/skills/
