@@ -1,0 +1,32 @@
+#!/bin/sh
+# what: strip any Co-Authored-By trailer before a commit is finalized.
+#
+# why:  the git-commit skill already tells Claude never to add one, and
+#       "includeCoAuthoredBy": false in settings.json is a second, harness-level
+#       layer — but both are Claude Code's own compliance, unverifiable from
+#       outside a closed binary and only in effect for a session started after
+#       they were set. This is a THIRD, independent layer: a real git hook,
+#       triggered by `git commit` itself, not by Claude Code's hook system at
+#       all. It catches every commit from every source (any Claude session, a
+#       stale build that predates the setting, a human, a future tool), and its
+#       correctness can be read from this file and tested with two commands.
+#
+# how:  $1 is the path git hands every commit-msg hook: the message file, about
+#       to become the commit object. Editing it here IS editing the commit,
+#       before it exists — this fires DURING `git commit`, so there is no
+#       instant where a commit carrying the trailer exists in the object store.
+#
+# scope: strips ANY "Co-Authored-By:" line, matching the git-commit skill's
+#        rule verbatim ("NEVER include ... trailers", no carve-out for a real
+#        human co-author). Narrow the grep pattern below if that changes.
+#
+# portable on purpose: grep -v + mv, no `sed -i` (GNU and BSD sed take the
+# backup-suffix argument differently) and no jq/python3 dependency, so the
+# SAME file works unmodified on the Linux DSW boxes and on macOS. Wired up
+# via `core.hooksPath`, not by copying into every repo's .git/hooks/.
+
+grep -qi '^Co-Authored-By:' "$1" || exit 0
+
+grep -vi '^Co-Authored-By:' "$1" > "$1.tmp" && mv "$1.tmp" "$1"
+echo "commit-msg hook: stripped a Co-Authored-By trailer" >&2
+exit 0

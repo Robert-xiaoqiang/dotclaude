@@ -1,0 +1,8 @@
+{
+  "model": "sonnet",
+  "effortLevel": "high",
+  "tui": "default",
+  "skipDangerousModePermissionPrompt": true,
+  "theme": "auto",
+  "includeCoAuthoredBy": false
+}
