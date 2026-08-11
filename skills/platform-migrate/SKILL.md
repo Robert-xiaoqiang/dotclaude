@@ -1,0 +1,88 @@
+# Skill: platform-migrate
+
+## Purpose
+Move a persistent home from one shared mount to another, and decide **what is actually worth
+moving** before spending hours on it. `platform-env` covers *landing* on a new environment;
+this covers *leaving* one. The core claim is that a naive "copy the persistent dir" is almost
+always the wrong plan: it takes far longer than expected, and a meaningful fraction of what it
+copies is either reconstructible or **broken on arrival**.
+
+## When to Use
+- Migrating to a new cluster, a new storage backend, or a different mount on the same platform.
+- Deciding whether some large directory is worth backing up at all.
+- Estimating how long a bulk transfer will take, before committing to it.
+- Someone proposes "just copy `$PERSISTENT_HOME`" and you need to say what that really costs.
+
+## File count, not size, predicts transfer time
+The single most useful thing to internalise. On network storage, per-file round-trip cost
+dominates raw bandwidth by orders of magnitude. Measured on one PAI platform, CPFS to NFS:
+
+| regime | rate |
+|---|---|
+| large files | 412 MB/s |
+| small files | **126 files/s** |
+
+That is a ~3300x per-byte difference, and it inverts the intuitive ordering. A 54G venv tree of
+711k files took ~1.6h; a 239G model cache of 2k files took ~10min. **Always measure both**
+`du -sm` and `find -type f | wc -l`, and estimate as `max(files/rate_files, mb/rate_mb)`.
+
+Benchmark the destination rather than assuming these numbers. Two `dd`/`cp` runs, one large
+file and one directory of ~500 small ones, take under a minute and make every later estimate
+real instead of guessed.
+
+## The three tiers
+Classify every top-level entry before copying anything.
+
+**MUST** — irreplaceable, nothing regenerates it. Run outputs and checkpoints, agent/session
+history, ssh keys, secrets, and the env/bootstrap scripts themselves.
+
+**SHOULD** — cheap to copy, annoying to rebuild. Source checkouts (git has them, but copying
+preserves uncommitted work and remote wiring), datasets, XDG config/state, shell history.
+
+**SKIP** — reconstructible, or actively wrong to copy. Every entry needs a stated reason, not
+just an exclusion. Caches (model, JIT, corpora) refill on demand. Installed toolchains are
+reinstalled by the commands that created them. Scratch and trash dirs are disposable.
+
+## The trap: a venv is not portable
+The one that turns a slow copy into a *broken* copy. A python venv hardcodes its interpreter
+path in `pyvenv.cfg` (`home = ...`) and in the `bin/python` symlink. Copy it to a different
+prefix and every one of those still points at the **old** path, so the venv is dead on arrival
+while looking perfectly intact.
+
+Venv trees are also usually the worst file-count offender in the whole home, so this is the
+rare case where the expensive thing to copy is also the wrong thing to copy. Rebuild from each
+project's installer instead. The same reasoning applies to anything embedding absolute paths:
+compiled extensions, `.pth` files, tool configs written with a literal prefix.
+
+## The manifest is not the env file
+A tempting shortcut is to take the persistent-dir list straight from `env.sh`'s
+export-and-mkdir calls. That list exists so paths get *created and exported*, and it
+deliberately includes caches and toolchains because they must exist, not because they matter.
+Reading it as a backup manifest copies every cache in the environment. The tiers are a
+**separate, curated judgement**, and the exclusions are the valuable part.
+
+## Use rsync, and re-run it
+Not `cp`. `rsync -a --partial` is resumable, verifiable, and idempotent, which matters because
+a multi-hour copy of a **live** source is guaranteed to be internally inconsistent. Re-running
+after the bulk pass catches up whatever changed, and is the normal way to finish, not a
+failure. Copy the source entry *without* a trailing slash so files and directories behave the
+same way.
+
+## Pair the migration with a reinstall script
+A migration is only half a move. Everything in SKIP must be reconstructible **by a command you
+have written down**, or it was not really reconstructible, it was just forgotten. Emit those
+commands as part of the tool, so the far side is a script to run rather than a memory exercise.
+Order matters: bootstrap env, then the package manager, then interpreters, then per-project
+venvs, then control-plane tooling.
+
+## Reference implementation
+`$CPFS_HOME/snippets/migrate-cpfs-home.sh` in the dotfile repo implements this skill:
+`audit` (classify + measure + estimate, changes nothing), `migrate` (rsync the MUST+SHOULD
+tiers), `reinstall` (print the far-side rebuild commands). The tier lists are data at the top
+of the file, so adapting it to a different home is editing three arrays.
+
+## Companions
+`platform-env` (landing on a new environment, the inverse of this) · `platform-runtime` (the
+driver/image/venv stack a job needs) · `layout-output` (what in a run output tree is resume
+state vs deliverable vs junk, which is how to decide whether a run dir must move in full) ·
+`output-cleanup` (reclaiming space, the same classification applied to deletion).
