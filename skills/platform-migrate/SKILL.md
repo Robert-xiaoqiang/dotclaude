@@ -86,6 +86,15 @@ changing nothing. `migrate` rsyncs the MUST and SHOULD tiers. `reinstall` prints
 rebuild commands. The tier lists are three arrays at the top, so retargeting it to a different
 home is editing data, not logic.
 
+`scripts/with-root.sh` — run a command rooted at a given prefix, with the *other* root's
+variables scrubbed. Read the header before skipping it. Setting `CPFS_HOME` is **not**
+sufficient to retarget anything that sources `env.sh`, because `env.sh` deliberately writes
+`UV_HOME="${UV_HOME:-$CPFS_HOME/uv_home}"` — an override that exists so a half-migrated root
+stays usable, and that therefore *outranks* the prefix. A shell on a half-migrated box always
+has the old `UV_HOME` exported, so `CPFS_HOME=/new bash install.sh` builds into the **old**
+root's venv tree, reports success, and warns about nothing. This cost a real venv during the
+cpfs→data migration. Any build or install aimed at a specific root goes through this wrapper.
+
 `scripts/migrate-claude-state.sh` — the narrower, earlier case: relocating Claude Code's own
 state (sessions, plugins, login) off a volatile home onto the persistent mount, which is what
 makes `--resume` survive a node dying. Worth reading before the general tool, because it is a
