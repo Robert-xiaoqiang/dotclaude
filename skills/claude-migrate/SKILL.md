@@ -58,6 +58,59 @@ Script path: `~/.claude/skills/claude-migrate/migrate_session.py`
    ```
 On Windows, invoke with `python` (or `py`); the script is OS-agnostic.
 
+## The other case: the whole persistent root moved
+
+Use `--old-root/--new-root` when a persistent home moved and **every** project moved
+with it — a new cluster, a new mount, a storage migration. This is not the same job
+as the one above and the single-project mode cannot do it:
+
+- **Nothing needs renaming on disk.** An rsync already put both trees in place, so
+  the folder move that mode leads with is not just unnecessary — its
+  `if Path(new).exists(): die(...)` preflight fires on every project, above the
+  `--dry-run` branch, so there is not even a way to look without failing.
+- **One `--old/--new` pair cannot cover it.** A real store had 65 distinct embedded
+  cwd values behind 18 slugs.
+- **Both spellings can already hold sessions.** Work done from the new root before
+  the migration finished creates new-root slugs, so the old store must be **merged**
+  into the new one. `mv` of a directory onto an existing directory nests it a level
+  deep, where `--resume` will never look.
+
+```
+python "$CLAUDE_CONFIG_DIR/skills/claude-migrate/migrate_session.py" \
+    --old-root /mnt/cpfs/xqwang --new-root /mnt/data/xqwang \
+    --claude-dir /mnt/data/xqwang/.claude --prune-snapshots --dry-run
+```
+
+Drop `--dry-run` (add `--yes`) to run it. It is **re-runnable**: run it again after a
+later catch-up sync and it is a no-op if nothing new arrived. That matters because
+the final sync has to happen after the last old-root session exits, which is
+necessarily after you have already migrated once.
+
+### Things that cost time to learn
+- **The slug encoding is one-way.** `encode_slug` maps every non-alphanumeric char to
+  `-`, so `/` and `_` are indistinguishable afterwards and decoding a slug to re-encode
+  it invents paths that never existed. Both roots encode to a fixed prefix, so
+  substitute on the **slug string**, never round-trip through a path.
+- **Anchor on the full old root, never the mount point.** `/mnt/cpfs` also prefixes
+  other people's homes, and transcripts legitimately reference their shared
+  checkpoints. Substituting on the mount point corrupts those references.
+- **`.jsonl` is not enough.** Sidecar `.js` workflow scripts, `.json` task state and
+  `.md` notes carry absolute paths too — 12,071 references across 156 non-jsonl files
+  in one real store.
+- **Files outside `projects/` matter.** `history.jsonl`, `.claude.json`,
+  `plugins/known_marketplaces.json`, `jobs/*/state.json`, `settings.local.json`.
+- **`.claude.json` needs JSON-aware handling.** Its project entries are *keys*, so a
+  textual replace when both spellings are present yields duplicate keys and every
+  parser silently keeps only the last — discarding a trust flag and tool allow-list.
+- **Shell snapshots are poison, not data.** Every one pins a whole stale `PATH` and
+  they are live-sourced by each Bash call. `--prune-snapshots` deletes them; they
+  regenerate.
+- **Never `rsync --delete` the catch-up pass.** Claude Code garbage-collects its own
+  state, so the old root can be *missing* files the new one should keep.
+- **Exclude the tracked repo from the catch-up sync.** If `.claude` is a git checkout
+  (skills, hooks), syncing the old root over it reverts commits and edits. Sync state
+  only.
+
 ## Manual fallback (no Python)
 Compute `SLUG = path with every non-[A-Za-z0-9] char → '-'`. Then:
 
