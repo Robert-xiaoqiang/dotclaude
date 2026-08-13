@@ -18,11 +18,15 @@ starting or organizing a project, or when unsure which convention applies.
 | **layout** | where does this doc / script / run output live? | `layout-workspace` (`docs/`, `scripts/`, reports/plans, what's committed) · `layout-output` (the run-output tree under `$OUTPUT_DIR_HOME`) |
 | **docs** | how do I write/maintain the living docs? | `docs-plan` (`docs/plans/<date>-<topic>.md`) · `docs-arch` (`docs/ARCH.md`) · `docs-weekly` (the staged Chinese+English weekly report) |
 | **platform** | how do I set up, submit to, and match the runtime of a compute platform? | `platform-env` (env.sh / cluster setup) · `platform-run` (neutral `task.yaml` → DLC/Slurm/EAI) · `platform-runtime` (driver × image × venv × storage stack) · `platform-migrate` (moving a persistent home to another mount) |
+| **code style** | may this input have a default? | `code-no-fallbacks` (required inputs fail loudly; defaults are only for values the code legitimately owns) |
 | **outputs** | how do I compare runs or reclaim their space? | `output-analysis` (latitude vs longitude) · `output-cleanup` (resume-safe reclaim) |
 | **figures** | what may a figure contain, and how do I render it? | `docs-figure` (TikZ / Mermaid / HTML / matplotlib, embed-not-standalone) |
 | **campaign** | how do I run all of the above unattended for days, and resume after a context reset? | `claude-auto-research` (the plan-plus-ledger in `docs/plans/<date>-<topic>/`, and the autonomy boundary) |
 
 ## The philosophy (one line each)
+- **code style** — a required input has three sources (the environment, an argument, the job
+  config); if none supplied it the chain is broken, so fail there rather than guess and
+  relocate the run (`code-no-fallbacks`).
 - **naming** — a config's *name* uniquely identifies what runs; two ablation arms differ in
   exactly the slots that describe the change (`naming-config`).
 - **layout** — plans, reports, and re-runnable scripts persist out of the source tree
