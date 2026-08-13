@@ -117,6 +117,14 @@ project override, cluster entry, named `runtime`, then the task's own `platform.
 `envs` merge in that order too, so a cluster can carry fabric tunables (`NCCL_IB_*`) that a
 single task may still override.
 
+## Resources: a total, not a layout
+
+A neutral spec's `num_nodes x accelerators` is a **total world size**, and the platform layer
+re-splits it against the target pool's node shape — 16 accelerators is one node on a 16-card pool
+and two on an 8-card pool, the same experiment either way. Never encode a pool's node count in a
+launcher: batch algebra depends on `num_processes`, so a layout baked for one pool silently becomes
+a different recipe on the next. See `platform-runtime` for the invariant and its RNG caveat.
+
 ## Rules
 1. The neutral `task.yaml` contains **zero** platform IDs. If you're tempted to put a
    workspace/quota/data-source id in it, it belongs in the profile.

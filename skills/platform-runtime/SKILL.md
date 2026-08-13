@@ -79,6 +79,58 @@ different stack from the jobs it launches. So:
   you debug blind (a real trap: vLLM replica logs on `/tmp` hid a one-line argparse error for
   20 minutes).
 
+## Many boxes, one filesystem (the hazard the four layers hide)
+
+Shared storage is layer 4, and the reason the stack works — but it is also the one layer several
+machines write to **at the same time**. Two boxes on different images, different accelerators and
+different kernels reach an identical tree, so the failure modes are not import errors, they are
+*state* errors, and they are silent.
+
+**What is safe to share, and what is not:**
+
+| tree | shared across boxes? | why |
+|---|---|---|
+| source, configs, datasets, model caches | **yes** — read freely | content-addressed or git-managed; conflicts are semantic, and git is the protocol for resolving them |
+| outputs / run dirs | **yes** | config-hash keyed, so two runs cannot collide unless they are the same run (which is the duplicate-job bug, not a storage bug) |
+| **venvs** | **per-accelerator, never shared across silicon** | a venv is compiled against ONE accelerator's driver ABI. Name them per platform (`<proj>_trl`, `<proj>_trl_ppu`) and let the *cluster* select, never the job |
+| **volatile per-host state** (shell history, editor/agent session files, tmux resurrect snapshots, tool caches) | **no** — last-writer-wins, or worse | two boxes appending to one history file interleave; two processes writing one session file over NFS produce *torn* records, not a clean overwrite |
+
+**Four rules that cost real incidents:**
+
+1. **One live agent per mandate.** Two agents resuming the same session act on the same cluster with
+   the same memory and no knowledge of each other — the fastest route to duplicate jobs, because
+   each believes its own supervisor is the only one. Split by *mandate* (this pool, that pool), not
+   by machine.
+2. **Background processes are box-local; the transcript that describes them is not.** A session file
+   restored on another box confidently describes supervisors, watchers and monitors that do not
+   exist there. Re-derive liveness from the scheduler, never from a remembered pid.
+3. **File locks may not lock.** On an NFS mount carrying `nolock` / `local_lock=all`, `flock` is
+   node-local — it excludes processes on one box and nobody else. Cross-node mutual exclusion needs
+   an atomic filesystem primitive (`mkdir`, `O_EXCL` create), and even then, prefer *one designated
+   writer* over any mutex.
+4. **Same tree, different `$HOME` reality.** Every box restores `$HOME` from its own image, so the
+   shared tree is the only continuity; a boot hook re-installs the environment from it. That makes
+   the tree's *config* safely shared and its *state* dangerous — which is the split above.
+
+**The clean fix, when the noise gets expensive:** give volatile state a per-host segment
+(`HISTFILE`, `XDG_STATE_HOME`, tmux socket/snapshot dirs keyed by `$(hostname)`) while config and
+data stay shared. Sequential handoff — finish on one box, resume on the other — needs no fix at all
+and is the intended way to move.
+
+## Node shape is a pool property, not a job property
+
+Accelerators-per-node differs between pools (8 on one, 16 on another). A neutral job spec cannot
+know it, and it must not: what a distributed recipe depends on is the **total** world size, because
+batch algebra contains `num_processes`. So a spec declares a total and the platform layer re-splits
+it against the pool's node shape (`cards_per_node`), scaling per-node CPU/RAM by the same ratio.
+Two consequences worth stating:
+
+- **Changing the total changes the recipe.** Doubling processes doubles per-step batch unless an
+  accumulation term halves. Move both together, and let the config gate assert the invariant.
+- **Resuming across a world-size change loses per-rank RNG.** Checkpoints carry one RNG file per
+  rank; a resume at a different rank count leaves the extra ranks unseeded and the framework warns
+  and continues. Restart rather than resume across such a change when the run is a comparison arm.
+
 ## Symptom to layer (fast triage)
 | symptom | culprit layer | fix |
 |---|---|---|
@@ -108,6 +160,12 @@ only the control surface differs.
   not re-export what env.sh already sets.
 - Route job logs to shared storage. Confirm a served endpoint from a peer job, never the
   submitting shell.
+- **One venv per accelerator, selected by the CLUSTER.** A job must never pin its own venv: a task
+  pin overrides the cluster's choice and lands one silicon's binaries on another's hardware.
+- **One live agent per mandate; never two writers on one volatile state file.** Sequential handoff
+  between boxes is safe and intended; concurrent sessions on one tree are not.
+- **Declare a TOTAL world size, let the platform split it** by the pool's `cards_per_node`, and move
+  the accumulation term with it so the recipe stays invariant.
 
 ## Companions
 `platform-run` (neutral spec → native submit) · `platform-env` (the machine env the profile assumes) ·
