@@ -62,6 +62,48 @@ complete: an empty section reads as "we did nothing here", which is worse than n
 
 ---
 
+## The report is a self-contained story
+
+**A reader who has seen nothing else must be able to read it start to finish and end up where you are.**
+No prior week assumed, no pointer to another document, no term used before it is defined. If a claim
+needs something from last week, restate that thing here in one sentence.
+
+Two arcs work. Pick one before writing and hold it for the whole report:
+
+| arc | when | shape |
+|---|---|---|
+| **challenge → solution** | the week produced a method | what is broken and how you know → what you built → does it move the thing that was broken |
+| **premise → setting → results** | the week produced measurements | what you are assuming and why it is reasonable → exactly what was run → what came out, and what it forces |
+
+**The arcs are not section lists, they are dependency orders.** Every section answers a question the
+previous section made the reader ask. If a section could be moved earlier without confusing anyone, the
+arc is not actually carrying the report and the reader is navigating a folder rather than following an
+argument.
+
+The commonest break: results arrive before the setting that makes them interpretable, and the setting
+is then reconstructed afterwards out of parenthetical asides. If a number needs a condition to be read,
+the condition is a section that precedes it, not a caveat that trails it.
+
+---
+
+## Format dealbreakers
+
+These are not preferences. A draft that violates one gets fixed before anything else is looked at.
+
+1. **No section numbers. Ever.** Not `## 1.`, not `### 3.8`, not `一、`, not `(1)`. Headings are bare
+   names. A numbered list *inside* a section is fine and starts at 1.
+2. **When sections are generated as separate files that assemble into one report, the top heading in
+   every file is H2.** The H1 belongs to the assembled document alone, written once by the assembler.
+   A per-section file starting at H1 produces a report with ten titles.
+3. **Figures are embedded at the point of use, with the figure named and its path visible.** Never a
+   placeholder that survives into the delivered document, never a figure referenced but not shown.
+4. **No cross-references between sections in the report.** If two sections need to point at each other,
+   they are one section (§What to cut). The `§` pointers in *this skill* are reference-doc navigation and
+   are not a licence to use them in a weekly.
+5. **One language in the body.** §Language hygiene.
+
+---
+
 ## Staged assembly: input → section
 
 The report is conditional. Check which inputs exist, emit only those sections, in this order.
@@ -73,16 +115,56 @@ The report is conditional. Check which inputs exist, emit only those sections, i
 | 3 | new measurements, an analysis subdir, cached verdicts | **新证据** · Evidence | numbers with their measurement basis, and what changed the design |
 | 4 | paper links, PDFs, a literature sweep | **相关工作 / 定位** · Positioning | a mapping table (dimension × existing work), and **which cell is empty** |
 | 5 | a codebase change | **实现与观测** · Implementation | what is implemented and verified vs what is not, as two explicit lists |
-| 6 | run outputs | **结果** · Results | tables and figure placeholders (§figures) |
-| 7 | *always* | **研究问题** · Research questions | one row per premise, and the experiment that would falsify it |
+| 6 | run outputs | **结果** · Results | tables, and every figure embedded at its point of use with name and path (§Figures) |
+| 7 | *always* | **研究问题** · Research questions | one row per premise **this report asserted**, and the measurement that would falsify it. Never a backlog of designs (§Forward-looking material) |
 | 8 | *always* | **Benchmark** | scale, composition, known defects, what each eval can settle |
-| 9 | *always* | **本周结论与未决项** · Findings + open | what holds, what is missing, what is next |
+| 9 | *always* | **本周结论与未决项** · Findings + open | what is still unknown and what happens next. The 结论 half moves **up**, under the tables that produced it (§What to cut) |
 
-**Sections 2 and 4 are where the argument lives.** A report that has 3, 5 and 6 but not 2 and 4 is a
-status update, and the reader cannot tell whether the week moved the thesis.
+The `#` column indexes this table only. **It is not a numbering scheme for the report** — the report's
+headings are bare names (§Format dealbreakers).
 
-Sections 7 and 8 are separate on purpose: a premise table without a benchmark description states what
-would be tested but not whether the test could settle it.
+**Formulation and Positioning are where the argument lives.** A report with Evidence, Implementation and
+Results but neither of those two is a status update, and the reader cannot tell whether the week moved
+the thesis.
+
+Research questions and Benchmark are separate on purpose: a premise table without a benchmark description
+states what would be tested but not whether the test could settle it.
+
+---
+
+## Where the length goes
+
+**The character budget is not spread evenly, and a draft reliably inverts it.** Two zones with opposite
+defaults. Getting this backwards is the single most common failure, and it reads as a writer who has
+padded the easy parts and rushed the hard ones.
+
+| zone | default | what it looks like when right |
+|---|---|---|
+| **Derivation, formulation, mechanism, setup** | **detailed** | every step shown, every symbol bounded, every constant sourced. A reader can re-derive the quantity and re-run the experiment without asking you a question |
+| **Prose around tables, results, verdicts, case narration** | **concise** | one line of judgment per table, one bullet per arm, the number in the cell and nothing restating it |
+
+### Be detailed here
+
+**A formulation states its derivation, not just its result.** From the definition to the quantity you
+actually measure, show the intermediate steps. If a quantity is a difference of two logged things, say
+which two and why the difference is the right object. If a bound is claimed, prove it or name the
+assumption it rests on. **A single line of math with no derivation under it is not a formulation, it is
+a citation of a formulation you did not write down.**
+
+Also detailed: **why a mechanism should work** before its numbers arrive, and **the setup**, to the
+level where someone else can reproduce the run. These are the parts a reader cannot reconstruct from
+your tables, so they are the parts that must be on the page.
+
+### Be concise here
+
+Everything downstream of a number. The table already carries the value, its condition and its
+comparison, so the prose beside it adds a **judgment** and stops. See §Tables. Measured shape to aim
+for: **median narrative paragraph of one sentence, under 5% of paragraphs running to three or more.**
+A drafted report ran 27% at three or more, all of it narrating tables.
+
+**The test, applied to any paragraph: could the reader have derived this from the display object next
+to it?** If yes, cut. If the answer is no because the paragraph carries a derivation, an assumption, or
+a mechanism, it belongs in the detailed zone and is probably still too short.
 
 ---
 
@@ -98,6 +180,46 @@ Do not translate a term the reader will meet again in a paper.
 Chinese words substituted, rewrite it. Common tells: 「基于…的…」stacking, 「进行了…」for a verb that
 already exists, 「其」as a possessive, subject and verb half a line apart.
 
+**Reflexive emphasis: hold the line, this one is fixed.** First measured against a human-authored doc on
+the same content at 「唯一」9x, 「本身（就）」9x, 「正是」5x, 「真正」6x. **On the next week's pair the gap
+had closed** — 唯一 3.4 vs 3.5 per 10K, 正是 and 真正 zero in both — so treat this as maintenance rather
+than a live defect. The failure was density, not any one instance: 「唯一算失败的一类」is a real, checkable
+uniqueness claim, but when every third sentence self-certifies as *the* one true X the reader discounts
+all of them, including the load-bearing ones. After drafting a section, count these four words. More than
+one live occurrence, cut to whichever carries the most information. 「真正」is the zh mirror of
+genuinely/truly/really. Cut it, or say what specifically makes the claim true.
+
+**Negation is the one word-level habit that has not improved, and it now carries a hard budget: one
+「不是 X，是 Y」 per document.** Measured across two drafted-vs-human pairs, 不是 runs **22 occurrences
+against 1** on the same content. X must be a number or a claim this document printed earlier, so the
+surviving instance corrects a reading of a value already on the page — 「Blind 失败率不是 28.2%，是
+0.41%」corrects the number the previous table just gave, and the negation is doing real work. Every other
+negation states Y and stops. Do not invent a strawman X for contrast: 「这不是失败，是训练成功之后的必然
+代价」→ 「这是训练成功之后的必然代价」, where the second half already makes the "not a failure" case
+without asserting it first.
+
+**「——」is correct paired Chinese punctuation and stays legal, but the budget is roughly one per 1,000
+characters of body prose, not two per paragraph.** Measured against a human-authored doc on the same
+content: **0.25 per 1,000 in the human version, 1.78 in the drafted one.** The per-clause test is sharper
+than the count: **a dash clause must add a number, a name, or a mechanism that appears nowhere else in
+the sentence.** 61% of the drafted version's dash clauses contained no number at all — they generalised
+the sentence they hung off, or pointed somewhere else. Delete the clause, not just the dash.
+
+| | |
+|---|---|
+| ✗ `——不干预，这条轴自己会烂掉` | a generalisation of the sentence before it |
+| ✗ `——见 §3.8` | a pointer (§What to cut) |
+| ✗ `——这就是它只涨 .011 的原因` | that number is already in the sentence |
+| ✓ `——正好一半` | a ratio the reader would otherwise have to compute |
+
+Most dashes that survive an edit sit **inside table cells**, separating a value from its condition. In
+body prose, one per section is already a lot.
+
+**Connectives are the same failure in another costume.** Measured per 1,000 prose characters: human 2.1,
+drafted 5.2. 因为 2 vs 11, 所以 1 vs 9, 但 4 vs 20. Chinese joins related clauses by juxtaposition and
+lets the relation show; spelling out 因为…所以… on a relation the reader can already see reads as
+translated English. Cut the connective first and only restore it if the sentence genuinely inverts.
+
 ### `en` mode
 Plain declarative English under `writing-style`: no em-dashes, no semicolons, no lists unless asked.
 The failure here is the mirror image, English that reads as translated Chinese, usually from keeping
@@ -108,13 +230,12 @@ Never write a heading or sentence that only exists to introduce the next one.
 
 ### Headings
 ```
-zh   ## 1. 挑战（Challenge）：上周 diagnosis 的回顾
-     ### 1.2 主要结果
-en   ## 1. Challenge: what last week's diagnosis established
-     ### 1.2 Main result
+zh   ## 挑战（Challenge）：上周 diagnosis 的回顾
+     ### 主要结果
+en   ## Challenge: what last week's diagnosis established
+     ### Main result
 ```
-Numbered from **1**, never 0. In `zh`, put the English term of art in parentheses after the Chinese
-name, top level only.
+In `zh`, put the English term of art in parentheses after the Chinese name, top level only.
 
 **A heading states the CLAIM or names the CONTENT. It never glosses its own title.**
 
@@ -130,9 +251,39 @@ name, top level only.
 The test: **delete everything before the colon. Does the remainder still carry information?** If it only
 restates the part you deleted, the heading is empty.
 
+**The H1 is the exception.** It names a **durable subject** — the standing problem, or the system under
+study — as a short noun phrase, with no number, no comparative verdict, and no draft marker. Both forms
+are attested; what is invariant is that nothing in the title goes stale when a later run flips a result.
+
+| | |
+|---|---|
+| ✗ `【目标版】四类失败模式的五个 epoch：机制 A 的振荡与机制 B 的稳定` | this week's result plus a draft tag; nothing in it survives to the next report |
+| ✗ `方法 B 优于方法 A` | a verdict, stale the moment a later run flips it |
+| ✓ `Training-time PO-MDP Controller for RSI Training` | names the system under study |
+| ✓ `开放端训练挑战：任务探索空间的多样性，反馈的可靠性` | names two standing problems |
+
+The check: **could this exact title head next week's report?** If not, it is a finding wearing a title's
+clothes, and the finding already has a home under the table that produced it. Take the title's nouns
+from the problem names bound in the Formulation recipe's move 4, so the title and the taxonomy speak one
+vocabulary. A title that headed one week's report is free to become a section heading in the next.
+
+**Headings carry no numbers.** A heading number exists so that something can point at it, and with
+cross-references cut to at most one (§What to cut) the ordinals have no referent left while still costing
+a renumber on every insertion. Delete the ordinal, keep the name. Any numbered list *inside* a section
+still starts at 1, never 0.
+
+**Count H2s before writing them: two or three, not seven.** Depth carries the grouping. A mechanism's
+setup and the numbers it produced are one section, not two, so a reader compares a row against the
+mechanism that produced it without scrolling. **The sections that pointed at each other in the draft are
+the ones to merge**, and merging them is what makes the cross-reference ban affordable. Per-component
+detail nests under the setup it belongs to, however deep that goes.
+
 ### Body
 - Bullets use `+` at top level, `-` then `*` nested. Not `*` at top level.
-- **Bold** the claim in a bullet, then the evidence. `_斜体_` for a gloss on a term.
+- **Bold an operand, not a proposition.** A number, a name, an action, or a one-clause verdict — something
+  a reader could lift into a table cell. Measured: 12% of the human doc's bold spans outside tables
+  contain a 。, against 40% of the drafted one's. A bolded full sentence followed by its unbolded
+  unpacking is the tell; bold the operand inside it and leave the rest plain.
 - Tables: numeric columns right-aligned `| ---: |`, `<br/>` for a two-line cell, tree glyphs
   (`├`, `└`) for a decomposition that sums to a parent row.
 - Every number carries its basis: `62.1%`（按回答对统计，330 对，良构过滤后）. A number without a
@@ -147,37 +298,193 @@ restates the part you deleted, the heading is empty.
 "note that this matters". If a claim is load-bearing, the reader learns that from the argument standing
 on it, never from being told. Delete every one of them, do not soften them.
 
+**Sentences that justify the document's own layout.** 「这就是要把 X 放在第一张表的原因」, 「所以主结果
+表把 X 放在第一张」, 「第 1 项排最前，因为…」. The order is either right, in which case the reader
+follows it without being told, or wrong, in which case reorder. The meta-commentary ban above does not
+catch these: they rate the *arrangement* rather than the content.
+
+**Internal cross-references.** Keep at most one, and only to name where a shared definition lives.
+Measured gap: **1.7 per 10K characters in the human doc against 14.7 in the drafted one.** A pointer is
+three promises — the target still exists, still says the same thing, still carries that number — and an
+edit pass breaks all three silently. The fix is almost never to paste the target in; it is to **merge the
+two sections** (§Headings) so they are adjacent, or to write the **mechanism** where the pointer was:
+「分数买到了，能力没全买到，强干预带来的强 overfitting，早期变化过大」 carries the finding with no
+arithmetic left to drift.
+
+**A synthesis or insight section whose subsections are reworded copies of findings already made under
+their evidence.** Check it mechanically: if every subsection of a late section opens by pointing at an
+earlier one, it is a second copy of the report. **Delete the section, do not reword it** — the instinct
+to reword the duplicate is what produced it. The copy that survives is the one next to its table. In the
+contrast that produced this rule, 13 of the drafted version's 15 table-free sections were deleted whole.
+
 Also cut: passive constructions where the actor matters, 「可以看出」/「值得注意的是」openers, and any
 sentence that restates its heading. If a paragraph survives being deleted, delete it.
+
+### After a deletion, re-read the sentence you cut into
+
+Most rules here remove text, and a deletion pass leaves wreckage that no rule about *writing* catches.
+Three checks, run over the diff rather than the draft. All three are taken from real damage in a
+human-edited doc, so they are what a careful editor actually leaves behind:
+
+1. **A two-part claim loses both halves or neither.** 「两处改动各自站得住，合起来是破坏性的」 trimmed to
+   「**两处改动各自站得住**」 is not a shortened claim, it is the opposite claim, still bolded.
+2. **No colon or causal connective may be left pointing at evidence that is gone.** A bolded sentence
+   ending in a bare `：` with nothing under it is the signature.
+3. **Pulling a pointer leaves a grammatical hole.** 「问的四件事就是〈第 1 节〉的三种失败模式」 minus the
+   pointer is 「问的四件事就是的三种失败模式」. After removing pointers, grep the file for `§` and 〈第 —
+   one survivor is one dangling reference.
 
 ### Words this project does not use
 | ✗ | ✓ |
 |---|---|
 | 诚实清单 | 本周结论与未决项 / 已有与未有 |
 | 我们在哪里 / 这条线在追什么 | say the actual position or the actual question |
+| 真正 (genuinely / truly / really) | cut it, or name what specifically makes the claim true |
+| 唯一 / 正是 / 本身（就） used as a default emphasis reflex | keep only when the sentence is actually a uniqueness or identity claim, not as connective tissue |
+| a manufactured 「不是 X」 nobody actually believes | state Y directly; keep the negation only when X was asserted earlier in the doc |
+
+The 「不是 X」row is the one that bites hardest in practice and the one drafts keep violating: **9.2 per
+10K characters in a drafted report against 0.9 in the human-authored one on the same content.** Reflexive
+emphasis (唯一/正是/本身/真正) is no longer the gap — those now measure the same in both. 不是 is.
+
+---
+
+## Tables, and the prose around them
+
+> **One quantity, one table. A number has one home. The prose beside a table adds a judgment, never a
+> reading lesson.**
+
+Tables survive editing at more than twice the rate of prose: **55% of table rows retained against 21% of
+prose blocks.** A table is the only object in a report that holds a number, its condition, and its
+comparison in one place, so a claim that can live in a cell should.
+
+### One home per number
+
+**A number appears once per section.** Two statements of the same figure on one screen, slicing it
+differently — a ranking table and the verdict bullet under it — are fine and are how a verdict reads.
+**The same figure in two sections is a drift bug**, whatever justifies it.
+
+In the contrast that produced this rule, one measurement appeared in three sections as `19 分里有 17 分`,
+`21 分里有 9 分`, and `21 分有 9 分`. The first was correct, the other two were invented at the restating
+site, and the cross-references between them were what kept the contradiction invisible for three drafts.
+**Restating a number across a section boundary does not duplicate it, it forks it.**
+
+### One table per quantity
+
+A second table that re-slices numbers the first one already gave is a copy, and copies drift. Delete any
+table derivable by arithmetic from a table you are already printing:
+
+| ✗ the re-slice | where it belongs instead |
+|---|---|
+| a snapshot table of the final time point | it is the last column of the over-time table |
+| a share-of-subtotal table | a `%` parenthetical in the cell, or in that row's verdict bullet |
+| a delta table between two points | a Δ **column** on the table that already has both points |
+| the same numbers rolled up side by side "for comparison" | the ranking table, if you have one |
+
+**Keep the delta column, kill the standalone delta table.** A derived table earns its place only when it
+adds a column that is a **judgment rather than arithmetic** — a per-row verdict, a best/worst call, a
+rank. That column is why the table exists, and it cannot be recomputed from the others.
+
+**One printing per defining equation.** An equation restated at the top of the results section is a
+re-sliced table in another costume.
+
+**A column holding one value in every row is not a column.** Delete it and state the constant in one
+sentence under the table. If that constant *is* a finding, the sentence is the finding and the column was
+hiding it in the margin. Where the same field varies in a neighbouring table, that table keeps its column,
+and the contrast between the two is the point.
+
+### Write the sentence before you draw the table
+
+A table earns its rows by making the reader scan two axes. **If the whole table reads out as one sentence
+carrying two numbers and a ratio, that sentence is the deliverable and the table was scaffolding.** Keep
+the table only when collapsing it loses a comparison the reader has to make. This catches the small table
+the arithmetic test above misses: a five-row, two-column table of derived fractions is not a re-slice of
+anything, and it still collapses to 「八次里四次，正好一半」.
+
+Order the result tables the way the definitions section introduced their quantities — left to right
+across the summing equation, the summary quantity last — and then delete the sentence explaining why you
+ordered them that way (§What to cut).
+
+### Where the verdict goes
+
+**One verdict block, immediately after the last table of the results section, with nothing between it and
+the tables**: a per-category ranking table, then one bullet per arm. Not eight interpretation subsections
+interleaved among the tables.
+
+**A worked example is a subsection of the result it illustrates, placed after the verdict, never a
+top-level peer.** A peer-level example forces a pointer in both directions and states the finding twice,
+once as a claim and once as a case. Placed after the verdict it reads as verification of a claim already
+made, which is the job it can actually do.
+
+### Never teach the reader how to read a table
+
+The direction of good goes in the label. Everything else goes in the cell it repairs.
+
+| | |
+|---|---|
+| ✗ a subsection `读这张表的三个陷阱` | three corrections, each belonging in the cell it corrects |
+| ✗ a document-wide preamble `两条读表规则，全文通用：` | a rule with no number attached is a rule nobody applies |
+| ✗ a paragraph `**X 要按占 M 的比例读，否则会读反**` | put the share in the cell: `.150（占 M 的 51.9%）` |
+| ✗ column header `（越低越好，但要连 M 一起读）` | `（越低越好）` |
+| ✓ cell `+.001（**振荡**）`, `−.045（后段走平）` | the anomaly is attached to the number it repairs |
+
+**This is a placement rule, not a deletion licence.** A denominator, a filter, an n, or a caveat that
+changes what a number *means* is load-bearing — §Body requires it — and it still appears, as a
+parenthetical inside the affected cell, inside the definition row, or inside that row's verdict bullet.
+The *block* gets deleted, never the caveat. A caveat with no cell small enough to hold it usually means
+the table is measuring two things.
 
 ---
 
 ## Figures
 
-Figures are **generated separately** and referenced by placeholder. Never inline plotting code in the
-report, and never block the report on a figure existing.
+Figures are **generated separately**. Never inline plotting code in the report, and never block drafting
+on a figure existing.
 
-Emit a placeholder plus a spec the generator can act on:
+**A placeholder is a drafting device with a deadline: it must not survive into the delivered document.**
+While drafting, emit a placeholder plus a spec the generator can act on:
 
 ```markdown
-<!-- FIG fig-drift: 见 figures/drift.png -->
-> **图 N**：`fig-drift`
+<!-- FIG fig-drift: figures/drift.png -->
 > x 轴 step｜y 轴 d∠（子空间漂移）｜曲线 = 4 条 arm，legend 用 arm 名｜灰带 = shuffle null
 ```
+
+**In the delivered document every figure is embedded at the point of use, named, with its path visible**
+— the reader sees the image, knows which figure it is, and can find the file that produced it:
+
+```markdown
+![fig-drift](figures/drift.png)
+
+**图：`fig-drift`（`figures/drift.png`）** x 轴 step｜y 轴 d∠｜4 条 arm｜灰带 = shuffle null
+```
+
+Name and path are not decoration. They are how a reader regenerates the figure, how a reviewer checks it
+against the analysis code, and how you find it again in six weeks. A figure referenced but not shown, or
+shown but unnamed, fails §Format dealbreakers.
 
 **Figure content and style are owned by `docs-figure`.** Read it before generating. The rules that bite
 most often in a weekly report:
 - **Nothing on the image that the report already says.** No headline claim, no explanatory sentence, no
   bullets copied out of the text. The report is the caption.
 - **Parallel arms merge into one figure** with a legend keyed by arm name, never one figure per arm.
+- **Quantities split.** Merge across arms, split across metrics. A multi-panel strip of four quantities
+  is one figure the reader must navigate instead of four they can each read beside their own table.
+- **Every result table showing a quantity over time gets a figure immediately above it.** The table
+  under it carries the values, so the figure's own line carries only its name, path, axes, and marker
+  convention.
 - Longitude (over steps) and latitude (across arms at one step) are different figures.
 - One generator per figure, isolated in a `figures/` directory beside the report.
+
+**A figure is the substitute for deleted interpretation prose, not a casualty of the same pass.** In the
+contrast that produced these rules, prose halved while the figure count went from four to seven. When you
+delete a paragraph describing the shape of a curve, the shape still has to arrive somewhere: put the
+figure above the table and let the reader see it.
+
+**Provenance is a cell property, not a preamble.** A table containing any projected, estimated, or
+borrowed value marks it **in the cell or in the column label**. Never define a marker convention in a
+document-level note, because that note is the first thing an edit pass deletes and it takes the definition
+of every marker with it — leaving solid-vs-hollow points on the images and provenance tags in the prose
+with nothing defining either, and aggregate tables of projections reading as measured.
 
 Generate with `output-analysis` when the runs are in the `layout-output` tree, otherwise a small script
 or `.tex` beside the report.
@@ -203,18 +510,47 @@ a contribution. Renaming a standard object is not.
 
 ## The Formulation section, when the week has one
 
-This section fails most often, so it has its own recipe. Four moves, in order:
+This section fails most often, so it has its own recipe. **It is also the section that gets shortchanged
+while the results prose runs long** (§Where the length goes), so give it the room. Five moves, in order:
 
 1. **The objects.** State the space, its indices, and their bounds, paired (`t ≤ T`, `i ≤ I`). A
-   reader must be able to write down the shape.
-2. **The equation.** One boxed statement of what is being optimised or measured.
+   reader must be able to write down the shape. **Every dimension gets a symbol and a bound, never this
+   week's configured value** — a constant baked into an object's type silently re-scopes the formulation
+   to one run. The value belongs in the setup section, where changing it invalidates nothing.
+2. **The equation, and the derivation to it.** One boxed statement of what is being optimised or
+   measured, and **the steps from the definitions in move 1 to that statement**. If the measured quantity
+   is a difference or ratio of two logged things, say which two and why that combination is the right
+   object. If a bound or a partition is claimed, prove it in two lines or name the assumption it rests
+   on. **A line of math with nothing under it is not a formulation, it is a citation of one you did not
+   write down**, and the reader cannot tell whether it holds.
 3. **为什么这个形式化能解释已量到的现象** / *why it explains what was measured.* Map each measured failure mode onto a term. This is the
    part that makes it a formulation rather than notation: if a measured phenomenon has no term, the
    formulation is incomplete and the report should say so.
-4. **它带来什么新的可做的事** / *what it makes possible.* What action or estimator becomes available that was not before.
+4. **每类绑定一个问题名和一种干预** / *bind each category to a named problem and to what moves it.* Move 3
+   runs phenomenon → term. This one runs term → **the standing problem it is a proxy for**, plus the kind
+   of change that moves it. Label the equation's underbraces with problem names, not with structural
+   descriptions of the partition (`_{探索不够}`, not `_{没有组内信号}`). Do it once, here, and every later
+   table reads as movement on a problem instead of movement in a metric.
+5. **它带来什么新的可做的事** / *what it makes possible.* What action or estimator becomes available that was not before.
+
+**Where two categories look alike on the headline metric, say in one sentence that their fixes point in
+opposite directions.** This is the sentence that pays for the section, and it is the one a drafted
+version reliably omits. Without it, a later result showing one category converting into another needs
+vocabulary invented on the spot, and the reader meets the report's best finding as a surprise instead of
+as the thing the taxonomy predicted.
+
+**The prose under a definition table says which rows matter and what repairs each of the rest. It never
+re-narrates the table's own 含义 column.** One sentence, then move on.
+
+| | |
+|---|---|
+| ✗ `X 表示…，Y 表示…，Z 表示…` | the 含义 column already said this |
+| ✓ `只有 Y 那部分有用。X 和 Z 都不产生信号，但含义相反：X 要靠抬高一侧来修，Z 要靠换一个更难的目标来修。` | ranks the rows, and gives each dead one its own repair |
 
 A formulation section that does 1 and 2 but not 3 is notation, and a reader is right to ask what it
-bought.
+bought. One that states the equation without deriving it is a claim the reader has to take on trust. One
+that does 3 but not 4 makes the reader carry a second vocabulary for the rest of the report, and leaves
+the title with nothing to be about.
 
 ---
 
@@ -238,6 +574,29 @@ Four rules make it an argument rather than a table:
 4. **The new rung must beat the rung below it, not the absence of one.** Name the simple mechanism each
    new component is measured against. Beating nothing is not a result, and a ladder whose middle rung is
    a strawman the authors wrote themselves is worse than no ladder.
+5. **State how your build deviates from the published one directly under the table**, before any prose
+   about the mechanism's internals. Not in an appendix, not two paragraphs into that rung's own
+   subsection. Citing a paper borrows its credibility, and a description written from memory of the paper
+   rather than from the config will overclaim a capability the implementation does not have, after which
+   the downstream arguments lean on it. The note is a **correction**, not a caveat: 「注：本实现与原方法
+   的区别：没有 X 这一步；只有单实例的跨轮分析，没有跨样本影响。」
+
+**`what it buys` and a prediction column look identical and are not.** `What it buys` argues a *design's*
+contribution and stays. **A column or paragraph predicting which of this report's own metrics a rung
+should move is a conclusion filed early, and it goes** — the column, the per-row prediction text, and the
+paragraph arguing why a rung ought to improve a named quantity. The results table is a few pages later.
+Let it answer. This holds even when the prediction turns out right, because a reader who was told the
+answer first cannot read the result as evidence.
+
+| ✗ | ✓ |
+|---|---|
+| a trailing column `该修哪一端`, filled with metric names from the results section | the four columns above, and nothing else |
+| `同上，但每次改之前先检索历史` | the exact scope of data the rung sees: `历史分析（1, 2, …, t−1）` vs `单轮分析（t−1）` |
+| a paragraph `这一级为什么该降 X` | delete it |
+
+Two adjacent rungs differ by a **stated range of data or a named component**, never by a sentence of
+narrative. Allow at most one clause of design rationale per rung, for a schedule or constant that would
+otherwise look arbitrary, and cut that clause before it turns into a claim about what it achieved.
 
 Read the "existing implementation" column top to bottom: it should describe a complete, runnable system
 with none of the week's new machinery. That configuration is the floor, and it is what makes the claim
@@ -254,7 +613,10 @@ One row per premise the earlier sections asserted as fact. Not the experiments y
 | # | premise | if it is wrong | falsifying experiment | what it needs |
 |---|---|---|---|---|
 
-A premise with no falsifying experiment is a belief, and the report labels it as one.
+A premise with no falsifying experiment is a belief, and the report labels it as one. **Every row names a
+premise stated earlier in this same report**; a row about a design nobody has built is a backlog row and
+belongs in `docs-plan` (§Forward-looking material). `what it needs` names a prerequisite, never a cost to
+rank by.
 
 ### (b) Benchmark
 
@@ -277,6 +639,69 @@ judge solidity before any number arrives:
 
 ---
 
+## Forward-looking material: where it goes, what shape it takes
+
+> **An open question lives under the number that raised it. Work you have not run gets one sentence,
+> not a section.**
+
+### Placement
+
+Every open question sits inside the subsection that raised it, within a few lines of the number, row, or
+figure that provoked it, one line, phrased as a question, and **carrying one visual marker reserved for
+the author's own voice** — whatever the rendering platform gives you, used consistently and for nothing
+else. The same marker carries the deviation notes of §The mechanism-ladder section: both are the author
+stepping out of the report to say something the tables cannot.
+
+```markdown
+**关键读数：撤除前 +19，撤除后 +2。**
+
+> **启发：强度取决于输入的数量，还是输入之间的结构？能不能更细粒度地控制？**
+```
+
+**No item's only appearance is in a closing list.** A closing section may collect what is still unknown,
+but a reader who stops at the last table must already have met every open question beside the evidence
+that raised it. An item reachable from its evidence only through a chain of pointers is an item nobody
+will connect to its evidence.
+
+### Form
+
+**A sentence about work that has not been run must not be assertable as a finding.** Write it as a
+question, or as a named missing measurement. Never as a declarative about what it would achieve.
+
+| ✗ | ✓ |
+|---|---|
+| `这正好补上 (a) 和 (b)。` | `这补不补得上 (a)？没测过。` |
+| `这是本轮最便宜的一条。` | name the cost, or delete the sentence |
+| `后两条都不需要新机制。` | a claim about code nobody has written |
+
+### Weight
+
+Work you have not started gets **at most one sentence naming the knob it would change**. No per-option
+subsection, no `方法 / 为什么 / 已有支持 / 风险` template, no comparison table of unbuilt options, and
+**no benchmark numbers from other people's papers marshalled to argue for them.** Citations for arms you
+actually ran stay; that is the ladder's `出处` column. The rule is about structural weight: a proposal
+nobody has built should never be the most quotable page in the report.
+
+### Reconciling with the Research-questions section
+
+A terminal section is legitimate and both staged rows 7 and 9 stay. The failure is not that the section
+exists, it is what fills it. **A research-question row points backwards at a premise this report asserted
+as fact and names the measurement that would break it. A backlog row points forwards at a design not yet
+built**, and it is the backlog rows that make the section unreadable.
+
+**The test: could you have written this row before the week's measurements existed?** If yes it is a
+backlog, and a backlog belongs in the plan doc (`docs-plan`), not here. What survives is the question
+this week's numbers forced. Every surviving row must also have an inline antecedent — the open question
+already asked beside its evidence — so the closing section collects, and never invents.
+
+`what it needs` in the §Evaluation template is a **prerequisite, not a price**. The moment that column
+starts carrying comparable costs, the table has become a ranked backlog and the falsification column is
+decoration on it. Row 9 keeps only what is still unknown; anything that already held up under its own
+table stays there, because a terminal section restating delivered conclusions is a second copy of the
+report (§What to cut).
+
+---
+
 ## Anti-patterns
 
 - **A skeleton with empty sections.** Omit the heading instead.
@@ -287,13 +712,24 @@ judge solidity before any number arrives:
 - **"Learned component X helps"** with no rule-based sibling in the comparison.
 - **Restating the plan as achievement.** What is implemented and what is not are two lists, and the
   second one is the useful one.
-- **Numbering from 0.**
+- **Numbered headings**, which exist only so a cross-reference can point at them. Any list *inside* a
+  section still starts at 1, never 0.
+- **A section file whose top heading is H1**, so the assembled report has one title per section.
+- **A figure placeholder shipped in the delivered document**, or a figure shown without its name and path.
+- **A formulation whose equation has no derivation under it**, while the results prose runs three
+  paragraphs per table.
 - **A mixed-language document**, or a term of art translated into the prose language.
 - **A heading that glosses its own title** (`挑战：这条线在追什么`).
 - **Meta-commentary** telling the reader which part is important.
 - **A coined term where a standard one exists**, especially one that redefines a framework's word.
 - **An evaluation plan with no benchmark description**, so no one can judge what a number would mean.
 - **A ladder whose lower rungs are strawmen the report invented**, rather than published mechanisms.
+- **A title that states this week's result** instead of naming a durable subject.
+- **The same number stated in two sections.** They fork, and the cross-reference between them hides it.
+- **A second table that re-slices numbers already tabulated.**
+- **A subsection teaching the reader how to read the table above it.**
+- **A synthesis section that is a second telling of findings already made under their evidence.**
+- **A ranked, costed table of options nobody built.**
 
 ---
 
@@ -301,14 +737,25 @@ judge solidity before any number arrives:
 
 1. Inventory the inputs: codebase diff, analysis subdirs, run outputs, paper links, figures.
 2. Map them onto the staged table. Decide which sections exist. Say out loud which are omitted.
-3. Draft the spine: section 1 and the Formulation, because they carry the argument.
-4. Fill evidence and mapping sections from real numbers and real citations.
-5. Emit figure placeholders with specs, do not generate inline.
-6. Write the Evaluation Plan from the premises the earlier sections asserted.
-7. Close with the honest list. Read it back: does someone who missed the week know what changed and
+3. **Pick the arc** (§The report is a self-contained story) and order the sections by it, not by the
+   order the work happened in.
+4. Draft the spine: the Challenge and the Formulation, because they carry the argument. Give the
+   Formulation its derivation now, while you still remember why the quantity is the right one.
+5. Fill evidence and mapping sections from real numbers and real citations.
+6. Emit figure placeholders with specs, do not generate inline. **Replace every placeholder with the
+   embedded figure, its name and its path before delivering** (§Figures).
+7. Write the Evaluation Plan from the premises the earlier sections asserted.
+8. Close with the honest list. Read it back: does someone who missed the week know what changed and
    what is still unknown?
+9. **Check §Format dealbreakers**: no section numbers anywhere, every section file topping out at H2,
+   every figure embedded with name and path, no cross-references, one language.
+10. **De-duplicate, then read your own diff.** Grep for every number appearing in two sections and every
+   claim stated twice, keep the copy next to its evidence, and delete whole sections that turn out to be
+   second copies — reworking the duplicate is not a fix. Then run §After a deletion over the diff rather
+   than the draft, and grep for surviving `§` and 〈第.
 
 ## Companions
-`writing-style` (punctuation and word choice in the authored doc) · `docs-figure` (what the embedded
+`writing-style` (**`en` mode only** — it governs English deliverables, and the `zh` rules here are
+self-contained and do not defer to it) · `docs-figure` (what the embedded
 figures may contain) · `output-analysis` (comparing the runs behind them) · `docs-plan` (the actionable plan a report's next-week section points at) ·
 `layout-workspace` (where reports live) · `conventions` (the family index).
