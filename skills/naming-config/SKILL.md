@@ -531,6 +531,47 @@ apart on disk.
    overridden. If a launcher cannot set a field without a code change,
    the config system is broken, not the launcher.
 
+## Two walks, one name: assembly AND implementation
+
+A config name encodes TWO inheritance walks, and it must not contradict either:
+
+1. **Assembly walk** (`_base_`): a derived config's name extends an ancestor's name by suffix
+   segments. `x_y.yaml` with `_base_: x` is the walk made visible; `x_y` deriving from `z` is a
+   name that lies about its parentage.
+2. **Implementation walk** (class MRO): if the config resolves — directly or through its `_base_`
+   chain, including owned sub-objects like `trainer.class_path` — to a class that subclasses a
+   *named backbone*, the backbone's segment appears in the name. A config named as if it sat on the
+   plain backbone must not resolve to the specialized one: `x_harness` whose trainer subclasses
+   `DualRoleTrainer` hides a schedule change (half its passes are generator passes) behind a name
+   that promises the plain trainer. Either the name carries the segment (`x_dualrole_harness`) or
+   the component is made genuinely backbone-independent first — never the silent middle.
+
+   Checking this requires resolving the CLASS, not the module: a `class_path` that names a module
+   entry point tells you nothing about the trainer's MRO, and a checker that stops there reports
+   zero violations forever.
+
+## When every descendant neutralizes the base, the base is wrong
+
+If each derived config pins the same base-contributed knob to its inert value (`role_period: 1` in
+every arm of a family whose base is the two-role backbone), the family is telling you its inheritance
+is inverted: the arms wanted the OTHER backbone all along and were silencing this one per-file. The
+fix is structural — re-home the family on the backbone it actually runs (and let the specialized
+backbone become a marked leaf) — never one more pin. The pins are also latent crashes: the moment the
+base class changes, inherited-but-inapplicable ctor kwargs become constructor refusals at the pod
+(see layout-workspace scaffold rule A5, which makes that drift a pre-submit failure).
+
+Related mechanism note: a mid-chain `_unset_` cleans its own resolution, but a descendant that
+RE-DECLARES the key reintroduces it — check the whole family after removing a layer, not just the
+config that carried the marker.
+
+## Polarity: the unmarked name is the complete thing
+
+For datasets and any headline artifact, the UNMARKED name is the full/complete version and ablations
+carry the marker: `mix` (everything) vs `mix_wo_<component>`. Naming the full thing `mix_with_x`
+inverts the polarity — the baseline becomes the marked name, and every future reader must remember
+which way the marking runs. This is the same rule as "absence of the variant slot IS the baseline",
+applied to composition: absence of a REMOVAL marker is the whole.
+
 ## Steps when adding / reviewing a config
 
 1. Identify which slot grammar applies (model / pipeline / dataset / launcher).
