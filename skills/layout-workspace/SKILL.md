@@ -166,6 +166,29 @@ also when the coupling first does damage.
 - Name everything descriptively (`naming-descriptive`) — never `v1`/`Px`/`tmp`/`final2`.
 - Keep all of this **out of** the package/source/test trees.
 
+## One resolver owns a group's paths
+
+When a group's configs may live in family subdirs (the mirror rule), "which files are this group's"
+becomes a real function: recursive walk, other groups' subdirs excluded — and OWNERSHIP MUST COME
+FROM THE GROUP REGISTRY, never from glob depth. Depth was only ever an accident that happened to
+encode ownership. Export ONE `group_config_paths(group)` from the config system and make the loader
+AND every check import it: the day a family subdir appears, N private flat globs are N tools that go
+blind simultaneously while reporting healthy empty sets.
+
+## The layout walk is checkable — scaffold it
+
+The four associations this skill promises are mechanically verifiable, and a project should carry a
+`layout_walk` check that locks them:
+  A1  every config's class_path imports, and the config's subdir mirrors the class's module
+  A2  every `_base_` chain is a name-prefix walk (assembly inheritance visible in the name)
+  A3  the name carries the class walk (see naming-config "Two walks, one name") — resolve owned
+      sub-objects' class_paths too, not just the module entry point
+  A4  every launcher selector resolves to a real group config
+A generic scaffold lives in `scaffold/layout_walk.py` (copy + thin project adapter).
+Violations that predate the rule are DECLARED debts (a named list in the check, reported every run,
+failing under --strict), never silenced: a debt list is a decision queue, an exemption list is a
+blindfold.
+
 ## Anti-patterns
 - **Per-launcher `launch.sh`** beside each `task.yaml`. Redundant, and it drifts.
 - **Hyperparameters inline** in a `run:` block or a `train_*.sh` recipe — a config in disguise.
