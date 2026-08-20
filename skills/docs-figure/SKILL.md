@@ -26,6 +26,7 @@ figure trying to be readable on its own, which is a requirement nobody imposed.
 |---|---|---|
 | **A headline claim** ("no cross-step credit assignment", "our method wins") | the figure is asserting, not showing | body text |
 | **An explanatory sentence** ("q is never observed, so the state summarises...") | prose in an image cannot be edited, translated, or searched | body text |
+| **A trailing text node under a panel** ("schematic. two routes reach s≈0, collapsing k or rotating q off it") | a caption in disguise, parked exactly where the real caption goes | caption |
 | **Title or `suptitle`** | the document numbers and titles its own floats | caption |
 | **A baked caption** | duplicates the caption, and the two drift | caption |
 | **Bullets copied from the text** | the reader reads the same list twice, in a worse font | keep the text, cut from the figure |
@@ -57,6 +58,25 @@ For workflow, architecture, and formulation figures.
   should each mean one thing, and a two-entry key is the whole legend.
 - **Equations are content, not explanation.** A displayed update rule beside the block it governs is the
   figure doing its job. A sentence about why that rule matters is not.
+- **Never end a panel with a text node.** The last element under a panel is the single most common place
+  a caption gets smuggled into an image. If a node sits below the drawing, spans most of its width, and
+  reads as a sentence, it is a caption and it belongs in the document. Delete it and check the real
+  caption says it.
+
+  ```tex
+  % wrong: the panel explains itself
+  \node[align=center] at (2.6,-0.9) {schematic. two routes reach $s\approx0$,
+                                     collapsing $\mathbf{k}$ or rotating $\mathbf{q}$ off it};
+  % wrong: a definition the document already displays as an equation
+  \node at (2.6,0.6) {selectivity $s=\mathbb{E}_j[\cos(q_j,k_j)]-\mathbb{E}_{i\neq j}[\cos(q_j,k_i)]$};
+  % right: the panel names its parts, the caption carries the rest
+  \node at (0.6,1.1) {$s\approx 1$};   \node at (2.7,1.1) {$s\approx 0$};
+  ```
+
+  Three tests, cheapest first. Does it contain a finite verb. Does it start with a hedge such as
+  "schematic" or "note that". Would it survive being moved into the caption verbatim. Any yes means cut
+  it. Symbols, values, units and one-word or two-word part names stay, since those are the drawing, and
+  axis names such as "what must persist" stay because an axis without a name is unreadable.
 
 ### Pipeline choice
 
@@ -130,6 +150,7 @@ A figure is regenerated whenever a run updates, so the generator is an artifact,
 
 - **A figure that reads fine with the document covered.** It has absorbed the document's job.
 - **A claim, a conclusion, or a "key insight" printed on the image.**
+- **A footnote node under a panel**, which is a caption written twice in two places that will drift.
 - **A caption baked into the image**, then a second caption in the document.
 - **One figure per arm** where a legend would do.
 - **A legend key that is a sentence.**
