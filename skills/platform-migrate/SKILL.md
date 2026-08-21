@@ -1,3 +1,8 @@
+---
+name: platform-migrate
+description: "Move a persistent home from one shared mount to another, decide what is actually worth copying, and carry out the cutover - the half where migrations actually fail."
+when_to_use: "Use when migrating to a new cluster, mount or storage backend, when jobs fail on a path that demonstrably exists on shared storage, or before retiring an old root."
+---
 # Skill: platform-migrate
 
 ## Purpose

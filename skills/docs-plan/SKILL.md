@@ -1,3 +1,8 @@
+---
+name: docs-plan
+description: "Create or update a structured task plan under docs/plans/<date>-<topic>.md so multi-step work has a written, resumable design."
+when_to_use: "Use when a task is non-trivial or spans multiple files or modules."
+---
 # Skill: docs-plan
 
 ## Purpose

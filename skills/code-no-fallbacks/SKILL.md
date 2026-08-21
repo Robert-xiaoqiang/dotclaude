@@ -1,3 +1,8 @@
+---
+name: code-no-fallbacks
+description: "Decide whether an input may carry a default. Required inputs fail loudly; only values the code legitimately owns may default. Covers ${VAR:?} in shell, os.environ[VAR] in python, and default parameters."
+when_to_use: "Use when writing or reviewing a launcher, entrypoint, install script or job wrapper, when reaching for a fallback, or when a run worked but wrote to the wrong place or used the wrong venv."
+---
 # Skill: code-no-fallbacks
 
 ## Purpose

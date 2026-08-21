@@ -1,3 +1,8 @@
+---
+name: writing-style
+description: "The user's punctuation and formatting rules for authored documents. Covers the written deliverable, not the content and not the way you talk in session."
+when_to_use: "Use when producing or revising a written document for the user."
+---
 # Skill: writing-style
 
 ## Purpose

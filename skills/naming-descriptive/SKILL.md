@@ -1,3 +1,8 @@
+---
+name: naming-descriptive
+description: "Name every durable artifact by what it is - the design, feature or module and its point - never by an opaque sequence ID such as v1/v2, P0/P1, step1 or draft_final_FINAL."
+when_to_use: "Use when naming commits, branches, files, directories, docs, reports or modules."
+---
 # Skill: naming-descriptive
 
 ## Purpose

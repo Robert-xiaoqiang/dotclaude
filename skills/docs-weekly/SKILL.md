@@ -1,3 +1,8 @@
+---
+name: docs-weekly
+description: "Write the weekly research report in stages: prose in one chosen language with technical vocabulary kept in English, carrying the argument rather than listing what happened."
+when_to_use: "Use on requests like write the weekly report or finish this week's report, or when a draft weekly needs bringing to style."
+---
 # Skill: docs-weekly
 
 ## Purpose

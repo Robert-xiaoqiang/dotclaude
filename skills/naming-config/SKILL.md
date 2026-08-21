@@ -1,3 +1,8 @@
+---
+name: naming-config
+description: "Apply the slot grammar to model, pipeline, dataset and launcher config names so a name uniquely identifies what runs and two ablation arms differ in exactly the slots that describe the change."
+when_to_use: "Use when adding a model variant, pipeline stage, dataset or launcher, or renaming an existing config."
+---
 # Skill: naming-config
 
 ## Purpose

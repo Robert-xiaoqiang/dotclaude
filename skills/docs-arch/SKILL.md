@@ -1,3 +1,8 @@
+---
+name: docs-arch
+description: "Keep docs/ARCH.md consistent with the current codebase, so the architecture reference never drifts from the code it describes."
+when_to_use: "Use after a structural change or a refactor."
+---
 # Skill: docs-arch
 
 ## Purpose

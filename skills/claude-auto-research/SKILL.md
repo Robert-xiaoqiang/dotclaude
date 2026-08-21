@@ -1,3 +1,8 @@
+---
+name: claude-auto-research
+description: "Run an approved research objective unattended for 24-48h or longer across sessions and context resets - implement, launch, monitor, debug, evaluate, iterate - via a durable plan-plus-ledger a cold session can resume from."
+when_to_use: "Use when the objective needs several train/eval cycles or a job longer than one session, or when the user is asleep or away and has said to keep going."
+---
 # Skill: claude-auto-research
 
 ## Purpose

@@ -1,3 +1,8 @@
+---
+name: platform-runtime
+description: "Reason about a cluster job's runtime as a layered, partially independent stack - GPU driver, container image, python venv, shared storage - so you pick a mutually consistent set."
+when_to_use: "Use when choosing a driver, image or venv for a job, or when a job fails with libcudart.so.N not found, undefined symbol, or driver too old."
+---
 # Skill: platform-runtime
 
 ## Purpose

@@ -1,3 +1,8 @@
+---
+name: output-cleanup
+description: "Reclaim space in the layout-output tree without destroying what a run needs to resume or what stands as a result. Discovers, classifies and proposes; never deletes on its own."
+when_to_use: "Use when runs are called junk and should be cleared, or when space is tight and old smoke, debug or superseded checkpoints may be reclaimable."
+---
 # Skill: output-cleanup
 
 ## Purpose

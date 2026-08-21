@@ -1,3 +1,8 @@
+---
+name: platform-env
+description: "Configure a usable, persistent working environment on a new compute node, where the local filesystem is ephemeral and a shared filesystem holds everything that must survive."
+when_to_use: "Use on first landing on a cluster node or container, or when a job-submission script must resolve the same tools, paths and caches as an interactive shell."
+---
 # Skill: platform-env
 
 ## Purpose

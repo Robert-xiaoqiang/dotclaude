@@ -1,3 +1,8 @@
+---
+name: output-analysis
+description: "Compare runs that share the layout-output schema along latitude (different runs at the same step) and longitude (dynamics across steps), and emit embed-ready tables and figures."
+when_to_use: "Use when pointed at a run dir, a pair of runs or a logging root and asked to compare, or when building the results table or metric curves for a paper or report."
+---
 # Skill: output-analysis
 
 ## Purpose

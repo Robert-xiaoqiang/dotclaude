@@ -1,3 +1,8 @@
+---
+name: layout-output
+description: "Define the run-output tree under $OUTPUT_DIR_HOME where runs write checkpoints, logs, metrics, samples and eval results, and classify what is resume state versus deliverable versus junk."
+when_to_use: "Use when deciding where a run writes its outputs, reviewing a launcher's output path, or before comparing runs or reclaiming space."
+---
 # Skill: layout-output
 
 ## Purpose

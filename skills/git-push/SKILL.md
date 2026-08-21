@@ -1,3 +1,8 @@
+---
+name: git-push
+description: "Push local commits to the correct remote and branch with the right SSH key, after fetching and verifying the branch is strictly ahead. Never force-pushes main and never bypasses hooks."
+when_to_use: "Use ONLY when the user explicitly asks to push. Never runs automatically after a commit."
+---
 # Skill: git-push
 
 ## Purpose

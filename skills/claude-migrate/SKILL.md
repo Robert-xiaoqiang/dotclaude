@@ -1,3 +1,8 @@
+---
+name: claude-migrate
+description: "Rename or move a Claude Code project folder without orphaning its session history, or recover sessions after a whole persistent root moved."
+when_to_use: "Use when --resume or --continue stops finding past sessions after a rename, move, or storage migration."
+---
 # Skill: claude-migrate
 
 ## Purpose
@@ -16,7 +21,9 @@ transcripts — so resume keeps working.
 - Renaming the project/package as part of a rebrand (folder name should follow)
 
 ## Background — why a plain rename breaks sessions
-- Sessions live at `~/.claude/projects/<SLUG>/<uuid>.jsonl`.
+- Sessions live at `$CLAUDE_CONFIG_DIR/projects/<SLUG>/<uuid>.jsonl` — `~/.claude` only when
+  that variable is unset. On a box whose Claude state lives on shared storage the two differ,
+  and a `~/.claude/...` path there points at nothing; pass `--claude-dir` to be explicit.
   **SLUG** = the absolute path with every non-alphanumeric char replaced by `-`
   (no collapsing, case preserved):
   - Windows: `D:\projects\Old App` → `D--projects-Old-App`
@@ -39,17 +46,17 @@ Use the bundled helper. It computes slugs, backs up the store, renames the
 folder + slug store, rewrites embedded paths (BOM-safe, JSON-valid), and prints
 how to resume. Needs only Python 3.
 
-Script path: `~/.claude/skills/claude-migrate/migrate_session.py`
+Script path: `${CLAUDE_SKILL_DIR}/migrate_session.py`
 
 1. **Dry run first** (changes nothing — confirm the slug mapping, transcript
    count, and that embedded cwd count drops to 0):
    ```
-   python "~/.claude/skills/claude-migrate/migrate_session.py" \
+   python "${CLAUDE_SKILL_DIR}/migrate_session.py" \
        --old "<OLD_ABS_PATH>" --new "<NEW_ABS_PATH>" --dry-run
    ```
 2. **Migrate** (`--yes` skips the prompt; `--claude-dir` if `~/.claude` is elsewhere):
    ```
-   python "~/.claude/skills/claude-migrate/migrate_session.py" \
+   python "${CLAUDE_SKILL_DIR}/migrate_session.py" \
        --old "<OLD_ABS_PATH>" --new "<NEW_ABS_PATH>"
    ```
 3. **Resume** from the new path:
@@ -76,7 +83,7 @@ as the one above and the single-project mode cannot do it:
   deep, where `--resume` will never look.
 
 ```
-python "$CLAUDE_CONFIG_DIR/skills/claude-migrate/migrate_session.py" \
+python "${CLAUDE_SKILL_DIR}/migrate_session.py" \
     --old-root /mnt/cpfs/xqwang --new-root /mnt/data/xqwang \
     --claude-dir /mnt/data/xqwang/.claude --prune-snapshots --dry-run
 ```

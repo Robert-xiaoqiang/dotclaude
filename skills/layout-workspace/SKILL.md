@@ -1,3 +1,8 @@
+---
+name: layout-workspace
+description: "Lay out a config-driven research project end to end: config/ mirroring the package tree, launcher/, one flat platform layer, plus docs/ and session scripts/."
+when_to_use: "Use when standing up or auditing such a project, or when deciding where a hyperparameter, launcher, plan or one-off script belongs."
+---
 # Skill: layout-workspace
 
 ## Purpose

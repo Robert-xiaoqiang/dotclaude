@@ -1,3 +1,8 @@
+---
+name: conventions
+description: "The map of the project-convention skill family. Names each concern - naming, layout, docs, platform, outputs, figures, code style - and routes to the focused skill for it."
+when_to_use: "Use when setting up or reorganizing a project, or when you want the convention but do not know which skill owns it."
+---
 # Skill: conventions
 
 ## Purpose

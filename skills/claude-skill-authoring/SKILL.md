@@ -1,3 +1,8 @@
+---
+name: claude-skill-authoring
+description: "Write or revise a skill in this family so every skill keeps one predictable shape: the required section spine, the frontmatter contract, and the voice that states why rather than only what."
+when_to_use: "Use when creating a skill, turning repeated instructions into one, or restructuring one that has grown unreadable."
+---
 # Skill: claude-skill-authoring
 
 ## Purpose
@@ -16,6 +21,7 @@ which skill owns a concern; this says what a skill must look like once it does.
 - [Section contracts](#section-contracts)
 - [When a TOC is required](#when-a-toc-is-required)
 - [Voice: why, not just what](#voice-why-not-just-what)
+- [The frontmatter contract](#the-frontmatter-contract)
 - [Updating an existing skill](#updating-an-existing-skill)
 - [Rules](#rules)
 - [Anti-patterns](#anti-patterns)
@@ -55,6 +61,11 @@ Every skill has these sections, with these names, **in this order**. Anything sp
 goes in the body, between `When to Use` and `Rules`.
 
 ```
+---                            <- REQUIRED frontmatter; see the contract below
+name: <name>
+description: "..."
+when_to_use: "..."
+---
 # Skill: <name>                 <- H1, exactly this form, matches the directory name
 
 ## Purpose                      <- REQUIRED, first
@@ -120,6 +131,59 @@ endpoints x 3 attempts`" is worth ten lines of principle, because it tells the r
 Keep prose tight — see `writing-style`. Tables for anything with more than three parallel cases; prose
 for anything with a because.
 
+## The frontmatter contract
+
+`description` is the ONLY way Claude decides to load a skill it was not asked for by name. Omit it
+and the loader falls back to the first paragraph of markdown — which in this family is the H1, so
+the skill advertises itself as `layout-workspace: Skill: layout-workspace`. That is a tautology: it
+tells a reader nothing they did not already have from the name. All 22 skills sat that way until
+2026-08-14, discoverable only by someone who already knew they existed, while 235 KB of bodies waited
+to be found. A skill nobody can find is 100% waste no matter how good the body is.
+
+Write the pair as **what it does**, then **when to reach for it**:
+
+```yaml
+---
+name: <matches the directory>
+description: "What it does, key use case first. State the mechanism, not the category."
+when_to_use: "Use when <situation>, <trigger phrase>, or <the symptom that should send you here>."
+---
+```
+
+- Put the **symptom** in `when_to_use` where one exists — "a run worked but wrote to the wrong place"
+  finds `code-no-fallbacks` in a way "input validation" never will.
+- `description` + `when_to_use` are truncated together at **1,536 characters** in the listing. Two or
+  three sentences each; the listing is always in context, the body is not.
+- `name` may be omitted (it defaults to the directory) but state it anyway — it makes the mismatch
+  between H1, directory and `conventions` visible in one place.
+
+**Arguments.** Without `$ARGUMENTS` in the body, whatever the caller passed is appended as
+`ARGUMENTS: <value>`, which is fine for prose skills and is what this family relied on for a year.
+Add `$ARGUMENTS` only when **placement** matters — the target has to appear before a checklist rather
+than after it. Verified behaviour when a skill is invoked with nothing passed:
+
+| placeholder | no args passed | args passed |
+|---|---|---|
+| `$ARGUMENTS` | empty string | the raw string, quoting preserved |
+| `$name` (declared in `arguments:`) | empty string | that positional value |
+| `$0`, `$1` | **stays literal** — `$1` reaches the model as text | shell-split value |
+
+**Indexed `$0`/`$1` are therefore banned here.** An unfilled one leaks a literal placeholder into the
+prompt and the model has to guess whether it is a variable, a literal, or noise — the same
+silently-wrong-instead-of-loudly-absent shape `code-no-fallbacks` exists to kill. Use named
+`arguments:` when position matters; they empty cleanly.
+
+**Paths to bundled files use `${CLAUDE_SKILL_DIR}`**, never `~/.claude/skills/<name>/...`. `$HOME` and
+`$CLAUDE_CONFIG_DIR` differ whenever Claude's state lives on shared storage, and this skill family
+shipped a `~/.claude/skills/claude-migrate/migrate_session.py` that resolved to nothing on the very
+box it was written on.
+
+**Fields to leave alone.** `allowed-tools` grants tool permission for the whole turn — wrong for a
+fleet that runs destructive operations. `disable-model-invocation` also removes the description from
+context, so a safety-rule skill like `git-push` becomes *less* safe: the user says "push it" in prose
+and the rules that say how to push safely are no longer loaded. `model`, `effort`, `context: fork`,
+`user-invocable` have no use in this family yet.
+
 ## Updating an existing skill
 
 1. **Read the whole file first.** Skills accrete, and the section you are about to add often already
@@ -146,7 +210,9 @@ for anything with a because.
    the change" is.
 6. **Every rule carries its reason**, and where one exists, the failure that produced it.
 7. **The H1 matches the directory name**, and both match how `conventions` refers to it.
-8. **No YAML frontmatter.** This family's header is `# Skill: <name>` followed by `## Purpose`.
+8. **YAML frontmatter is REQUIRED**, above the H1: `name`, `description`, `when_to_use`. The body
+   header stays `# Skill: <name>` followed by `## Purpose`. See the frontmatter contract below for
+   why, and for which other fields to leave alone.
 9. **Cross-link, don't duplicate.** When another skill owns a concept, name it and move on. Two copies
    of a rule drift, and the reader cannot tell which is current.
 10. **A skill that has never been used is deleted, not kept.** Dead rules make the live ones cheaper to

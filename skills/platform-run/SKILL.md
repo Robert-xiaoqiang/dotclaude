@@ -1,3 +1,8 @@
+---
+name: platform-run
+description: "Specify a run once in a platform-neutral job spec and render or route it to whatever scheduler is available - PAI DLC, Slurm, EAI, Kubernetes - keeping account, quota and image detail in a separate profile."
+when_to_use: "Use when adding a launcher or wiring remote submission, or when adding support for a new platform."
+---
 # Skill: platform-run
 
 ## Purpose
