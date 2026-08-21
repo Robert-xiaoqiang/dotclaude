@@ -116,9 +116,9 @@ The report is conditional. Check which inputs exist, emit only those sections, i
 | 4 | paper links, PDFs, a literature sweep | **相关工作 / 定位** · Positioning | a mapping table (dimension × existing work), and **which cell is empty** |
 | 5 | a codebase change | **实现与观测** · Implementation | what is implemented and verified vs what is not, as two explicit lists |
 | 6 | run outputs | **结果** · Results | tables, and every figure embedded at its point of use with name and path (§Figures) |
-| 7 | *always* | **研究问题** · Research questions | one row per premise **this report asserted**, and the measurement that would falsify it. Never a backlog of designs (§Forward-looking material) |
+| 7 | *always*, but in `docs-plan` | **研究问题** · Research questions | one row per premise **this report asserted**, and the measurement that would falsify it. Built as a check, not shipped in the report (§Forward-looking material) |
 | 8 | *always* | **Benchmark** | scale, composition, known defects, what each eval can settle |
-| 9 | *always* | **本周结论与未决项** · Findings + open | what is still unknown and what happens next. The 结论 half moves **up**, under the tables that produced it (§What to cut) |
+| 9 | *always* | **计划** · What happens next | three to five bare names, each with an antecedent in the body. The 结论 half moves **up**, under the tables that produced it (§What to cut) |
 
 The `#` column indexes this table only. **It is not a numbering scheme for the report** — the report's
 headings are bare names (§Format dealbreakers).
@@ -158,9 +158,27 @@ your tables, so they are the parts that must be on the page.
 ### Be concise here
 
 Everything downstream of a number. The table already carries the value, its condition and its
-comparison, so the prose beside it adds a **judgment** and stops. See §Tables. Measured shape to aim
-for: **median narrative paragraph of one sentence, under 5% of paragraphs running to three or more.**
-A drafted report ran 27% at three or more, all of it narrating tables.
+comparison, so the prose beside it adds a **judgment** and stops. See §Tables.
+
+**Count sentence-enders. That one number decides whether the report is written or narrated.** Measured
+across two drafted-vs-human pairs on identical content:
+
+| | human | drafted |
+|---|---:|---:|
+| 句号 per 1,000 characters | **0.5** | 8.3 |
+| prose share of the document | **24%** | 61% |
+| median narrative paragraph | **40 chars** | 107 |
+
+The second pair's human version contains **five sentence-enders in the entire report.** It is tables,
+figures, captions and bolded labels; prose appears only where no table can hold the thing. That is the
+target shape, not an eccentricity — and it explains why the word-level budgets keep getting blown: a
+draft at 8 句号 per 1,000 has to invent connectives, negations and dashes to hold all those sentences
+together. Cut the sentences and 「不是」/「——」/「所以」 fall to zero on their own, which is exactly what
+the human version measures (0 / 0 / 0).
+
+**The operational test, applied per paragraph: is this a judgment, or is it narration of the table above
+it?** A judgment survives as one clause. Narration gets deleted, and if the fact it carried matters, it
+becomes a column, a cell parenthetical, or a bolded label.
 
 **The test, applied to any paragraph: could the reader have derived this from the display object next
 to it?** If yes, cut. If the answer is no because the paragraph carries a derivation, an assumption, or
@@ -271,6 +289,19 @@ vocabulary. A title that headed one week's report is free to become a section he
 cross-references cut to at most one (§What to cut) the ordinals have no referent left while still costing
 a renumber on every insertion. Delete the ordinal, keep the name. Any numbered list *inside* a section
 still starts at 1, never 0.
+
+**When the system has a store, name the sections by which direction data moves through it.** A pipeline
+described component-by-component makes the reader hold the dataflow in their head; described by
+write-then-read it is already sorted. The pattern is one heading per direction with the component name
+in parentheses:
+
+| | |
+|---|---|
+| ✗ `dynamics store、diff 算子与 agent 装配` | three component names, no order among them |
+| ✓ `训练动态 (memory write)` then `PE (memory read/utilization)` | the store is written here, read there; everything else nests under one of the two |
+
+This is worth reaching for whenever the week's object is a thing that accumulates. It also silently
+enforces the arc, because writing precedes reading.
 
 **Count H2s before writing them: two or three, not seven.** Depth carries the grouping. A mechanism's
 setup and the numbers it produced are one section, not two, so a reader compares a row against the
@@ -491,6 +522,38 @@ or `.tex` beside the report.
 
 ---
 
+## Citing a paper costs one line
+
+A paper enters a weekly as **one bolded mechanism phrase plus the operative detail**, on a single line
+under the citation. Not a paragraph, not a summary of its contributions.
+
+```markdown
+Agentic Rubrics as Contextual Verifiers for SWE Agents, Scale AI, ACL 2026
+
++ **Rubric as execution-free verifier:** candidate patches are scored against this contextual
+  rubric **without running tests**
+```
+
+The bolded phrase is the thing you will reuse later in your own argument; the rest of the line is the
+detail that makes it checkable. Everything else about the paper belongs in the literature list, not here.
+
+**Bold the operative clause inside quoted external text too.** A rubric criterion, an abstract sentence,
+a spec line — quote it verbatim, and bold the two or three words your argument turns on, so a reader
+scanning the quote lands where you need them:
+
+```markdown
++ "The fix modifies the **correct location(s):** hydra/_internal/instantiate/_instantiate2.py, ..."（4.0）
+```
+
+**The one-line form is also a correctness device.** Compressing a paper to a single mechanism phrase
+forces you to name what it actually does, and a wrong compression is visible immediately. A paragraph of
+paraphrase hides the same error: in the pair that produced this rule, a drafted report described an
+agentic verifier as one that *applies the patch and runs the named test*, while the cited work is
+explicitly **execution-free**. The one-line form would have made the contradiction unmissable; the
+paragraph did not.
+
+---
+
 ## Use the field's vocabulary, never coin a rival one
 
 When a formulation is an instance of a standard framework, **write it in that framework's terms**. A
@@ -608,7 +671,9 @@ Splitting these is what lets a reader judge whether the plan could settle anythi
 
 ### (a) Research questions
 
-One row per premise the earlier sections asserted as fact. Not the experiments you feel like running.
+**Build this table; do not ship it.** It is the check that the report's assertions are falsifiable, and
+it lives in the plan doc (§Forward-looking material). One row per premise the earlier sections asserted
+as fact. Not the experiments you feel like running.
 
 | # | premise | if it is wrong | falsifying experiment | what it needs |
 |---|---|---|---|---|
@@ -652,6 +717,14 @@ the author's own voice** — whatever the rendering platform gives you, used con
 else. The same marker carries the deviation notes of §The mechanism-ladder section: both are the author
 stepping out of the report to say something the tables cannot.
 
+**That marker's real job is wider than questions: it marks whatever is least settled.** It goes on the
+newly added domain, the arm that has not been decided, the parameter still written as a guess. Observed
+uses in one report: a whole table row (the domain added this week), a heading fragment, and a bare
+`(7-8B?)` where a model size had not been chosen. All three are the same act — telling a reader which
+parts of the page the author would not yet defend. A report with the marker on nothing is claiming
+uniform confidence it does not have, and a reader who later finds the soft part unmarked stops trusting
+the firm parts too.
+
 ```markdown
 **关键读数：撤除前 +19，撤除后 +2。**
 
@@ -682,23 +755,31 @@ subsection, no `方法 / 为什么 / 已有支持 / 风险` template, no compari
 actually ran stay; that is the ladder's `出处` column. The rule is about structural weight: a proposal
 nobody has built should never be the most quotable page in the report.
 
-### Reconciling with the Research-questions section
+### The terminal section is a list of names, and the premise table is not in the report
 
-A terminal section is legitimate and both staged rows 7 and 9 stay. The failure is not that the section
-exists, it is what fills it. **A research-question row points backwards at a premise this report asserted
-as fact and names the measurement that would break it. A backlog row points forwards at a design not yet
-built**, and it is the backlog rows that make the section unreadable.
+**Two consecutive weeks, the human deleted the premise/falsification table outright.** In its place, a
+closing section of three bare bullets — a name each, no columns, no falsifying experiment, no
+prerequisite:
 
-**The test: could you have written this row before the week's measurements existed?** If yes it is a
-backlog, and a backlog belongs in the plan doc (`docs-plan`), not here. What survives is the question
-this week's numbers forced. Every surviving row must also have an inline antecedent — the open question
-already asked beside its evidence — so the closing section collects, and never invents.
+```markdown
+## 计划
++ Case-analysis
++ Trainable just-in-time diff
++ Internalization
+```
 
-`what it needs` in the §Evaluation template is a **prerequisite, not a price**. The moment that column
-starts carrying comparable costs, the table has become a ranked backlog and the falsification column is
-decoration on it. Row 9 keeps only what is still unknown; anything that already held up under its own
-table stays there, because a terminal section restating delivered conclusions is a second copy of the
-report (§What to cut).
+Take this as settled rather than as two accidents. The premise table is a **working artifact**: it is how
+you check that the report's assertions are falsifiable, and it belongs in the plan doc (`docs-plan`)
+where the next week's work is scheduled. Building it is still worth doing — a report whose premises
+survive that check reads differently from one whose premises were never tested — but the table itself
+does not ship.
+
+What ships is **three to five names**, each one word or phrase that a reader already met in the body.
+If a name has no antecedent in the body, it is a backlog item and it goes to the plan doc with the table.
+
+`what it needs` in the §Evaluation template stays a **prerequisite, not a price**; the moment that column
+carries comparable costs, the table has become a ranked backlog. Row 9 keeps only what is still unknown,
+because a terminal section restating delivered conclusions is a second copy of the report (§What to cut).
 
 ---
 
@@ -730,6 +811,9 @@ report (§What to cut).
 - **A subsection teaching the reader how to read the table above it.**
 - **A synthesis section that is a second telling of findings already made under their evidence.**
 - **A ranked, costed table of options nobody built.**
+- **A premise/falsification table shipped in the report** instead of built in the plan doc.
+- **A paper summarised in a paragraph** where one bolded mechanism phrase would do.
+- **A report with the author's-voice marker on nothing**, claiming uniform confidence.
 
 ---
 
@@ -749,7 +833,10 @@ report (§What to cut).
    what is still unknown?
 9. **Check §Format dealbreakers**: no section numbers anywhere, every section file topping out at H2,
    every figure embedded with name and path, no cross-references, one language.
-10. **De-duplicate, then read your own diff.** Grep for every number appearing in two sections and every
+10. **Count 句号 per 1,000 characters** (§Where the length goes). Above ~2, the report is being narrated
+   rather than written, and the 不是/——/所以 budgets will be blown as a side effect. Delete sentences
+   before editing words.
+11. **De-duplicate, then read your own diff.** Grep for every number appearing in two sections and every
    claim stated twice, keep the copy next to its evidence, and delete whole sections that turn out to be
    second copies — reworking the duplicate is not a fix. Then run §After a deletion over the diff rather
    than the draft, and grep for surviving `§` and 〈第.
