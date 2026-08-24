@@ -168,6 +168,7 @@ A figure is regenerated whenever a run updates, so the generator is an artifact,
 
 ## Companions
 `output-analysis` (which runs to compare, and the latitude / longitude split) · `docs-weekly` (how a
-report references a figure and what a placeholder spec contains) · `dataviz` (palette and mark detail for
+report references a figure and what a placeholder spec contains) · `docs-pptx` (how a figure reaches
+a slide: cropping a published one to the panel that carries the argument, rather than redrawing it) · `dataviz` (palette and mark detail for
 richer or interactive charts, whose default is a standalone dashboard, so strip its title and caption) ·
 `layout-workspace` (where generators live) · `conventions` (family index).

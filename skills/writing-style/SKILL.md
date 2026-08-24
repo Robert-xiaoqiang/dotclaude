@@ -62,5 +62,7 @@ In finished documents this user prefers writing that reads like continuous, spok
 
 ## Companions
 `writing-paper` (the paper-specific layer: citation placement, related work, section openers) ·
-`docs-weekly` (the staged weekly report) · `docs-plan` and `docs-arch` (the living project docs) ·
-`git-commit` (version-control text, which these rules deliberately do not govern).
+`docs-weekly` (the staged weekly report) · `docs-pptx` (slide text and speaker notes, which obey
+these rules and add the constraint that the notes must be speakable aloud) · `docs-plan` and
+`docs-arch` (the living project docs) · `git-commit` (version-control text, which these rules
+deliberately do not govern).
