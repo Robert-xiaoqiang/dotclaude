@@ -18,6 +18,7 @@ figure may contain (`docs-figure`) or the prose inside it (`writing-style`).
 - [What belongs in the source](#what-belongs-in-the-source)
 - [Citations: one bibliography, cited by key](#citations-one-bibliography-cited-by-key)
 - [Figures: clip the paper's own](#figures-clip-the-papers-own)
+- [Speaker notes are the script](#speaker-notes-are-the-script)
 - [The preview that lies](#the-preview-that-lies)
 - [The gates a deck build must have](#the-gates-a-deck-build-must-have)
 - [Reviewing a deck you cannot open](#reviewing-a-deck-you-cannot-open)
@@ -102,9 +103,49 @@ four panels and a slide is 16:9, so pasting the whole figure wastes most of the 
 part that matters to illegibility. Crop to the panel the slide actually argues about, land the crop
 on a panel boundary rather than through a label, and aim for something close to 2:1 or wider.
 
+**Take the vector original, not the web raster.** A paper's HTML build usually ships a downsampled
+copy that is about ninety dots per inch once it is a foot wide on a screen, and the text in it will not
+survive projection. The e-print tarball has the PDF or SVG the authors actually drew, and rendering
+that at four to eight times gives you something readable from the back. Worth knowing too that some
+figures are embedded as `<object type="image/svg+xml">` rather than `<img>`, so scraping image tags
+silently misses exactly the diagram you wanted, which is how a rubric-tree figure went missing on the
+first pass here.
+
+**The aspect ratio picks the layout, not the other way round.** Do the arithmetic before writing the
+slide. A figure placed at fraction `w` of a body `W` inches wide is `w x W / aspect` inches tall, and a
+caption or callout underneath costs roughly another inch. So a figure wider than about 2.5:1 wants a
+full-width slide with a callout beneath it, and anything near square or taller wants a two-column
+slide with the figure in one column. Forcing a tall figure into a full-width slot centres it, shrinks
+it to the box height, and wastes half the slide.
+
 Diagrams with no published original are written as text in the source and rendered by a diagram tool
 into the same cache. Push the deck's palette down into that renderer. A diagram in the tool's stock
 colours announces itself as a different document from the slide it sits on.
+
+## Speaker notes are the script
+
+Write the notes as the words that will be said, not as a summary of the slide. The test is whether a
+colleague who did not build the deck could stand up and read it. That test is worth applying literally,
+because it forces out the two things that make notes useless: bullet fragments that only make sense to
+the person who wrote them, and restatements of text the audience is already reading.
+
+What changes when notes become a script. Numbers get written the way they are spoken, so "nought point
+three seven" rather than "0.37", because a presenter reading "0.37" aloud stumbles over whether to say
+"zero point three seven" or "thirty-seven percent". Figures get stage directions that point, so "look
+at the bottom-left cell" and "read it downwards", because a slide with a figure on it is useless if the
+speaker does not tell the room where to look. Paragraphs carry one idea each, so the reader can find
+their place after glancing up. And the last slide ends with the handoff line, whatever it is.
+
+**The script is the clock, and it costs more than notes do.** This is the part that surprises people.
+Rewriting the same thirty-seven slides from summary notes into a read-aloud script moved the estimate
+from twenty-nine minutes to forty-one, without a single slide changing. Prose that is comfortable to
+read aloud is roughly a third longer than prose written to remind yourself.
+
+The consequence is a working order. Write the script first, then let the measured time set the slide
+count. And know which lever actually buys time back: **cutting body text off a slide buys almost
+none**, because the speaking time lives in the notes. Only cutting slides, or tightening the script
+itself, moves the number. Cutting five slides and tightening the ten longest note blocks is what took
+that deck from forty-one minutes back to thirty-one.
 
 ## The preview that lies
 
@@ -192,10 +233,17 @@ Do this at least once per major edit, not once at the end.
 8. **Preprints are cited with year and month.** In a fast field a bare year does not identify the work.
 9. **Show the paper's own figure, cropped to the panel the slide argues about.** Crops are fractions
    of the source, cached by content, and land on panel boundaries.
-10. **Every slide that carries an argument carries speaker notes**, because notes are the timing input
-    and the handover artifact.
-11. **The slot length is declared in the source.** Without it there is no timing check, only a hope.
-12. **Look at the rendered slides.** Rasterise to a contact sheet at least once per major edit.
+10. **Speaker notes are the script, written as spoken words.** Numbers spelled the way they are said,
+    stage directions where there is a figure, one idea per paragraph. The test is whether a colleague
+    could deliver the talk from them.
+11. **Write the script before fixing the slide count**, because the script is what the clock measures.
+    A read-aloud script runs about a third longer than summary notes on the same slides.
+12. **To recover time, cut slides or tighten the script.** Deleting body text off a slide changes the
+    estimate almost not at all, since the speaking time lives in the notes.
+13. **Take the figure from the vector original** where the paper has one, and let its aspect ratio
+    choose between a full-width slide and a two-column one.
+14. **The slot length is declared in the source.** Without it there is no timing check, only a hope.
+15. **Look at the rendered slides.** Rasterise to a contact sheet at least once per major edit.
 
 ## Anti-patterns
 
@@ -210,6 +258,11 @@ Do this at least once per major edit, not once at the end.
   the authority of the original.
 - **Notes as bullet echo.** Speaker notes that restate the slide text. They inflate the timing
   estimate, help no one rehearse, and cannot be handed to a colleague.
+- **Trimming slide text to save time.** The instinct when a talk runs long is to shorten the bullets.
+  It buys nothing, because the clock is counting the notes. It also makes the slide worse.
+- **The screenshot of a figure.** Taking the paper's web raster because it was the first thing an
+  image scrape returned, when the vector original was in the e-print tarball. It looks acceptable on a
+  laptop and turns to mush on a projector.
 - **The green exit code.** A build that reports findings and returns success anyway, so the Makefile,
   the CI job and the author all believe the deck is fine.
 - **The bibliography retyped onto a slide.** One author list corrected in the source and not in the
