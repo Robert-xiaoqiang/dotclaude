@@ -25,6 +25,7 @@ starting or organizing a project, or when unsure which convention applies.
 | **platform** | how do I set up, submit to, and match the runtime of a compute platform? | `platform-env` (env.sh / cluster setup) · `platform-run` (neutral `task.yaml` → DLC/Slurm/EAI) · `platform-runtime` (driver × image × venv × storage stack) · `platform-migrate` (moving a persistent home to another mount) |
 | **code style** | may this input have a default? | `code-no-fallbacks` (required inputs fail loudly; defaults are only for values the code legitimately owns) |
 | **outputs** | how do I compare runs or reclaim their space? | `output-analysis` (latitude vs longitude) · `output-cleanup` (resume-safe reclaim) |
+| **papers** | where does the citation go, and why does this paragraph say nothing? | `writing-paper` (citation placement, themed related work, findings-first section openers) · `writing-style` (the punctuation and word rules it builds on) |
 | **figures** | what may a figure contain, and how do I render it? | `docs-figure` (TikZ / Mermaid / HTML / matplotlib, embed-not-standalone) |
 | **campaign** | how do I run all of the above unattended for days, and resume after a context reset? | `claude-auto-research` (the plan-plus-ledger in `docs/plans/<date>-<topic>/`, and the autonomy boundary) |
 
@@ -32,6 +33,9 @@ starting or organizing a project, or when unsure which convention applies.
 - **code style** — a required input has three sources (the environment, an argument, the job
   config); if none supplied it the chain is broken, so fail there rather than guess and
   relocate the run (`code-no-fallbacks`).
+- **papers** — a citation attaches to the concept it supports, related work is grouped by theme
+  and ends on the gap, and a section leads with its finding rather than its topic
+  (`writing-paper`).
 - **naming** — a config's *name* uniquely identifies what runs; two ablation arms differ in
   exactly the slots that describe the change (`naming-config`).
 - **layout** — plans, reports, and re-runnable scripts persist out of the source tree

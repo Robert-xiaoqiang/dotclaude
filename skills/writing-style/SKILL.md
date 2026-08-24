@@ -11,6 +11,12 @@ The user's style rules for authored documents. They cover punctuation and format
 ## When to Use
 When you write or edit a standalone document that the user will keep or publish. Examples are a paper, a report, an article or essay, a README or other repository documentation, a design doc, or a proposal. If the text is itself the thing being delivered, these rules apply.
 
+## Papers
+A research paper is in scope for every rule here, and it has requirements these rules do not reach:
+where a citation attaches, how related work is grouped, and how a section leads with its finding
+rather than its topic. Those live in `writing-paper`, which inherits this skill rather than restating
+it. Read both when writing one.
+
 ## Out of scope
 These rules do NOT govern:
 1. Session replies and any conversational input or output in the chat.
@@ -53,3 +59,8 @@ Technical terms keep their meaning. Words like robust, comprehensive, significan
 
 ## Why
 In finished documents this user prefers writing that reads like continuous, spoken prose rather than punctuation-heavy or list-chopped text. Em-dashes, semicolons, stacked colons, and reflexive bullets fragment a paragraph and read as a generic AI default. Chat and logs are working text, not deliverables, so they are deliberately left alone.
+
+## Companions
+`writing-paper` (the paper-specific layer: citation placement, related work, section openers) ·
+`docs-weekly` (the staged weekly report) · `docs-plan` and `docs-arch` (the living project docs) ·
+`git-commit` (version-control text, which these rules deliberately do not govern).
