@@ -217,6 +217,7 @@ question is theirs:
 | `references/runner-styles.md` | starting a project: do you own the loop, or wrap a framework? |
 | `references/pipeline-kinds.md` | adding a pipeline kind, or placing a term like `lora` / `nar` / `mtp` |
 | `references/eval-launchers.md` | naming an eval launcher, or wiring a judge |
+| `references/eval-axes.md` | designing or extending an eval family: what forks a pipeline vs a scorer |
 | `references/overrides.md` | a launcher's `run:` grew a wall of `a.b.c=value` |
 
 ## Not this skill
