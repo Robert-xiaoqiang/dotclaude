@@ -54,7 +54,7 @@ and loses exactly one, which is that writing it by hand is awful. Removing that 
 compiler is for.
 
 The consequence for the output is concrete. Emit text boxes containing text and tables that are
-tables, and pictures only where there is genuinely a picture. An export that is a stack of images
+tables, and pictures only where the content actually is a picture. An export that is a stack of images
 satisfies nobody: the co-author cannot fix the typo, the venue gets a file it cannot reflow, and the
 accessibility tooling finds nothing to read.
 
