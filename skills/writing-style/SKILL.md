@@ -50,7 +50,11 @@ Some words read as generic AI or corporate filler in a finished document. Prefer
 14. `ledger`, used as a metaphor for a record of what happened, becomes record, log, or the name of
     the actual file. Reserve the word for double-entry bookkeeping.
 15. `ladder` and `rung`, used as a metaphor for an ordered set of comparisons or difficulty levels,
-    get rewritten as the ordering itself. Say which arms differ by what, or name the levels.
+    get rewritten as the ordering itself. Say which arms differ by what, or name the levels. This
+    binds a table's row labels too: a column of `rung 0 / rung 1 / rung 2` is the metaphor wearing a
+    header, and the fix is to label each row with the thing that actually varies down the column.
+16. `ruler`, `crutch`, `channel`, `reading`, `threshold` and the rest of that family, used for an
+    object that already has a name, become that name.
 
 Technical terms keep their meaning. Words like robust, comprehensive, significant, novel, scalable, and state-of-the-art carry a precise claim in scientific and ML writing, for example robust to outliers, statistically significant, and a comprehensive benchmark. Use them freely when they make a real technical point. Avoid them only when they are vague praise, and never drop a correct technical term just to dodge a filler word.
 
@@ -65,6 +69,8 @@ Technical terms keep their meaning. Words like robust, comprehensive, significan
 In finished documents this user prefers writing that reads like continuous, spoken prose rather than punctuation-heavy or list-chopped text. Em-dashes, semicolons, stacked colons, and reflexive bullets fragment a paragraph and read as a generic AI default. Chat and logs are working text, not deliverables, so they are deliberately left alone.
 
 ## Companions
+`writing-style-zh` (the Chinese sibling: same job, Chinese punctuation and its own word list — this
+skill does not govern Chinese deliverables) ·
 `writing-paper` (the paper-specific layer: citation placement, related work, section openers) ·
 `docs-weekly` (the staged weekly report) · `docs-pptx` (slide text and speaker notes, which obey
 these rules and add the constraint that the notes must be speakable aloud) · `docs-plan` and

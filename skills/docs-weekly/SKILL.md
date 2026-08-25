@@ -199,49 +199,10 @@ Technical terms stay English and unbolded, in their field-standard form: `rubric
 Do not translate a term the reader will meet again in a paper.
 
 ### `zh` mode
-**Natural Chinese, never translationese.** Read each sentence aloud. If it is an English sentence with
-Chinese words substituted, rewrite it. Common tells: 「基于…的…」stacking, 「进行了…」for a verb that
-already exists, 「其」as a possessive, subject and verb half a line apart.
 
-**Reflexive emphasis: hold the line, this one is fixed.** First measured against a human-authored doc on
-the same content at 「唯一」9x, 「本身（就）」9x, 「正是」5x, 「真正」6x. **On the next week's pair the gap
-had closed** — 唯一 3.4 vs 3.5 per 10K, 正是 and 真正 zero in both — so treat this as maintenance rather
-than a live defect. The failure was density, not any one instance: 「唯一算失败的一类」is a real, checkable
-uniqueness claim, but when every third sentence self-certifies as *the* one true X the reader discounts
-all of them, including the load-bearing ones. After drafting a section, count these four words. More than
-one live occurrence, cut to whichever carries the most information. 「真正」is the zh mirror of
-genuinely/truly/really. Cut it, or say what specifically makes the claim true.
+**中文的用词、标点与句式规则全部在 `writing-style-zh`，这里不复述。** 两份复制会各自漂移，而漂移是静默的——这正是 `naming-config` 对近似重复配置禁止的那件事，修法是指过去而不是分叉。写 `zh` 报告前读那一份，它管：自造比喻的禁令、「不是 X，是 Y」的每文档一次预算、「——」每 1,000 字一个的预算、反射式强调（唯一/正是/本身/真正）、连接词密度、译不出来就用英文、指代与量词跟前文对齐，以及标题点名主语与冒号测试。
 
-**Negation is the one word-level habit that has not improved, and it now carries a hard budget: one
-「不是 X，是 Y」 per document.** Measured across two drafted-vs-human pairs, 不是 runs **22 occurrences
-against 1** on the same content. X must be a number or a claim this document printed earlier, so the
-surviving instance corrects a reading of a value already on the page — 「Blind 失败率不是 28.2%，是
-0.41%」corrects the number the previous table just gave, and the negation is doing real work. Every other
-negation states Y and stops. Do not invent a strawman X for contrast: 「这不是失败，是训练成功之后的必然
-代价」→ 「这是训练成功之后的必然代价」, where the second half already makes the "not a failure" case
-without asserting it first.
-
-**「——」is correct paired Chinese punctuation and stays legal, but the budget is roughly one per 1,000
-characters of body prose, not two per paragraph.** Measured against a human-authored doc on the same
-content: **0.25 per 1,000 in the human version, 1.78 in the drafted one.** The per-clause test is sharper
-than the count: **a dash clause must add a number, a name, or a mechanism that appears nowhere else in
-the sentence.** 61% of the drafted version's dash clauses contained no number at all — they generalised
-the sentence they hung off, or pointed somewhere else. Delete the clause, not just the dash.
-
-| | |
-|---|---|
-| ✗ `——不干预，这条轴自己会烂掉` | a generalisation of the sentence before it |
-| ✗ `——见 §3.8` | a pointer (§What to cut) |
-| ✗ `——这就是它只涨 .011 的原因` | that number is already in the sentence |
-| ✓ `——正好一半` | a ratio the reader would otherwise have to compute |
-
-Most dashes that survive an edit sit **inside table cells**, separating a value from its condition. In
-body prose, one per section is already a lot.
-
-**Connectives are the same failure in another costume.** Measured per 1,000 prose characters: human 2.1,
-drafted 5.2. 因为 2 vs 11, 所以 1 vs 9, 但 4 vs 20. Chinese joins related clauses by juxtaposition and
-lets the relation show; spelling out 因为…所以… on a relation the reader can already see reads as
-translated English. Cut the connective first and only restore it if the sentence genuinely inverts.
+这里只留周报特有的那一条：**句号密度**，它测的是报告被写出来还是被叙述出来（见 §Where the length goes）。
 
 ### `en` mode
 Plain declarative English under `writing-style`: no em-dashes, no semicolons, no lists unless asked.
@@ -371,17 +332,8 @@ human-edited doc, so they are what a careful editor actually leaves behind:
    one survivor is one dangling reference.
 
 ### Words this project does not use
-| ✗ | ✓ |
-|---|---|
-| 诚实清单 | 本周结论与未决项 / 已有与未有 |
-| 我们在哪里 / 这条线在追什么 | say the actual position or the actual question |
-| 真正 (genuinely / truly / really) | cut it, or name what specifically makes the claim true |
-| 唯一 / 正是 / 本身（就） used as a default emphasis reflex | keep only when the sentence is actually a uniqueness or identity claim, not as connective tissue |
-| a manufactured 「不是 X」 nobody actually believes | state Y directly; keep the negation only when X was asserted earlier in the doc |
 
-The 「不是 X」row is the one that bites hardest in practice and the one drafts keep violating: **9.2 per
-10K characters in a drafted report against 0.9 in the human-authored one on the same content.** Reflexive
-emphasis (唯一/正是/本身/真正) is no longer the gap — those now measure the same in both. 不是 is.
+**这张表搬到 `writing-style-zh` 了**，连同 落差 / 尺子 / 拐杖 / 读数 / 门槛 / 通道 / 判读 / 命中位 / 界 这些新增行，以及 诚实清单、我们在哪里、真正、唯一 那几条。这里不再留副本。
 
 ---
 
@@ -624,6 +576,12 @@ the title with nothing to be about.
 
 ## The mechanism-ladder section
 
+**The word `ladder`, the word `rung`, and 阶梯 never appear in the report.** `writing-style` rule 15
+bans them as metaphors, and a row labelled `rung 2` is that metaphor wearing a table header. The
+recipe below is how you *build* the comparison; what ships is a table whose first column names the
+thing that actually varies down it — who produces the component, or what data each level sees. Refer
+to a level by that value（「prompted 改写这一档」）, never by its index.
+
 Use whenever the week's argument has the form *"this component should be X"* — learned, automated,
 adaptive, parameterised, whatever the project's X is. The claim is only as good as the rung below it.
 
@@ -847,7 +805,8 @@ because a terminal section restating delivered conclusions is a second copy of t
    than the draft, and grep for surviving `§` and 〈第.
 
 ## Companions
-`writing-style` (**`en` mode only** — it governs English deliverables, and the `zh` rules here are
-self-contained and do not defer to it) · `docs-figure` (what the embedded
+`writing-style` (**`en` mode only**) · `writing-style-zh` (**`zh` mode only** — the Chinese word,
+punctuation and sentence rules live there in full, and this skill does not restate them) ·
+`docs-figure` (what the embedded
 figures may contain) · `output-analysis` (comparing the runs behind them) · `docs-plan` (the actionable plan a report's next-week section points at) ·
 `layout-workspace` (where reports live) · `conventions` (the family index).
