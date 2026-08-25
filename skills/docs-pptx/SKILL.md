@@ -12,6 +12,12 @@ before it is shown, timed against the slot it has to fill, cited from a single b
 rebuilt from what is checked in. This skill owns the deck as a build product. It does not own what a
 figure may contain (`docs-figure`) or the prose inside it (`writing-style`).
 
+The reference implementation of everything below is **cc2pptx**, at
+`https://github.com/Robert-xiaoqiang/cc2pptx`, installed with
+`pip install git+https://github.com/Robert-xiaoqiang/cc2pptx`. Its `cc2pptx new <dir>` scaffolds a
+deck that already builds. The rules here are the reusable part and hold for any deck compiler, but
+where a rule names a mechanism, that is the one it was extracted from.
+
 ## Contents
 - [When to Use](#when-to-use)
 - [Why compile a deck at all](#why-compile-a-deck-at-all)
