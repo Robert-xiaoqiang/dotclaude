@@ -1,7 +1,7 @@
 ---
 name: writing-paper
-description: "Write or revise a research paper in LaTeX: where a citation attaches, how related work is grouped by theme rather than listed paper by paper, and how a section leads with its finding instead of announcing its topic. Inherits the punctuation and word rules of writing-style and adds the requirements a paper has on top of them."
-when_to_use: "Use when drafting or editing any section of a paper, when placing citations, when a related-work section reads as a list of summaries, or when a paragraph opens with what it is about rather than what it found."
+description: "Write or revise a research paper in LaTeX: where a citation attaches, how related work is grouped by theme rather than listed paper by paper, and how the method and experiments sections are built. A method opens with the modeling choice and each subsection with the limitation it fixes; a results paragraph takes a finding as its subject, never a table. Inherits the punctuation and word rules of writing-style."
+when_to_use: "Use when drafting or editing any section of a paper, when placing citations, when a method section reads as a derivation with no choices in it, when a results paragraph opens with Table 1 shows, when related work is a list of summaries, or when a reviewer says the contribution is hard to locate."
 ---
 # Skill: writing-paper
 
@@ -31,6 +31,8 @@ entries at inference time" has spent it setting up the gap the paper fills.
 - [Related work is organized by theme](#related-work-is-organized-by-theme)
 - [The leading sentence carries the finding](#the-leading-sentence-carries-the-finding)
 - [The arc: each section expands the last](#the-arc-each-section-expands-the-last)
+- [The method section](#the-method-section)
+- [The experiments section](#the-experiments-section)
 - [Numbers](#numbers)
 - [Rules](#rules)
 - [Anti-patterns](#anti-patterns)
@@ -206,6 +208,98 @@ The consistency requirement is strict: a mechanism named in the abstract must ap
 introduction, be defined in the method, and be measured in the experiments. A reader who finds a
 contribution in the abstract and cannot find its experiment stops trusting the paper.
 
+## The method section
+A method section fails in a specific way: it derives correctly and never says what was chosen or why.
+The reader finishes it able to reimplement the equations and unable to name the contribution.
+
+**Open with the modeling choice, not with notation.** The first sentence states what the paper decides
+to treat the problem as. Notation follows in the next sentence, once the reader knows what is being
+formalized.
+
+```latex
+% WEAK: formalism from the first word. Nothing here is a choice, so nothing is defended,
+% and standard background is indistinguishable from the contribution.
+Let $x_0 = (w^1, \ldots, w^L)$ be a clean token sequence over a vocabulary that includes a
+dedicated mask symbol. The forward process draws a masking level $t \sim \mathcal{U}(0,1]$ and
+independently replaces each token ...
+
+% STRONG: the choice, then the formalism it needs.
+We model adaptive memory as a generative policy \mempolicy{} parameterized by $\theta$, separate
+from the downstream agent. Let $\mathcal{E}$ denote an offline bank of context-guidance pairs
+$(x,m)$, where each context $x=(q,o)$ consists of a task specification $q$ and an observation $o$.
+```
+
+**Each subsection opens with the limitation that motivates it.** A method is a sequence of decisions,
+and a decision is only legible against the thing it fixes. "While experience distillation provides a
+strong initialization, the supervised policy cannot determine \emph{when} generation is useful or
+potentially harmful" earns the subsection that follows. A subsection that opens by defining its own
+title has to be read to the end before the reader learns why it exists.
+
+**Every design choice carries its reason, usually as a "so that" clause.** "We initialize the two
+decision-token embeddings symmetrically so that both decisions have comparable initial probabilities
+and can be explored at the beginning of training." Without the clause a reviewer cannot tell a
+considered choice from an arbitrary one, and will assume the second.
+
+**Mark background as background.** Standard machinery the paper inherits gets compressed and cited,
+not re-derived at length. A full derivation of a known objective, presented in the same voice and at
+the same length as the contribution, hides which part is new. Give the inherited objective, cite it,
+and spend the space on what the paper changes.
+
+**Define every symbol immediately after its equation**, in a "where" clause. An equation whose symbols
+are defined three paragraphs later, or not at all, is decoration.
+
+## The experiments section
+The test is mechanical. **Look at the grammatical subject of each paragraph's first sentence. If it is
+an artifact of the paper, a table, a figure, or a section, the sentence is wasted. If it is a claim
+about the world, it is doing work.**
+
+```latex
+% WEAK: the subject is the table. The reader learns what the table contains, which the caption
+% already said, and must hunt the paragraph for the result.
+Table~\ref{tab:main} positions our method against classical baselines of matched scale.
+Table~\ref{tab:ablation} ablates the sub-layer, and Table~\ref{tab:ensemble} reports ensembling.
+
+% STRONG: the subject is the finding. The table is cited as evidence for it.
+\textbf{Our method achieves state-of-the-art performance across all benchmarks and sub-domains.}
+As summarized in Table~\ref{tab:main-results}, it leads every sub-domain, with the largest gains
+in Reddit ($+$23.8\,pp) and CMS ($+$28.2\,pp), where structured navigation patterns benefit most
+from memorized experience.
+```
+
+The strong form also places the number **immediately after the claim it supports**, not several
+sentences later behind a digression. A result that appears mid-paragraph, after an explanation of why
+prior work is hard to compare against, will be missed by every reader who skims.
+
+**Structure the section as questions, not as tables.** Ablations and analyses are numbered research
+questions carried in run-in bold, answered before the numbers arrive:
+
+```latex
+\noindent\textbf{RQ1: Are both training stages necessary?}\
+We compare against two single-stage variants. \textit{(i) w/o Stage~1 init} skips experience
+distillation. \textit{(ii) Unified single-stage} collapses both stages into one RL phase.
+Results show that \textbf{both stages are essential, with unified training suffering the largest
+drop.} Removing Stage~1 degrades \textsc{WebArena} by 5.2\,pp, suggesting that without a
+well-initialized memory distribution, online RL struggles to converge.
+```
+
+Number the questions across the whole section, so RQ1 and RQ2 in the ablation continue into RQ4 in the
+analysis. A reader can then locate the claim a table supports without reading the table.
+
+**The setup is a reproducibility contract.** Benchmarks and baselines go under run-in bold headers.
+Each benchmark carries its citation on its name, its size, and, where a split is inherited rather than
+chosen, the prior work the split follows: "Following WebAgent-R1~\citep{wei-etal-2025-webagent} and
+WebRL~\citep{qi2024webrl}, we use a 647/165 train/test split." Naming the source of a split is what
+makes a comparison against those papers legitimate, and choosing a split freely without saying so is
+the most common way a results table stops being comparable.
+
+**Group baselines by paradigm, not alphabetically**, using the same inline enumeration as everywhere
+else: `\emph{(i)~Workflow-based memory}` then `\emph{(ii)~Learning-based memory}`. The grouping is
+itself an argument, because it says which family the paper competes with.
+
+**When a comparison is impossible, say so and say why.** If no prior system reports the suite, state
+it plainly, state what each reports instead, and state what the paper adds. That is a finding about
+the field. Burying it inside a paragraph about tables turns a legitimate contribution into an excuse.
+
 ## Numbers
 Report a difference with an explicit sign and a unit, and bind the unit with a thin space:
 `($+$23.8\,pp)`. Percentage points and percent are different quantities, so a change from 42.0\% to
@@ -230,8 +324,17 @@ gain sits on a small base, because "50\% relative improvement" on a base of 4\% 
 9. **Results lead with the finding in bold, ablations with the research question.** Evidence follows,
    attribution last.
 10. **No sentence exists only to introduce the next one.** Delete it and promote the next.
-11. **Signed differences carry a unit and a thin space**, and percentage points are not percent.
-12. **Every mechanism in the abstract appears in the method and is measured in the experiments.**
+11. **A method subsection opens with the limitation it fixes**, and every design choice carries a
+    reason, usually as a "so that" clause.
+12. **Background is compressed and cited, never re-derived** at the length of the contribution.
+13. **The subject of a results paragraph is a finding, never a table.** "Table 1 positions ..." is
+    always the wrong opener.
+14. **The number follows the claim immediately.** Not after a digression.
+15. **Ablations and analyses are numbered research questions**, answered in bold before the evidence.
+16. **An inherited split names the work it follows.** A freely chosen split that does not say so is
+    not comparable to anything.
+17. **Signed differences carry a unit and a thin space**, and percentage points are not percent.
+18. **Every mechanism in the abstract appears in the method and is measured in the experiments.**
 
 ## Anti-patterns
 - **The trailing citation.** `... is a left-to-right generative model~\citep{x}.` The citation now
@@ -246,6 +349,18 @@ gain sits on a small base, because "50\% relative improvement" on a base of 4\% 
   its final sentence. A reader who skims gets nothing.
 - **Effectiveness claims as interpretation.** "This demonstrates the effectiveness of our approach"
   restates that the number was good. Give the mechanism that produced it.
+- **The table-of-contents paragraph.** "Table 1 positions X. Table 2 ablates Y. Table 3 reports Z."
+  Three sentences that restate three captions and state no result.
+- **The formalism-first method.** A method section that opens `Let $x_0 = \ldots$` has defined the
+  problem without saying what the paper decided to do about it.
+- **Background at contribution length.** A known objective re-derived over a page, in the same voice
+  as the new part, so a reviewer cannot see the boundary.
+- **The undefended constant.** A design choice with no "so that". A reviewer reads an arbitrary choice
+  where a considered one was intended.
+- **The buried headline.** The main result arriving in the middle of a paragraph, after an
+  explanation of why comparison is difficult.
+- **The freely chosen split.** A train/test division with no cited source, which quietly makes every
+  number in the table incomparable with the work it is placed beside.
 - **Percent where percentage points belong.** It inflates every reported gain and a reviewer will
   notice.
 - **A contribution in the abstract with no experiment.** The fastest way to lose a reviewer.
