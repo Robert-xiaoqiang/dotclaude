@@ -45,17 +45,32 @@ research that fills the deck, and not for posters or papers.
 
 ## Why compile a deck at all
 
-Marp, reveal.js and pandoc all turn text into slides, and all of them treat PowerPoint as an export
-format rather than a target. What comes out is a stack of pictures. That is fine until a co-author
-wants to fix a typo, a venue asks for the file, or somebody runs it through accessibility tooling.
-Emit text boxes containing text and tables that are tables, and pictures only where there is
-genuinely a picture.
+Judge the formats as **compile targets**, not as authoring formats. That inverts the usual answer.
+Markdown, Beamer and HTML are all pleasant to write and all inconvenient to receive: each one makes
+the recipient install a toolchain, none lets them change a word without rebuilding, and none lets the
+producer predict the layout, because a Markdown renderer decides its own line breaks, LaTeX floats
+move on their own, and a CSS cascade is emergent. A presentation format wins every one of those rows
+and loses exactly one, which is that writing it by hand is awful. Removing that one is what a
+compiler is for.
+
+The consequence for the output is concrete. Emit text boxes containing text and tables that are
+tables, and pictures only where there is genuinely a picture. An export that is a stack of images
+satisfies nobody: the co-author cannot fix the typo, the venue gets a file it cannot reflow, and the
+accessibility tooling finds nothing to read.
 
 The deeper reason is that **typesetting fails silently**. A wrong colour is visible the moment you
 look. Text three lines past the bottom of its box is visible only from the back row of the room,
 because the tool that made it was happy and the person who made it was reading the source. A
 compiled deck can be asked how much of each box the content used, and that question is the whole
 justification for the pipeline.
+
+**Where the producer is an agent, this argument gets sharper.** An agent can emit any format. What it
+usually cannot do is find out whether what it emitted was any good, and a format with absolute
+geometry is the only one where that question has an answer the producer can compute. Ship the
+operating manual for the loop in the repository, in whatever file the agent harness reads by
+convention, and write it for the agent rather than for a human: the build command, what each lint
+finding means and the specific fix, and the instruction to look at the rendered slides. A claim that
+a tool is agent-friendly is worth nothing next to a file that tells the agent how to drive it.
 
 ## What belongs in the source
 
@@ -250,6 +265,8 @@ Do this at least once per major edit, not once at the end.
     choose between a full-width slide and a two-column one.
 14. **The slot length is declared in the source.** Without it there is no timing check, only a hope.
 15. **Look at the rendered slides.** Rasterise to a contact sheet at least once per major edit.
+16. **Ship the agent's operating manual in the repository.** Build command, per-finding fixes, and the
+    instruction to look. Agent-friendliness is a file, not a claim.
 
 ## Anti-patterns
 
