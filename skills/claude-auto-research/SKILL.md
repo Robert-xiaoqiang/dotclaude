@@ -236,6 +236,13 @@ Blocked on one thing is not blocked on everything. Park it, do the rest, and lea
 
 Templates to copy into a new campaign directory live in `templates/`.
 
+## Reporting back to the user
+The ledger is written so a cold session can resume, which makes it complete and unselective. When a
+person returns and asks what happened, they need a different artifact: a verdict, then anything
+blocking them, then live state, results, failures with their verification status, and what happens
+next if they say nothing. `claude-debrief` owns that shape. Read the ledger to write it, never paste
+the ledger in place of it.
+
 ## Companions
 `docs-plan` (the campaign directory is its directory form) · `layout-workspace` (where plans, scripts
 and configs live) · `naming-config` (config, launcher, and run-dir names, and the `tag` slot that makes

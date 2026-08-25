@@ -28,12 +28,16 @@ starting or organizing a project, or when unsure which convention applies.
 | **papers** | where does the citation go, and why does this paragraph say nothing? | `writing-paper` (citation placement, themed related work, findings-first section openers) · `writing-style` (the punctuation and word rules it builds on) |
 | **figures** | what may a figure contain, and how do I render it? | `docs-figure` (TikZ / Mermaid / HTML / matplotlib, embed-not-standalone) |
 | **talks** | how do I build slides that can be linted, timed and rebuilt? | `docs-pptx` (deck compiled from a plain-text source, one bibliography, cropped paper figures, notes as the spoken script) |
+| **debrief** | I left it running and came back, what do I need to know? | `claude-debrief` (verdict, blockers, live state, results, failures with verification, next) |
 | **campaign** | how do I run all of the above unattended for days, and resume after a context reset? | `claude-auto-research` (the plan-plus-ledger in `docs/plans/<date>-<topic>/`, and the autonomy boundary) |
 
 ## The philosophy (one line each)
 - **code style** — a required input has three sources (the environment, an argument, the job
   config); if none supplied it the chain is broken, so fail there rather than guess and
   relocate the run (`code-no-fallbacks`).
+- **debrief** — a person returning asks what needs doing before what happened, so the report leads
+  with a verdict and blockers, grounds every claim in an id or a path, and says what did not
+  happen as well as what did (`claude-debrief`).
 - **papers** — a citation attaches to the concept it supports, related work is grouped by theme
   and ends on the gap, and a section leads with its finding rather than its topic
   (`writing-paper`).
