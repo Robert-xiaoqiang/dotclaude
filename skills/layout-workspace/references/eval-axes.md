@@ -38,9 +38,20 @@ Applied:
 | AR vs MDM vs diffusion policy | model |
 | full bench vs subsampled bench | dataset (the `tag` slot: `mini` / `smoke` / `toy`) |
 
-So the pipeline name should say the **protocol**: `eval_single_turn_suite`, later
-`eval_multi_turn_suite` when there is an environment to talk to. It must not say how much of each
-bench was scored — that is the corpus, and the corpus has a tag slot for exactly this.
+So the pipeline name should say the **protocol** — and it must also carry the base it derives from.
+If the scorer subfamilies are `eval_ar_choice` / `eval_ar_graded`, a protocol subfamily is
+`eval_ar_single_turn_suite`, later `eval_ar_multi_turn_suite` when there is an environment to talk
+to. Dropping the `ar` makes the one pipeline you actually run the only one whose base you cannot
+read off its name. The name must not say how much of each bench was scored — that is the corpus, and
+the corpus has a tag slot for exactly this.
+
+**Make the protocol a component group, not just a name.** Code at `<pkg>/pipeline/eval/protocol/`,
+configs mirroring at `config/pipeline/eval/protocol/`, mounted at `pipeline.eval.protocol`. Then a
+pipeline is an assembly — `eval_ar_k_consistency_suite` is `eval_ar_single_turn_suite` with one slot
+moved — and the arms of a protocol comparison sit one config slot apart instead of being separate
+near-duplicate pipelines. Give the base class the invariants its subclasses must not break: that a
+record reaches the sink only once scored, and that a protocol declaring `carries_state` refuses to
+be sharded (two ranks would accumulate two histories and report two measurements under one name).
 
 ## Three traps
 
@@ -75,6 +86,13 @@ one group table and missing from another, so it built nothing while preflight ch
 
 Add `reduce` when the first n>1 arm needs it. Add the multi-turn protocol when there is an
 environment. The abstraction is the deliverable; the rungs are not.
+
+**But if you do build a rung ahead of its use, it must run or REFUSE.** Those are the only two honest
+states. A multi-turn protocol with no environment should raise at construction, naming what is
+missing and what to use instead — never quietly become a one-turn eval that reports plausible
+numbers under the multi-turn name. Then have a check instantiate every rung's config and assert that
+each one either constructs or refuses with an actionable message; that check is what keeps
+"not wired yet" from decaying into "silently does nothing".
 
 ## Auditing is not a mode of evaluating
 
