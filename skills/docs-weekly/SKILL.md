@@ -166,20 +166,22 @@ Everything downstream of a number. The table already carries the value, its cond
 comparison, so the prose beside it adds a **judgment** and stops. See §Tables.
 
 **Count sentence-enders. That one number decides whether the report is written or narrated.** Measured
-across two drafted-vs-human pairs on identical content:
+across three drafted-vs-human pairs on identical content: 句号 per 1,000 characters ran **0.5 – 1.0** in
+the human versions against **4.2 – 8.3** in the drafted ones, at roughly twice the total length.
 
-| | human | drafted |
-|---|---:|---:|
-| 句号 per 1,000 characters | **0.5** | 8.3 |
-| prose share of the document | **24%** | 61% |
-| median narrative paragraph | **40 chars** | 107 |
+But the count is a symptom. **The disease is that the two zones above get swapped.** In every pair the
+drafted version spent its paragraphs *interpreting results* and its one-liners *describing mechanism* —
+exactly backwards. Diagnose a long passage by asking which side of the line it is on:
 
-The second pair's human version contains **five sentence-enders in the entire report.** It is tables,
-figures, captions and bolded labels; prose appears only where no table can hold the thing. That is the
-target shape, not an eccentricity — and it explains why the word-level budgets keep getting blown: a
-draft at 8 句号 per 1,000 has to invent connectives, negations and dashes to hold all those sentences
-together. Cut the sentences and 「不是」/「——」/「所以」 fall to zero on their own, which is exactly what
-the human version measures (0 / 0 / 0).
+| the passage is | long because | verdict |
+|---|---|---|
+| a derivation, a mechanism, a protocol | the reader cannot reconstruct it from any table | correct, probably still too short |
+| a reading of a table | it speculates about *why* the numbers came out that way | **cut to one line** |
+
+**Speculation about a result gets one sentence, not a paragraph**, however interesting. "X beats Y,
+probably because Z" is one line, plus at most one line naming what would test Z. If the mechanism behind
+Z deserves three paragraphs, those paragraphs belong in the section that introduces the mechanism, before
+any numbers exist.
 
 **The operational test, applied per paragraph: is this a judgment, or is it narration of the table above
 it?** A judgment survives as one clause. Narration gets deleted, and if the fact it carried matters, it
@@ -478,6 +480,50 @@ Generate with `output-analysis` when the runs are in the `layout-output` tree, o
 or `.tex` beside the report.
 
 ---
+
+### Where a figure sits relative to its heading and its table
+
+Measured against a human-edited weekly on the same content, figures land in one of three positions, and
+each carries a different job:
+
+| position | what precedes it | use when |
+|---|---|---|
+| **directly under the heading** | nothing | the figure *is* the section's claim; the heading already named it |
+| **under a bold one-line label** | `**direct PE with memory：一次 memory read, 一次 analyzer 调用, 一次 updater 调用, 一次 memory write**` | several figures compare configurations, and the label is the only thing that differs between them |
+| **after the table** | the table it visualises | the numbers are the evidence, the figure is the shape |
+
+**Sibling figures share one label pattern and skip their captions.** Three pipeline diagrams in a row,
+each under a bold line naming its call sequence, need no `**图：**` line apiece — the labels already
+distinguish them, and three captions would repeat the three labels. Caption a figure that stands alone,
+not one standing in a series.
+
+### Nest the mechanism, do not flatten it
+
+Measured on the same content: the human-edited version used 8 `###` and 7 `#####`; the drafted one used
+25 `###` and no `#####`. Flattening turns one mechanism with parts into twenty-five siblings, and the
+reader loses which part belongs to what.
+
+**One `###` per claim; the machinery under that claim goes to `####` and `#####`.** In an implementation
+section, `#### 外层：一次 harness update` legitimately owns `##### JIT-diff`, `##### 跨步记忆`,
+`##### 跨步检索与跨样本检索`, `##### 工作流程` — four aspects of one mechanism, not four sections of the
+report.
+
+### One results subsection per claim, not per slice of the same data
+
+The same measurement re-cut along another axis is not a new finding. Measured on one pair: the
+human-edited version carried **主要结果 → failure pattern → 消融** and stopped; the drafted one had ten
+results subsections, six of which were the same nine arms re-sliced by scope, by bench, by epoch, by
+failure class, by rate, by correlation. Each slice was individually true and collectively noise.
+
+**Before adding a results subsection, state the claim it makes that no existing subsection makes.**
+
++ genuinely new claim — keep it
++ same claim at a finer grain — it is a **column** in the existing table, or a second panel in the
+  existing figure
++ no claim, just more of the data on display — cut it
+
+A results section with three subsections and one claim each gets read; one with ten gets skimmed, and the
+three claims that mattered are lost among the seven that did not.
 
 ## Citing a paper costs one line
 
