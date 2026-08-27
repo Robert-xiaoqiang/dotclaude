@@ -27,7 +27,7 @@ starting or organizing a project, or when unsure which convention applies.
 | **outputs** | how do I compare runs or reclaim their space? | `output-analysis` (latitude vs longitude) · `output-cleanup` (resume-safe reclaim) |
 | **papers** | where does the citation go, and why does this paragraph say nothing? | `writing-paper` (citation placement, themed related work, findings-first section openers) · `writing-style` (the punctuation and word rules it builds on) |
 | **figures** | what may a figure contain, and how do I render it? | `docs-figure` (TikZ / Mermaid / HTML / matplotlib, embed-not-standalone) |
-| **talks** | how do I build slides that can be linted, timed and rebuilt? | `docs-pptx` (deck compiled from a plain-text source, one bibliography, cropped paper figures, notes as the spoken script) |
+| **talks** | how do I build slides that can be linted, timed and rebuilt? | `docs-slides` (one source compiled to several backends, one bibliography, cropped paper figures, notes as the spoken script, and the discipline of what to strip off a slide) |
 | **debrief** | I left it running and came back, what do I need to know? | `claude-debrief` (verdict, blockers, live state, results, failures with verification, next) |
 | **campaign** | how do I run all of the above unattended for days, and resume after a context reset? | `claude-auto-research` (the plan-plus-ledger in `docs/plans/<date>-<topic>/`, and the autonomy boundary) |
 
@@ -49,7 +49,7 @@ starting or organizing a project, or when unsure which convention applies.
 - **docs** — a project keeps one living architecture ref (`docs-arch`), dated actionable plans
   (`docs-plan`), and a weekly report that carries the argument rather than logging the week
   (`docs-weekly`).
-- **talks** — a deck is compiled from a source and linted before it is shown (`docs-pptx`), because
+- **talks** — a deck is compiled from a source and linted before it is shown (`docs-slides`), because
   typesetting fails silently and the failure is only visible from the back of the room.
 - **platform** — working on a compute platform means setting up a persistent env on it
   (`platform-env`), submitting a platform-neutral run spec that is rendered per scheduler with

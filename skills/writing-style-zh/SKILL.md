@@ -253,4 +253,4 @@ when_to_use: "Use when producing or revising a Chinese-language document for the
 中文交付物里，用户要的是读起来像连续说话的文字，不是被标点和列表切碎的文字。自造比喻、反射式强调、堆叠的连接词都让段落显得有文采而实际在降低信息密度，也是通用 AI 输出最好认的默认。会话和日志是工作文本，不是交付物，所以刻意不管。
 
 ## Companions
-`writing-style`（英文对应版，管英文交付物，两份互不覆盖）· `docs-weekly`（分阶段的周报配方，正文用哪种语言就走哪一份 style skill）· `docs-pptx`（讲稿与备注，另加一条必须能念出声）· `docs-plan` 与 `docs-arch`（活文档）· `git-commit`（版本控制文本，这些规则刻意不管）。
+`writing-style`（英文对应版，管英文交付物，两份互不覆盖）· `docs-weekly`（分阶段的周报配方，正文用哪种语言就走哪一份 style skill）· `docs-slides`（讲稿与备注，另加一条必须能念出声）· `docs-plan` 与 `docs-arch`（活文档）· `git-commit`（版本控制文本，这些规则刻意不管）。
