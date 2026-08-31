@@ -657,4 +657,6 @@ Rule 6 below is the seam: it is a *name* (so it lives here) that determines a *p
 ## Companions
 `layout-workspace` (where these files live — the paired skill for the experiment-facing half) ·
 `naming-descriptive` (the general naming primitive this specialises) · `layout-output` (the run tree
-rule 6 derives) · `platform-run` (the launcher's neutral spec) · `conventions` (the family index).
+rule 6 derives) · `platform-run` (the launcher's neutral spec) · `launcher-template` (the template-vs-invocation
+contract behind the `tag` slot: variants are named configs or CLI overlays, never copies or
+mode flags) · `conventions` (the family index).

@@ -14,6 +14,16 @@ changes for a variant, and no variant exists outside a frozen config. This is th
 one launcher serving a 90-cell eval grid, a 4-rank local smoke, and a 16-rank production run without
 a single copied file.
 
+## Contents
+- [When to Use](#when-to-use)
+- [The two halves of the contract](#the-two-halves-of-the-contract)
+- [The grid pattern](#the-grid-pattern)
+- [Local and smoke invocations](#local-and-smoke-invocations)
+- [The bundled grid scripts](#the-bundled-grid-scripts)
+- [Rules](#rules)
+- [Anti-patterns](#anti-patterns)
+- [Companions](#companions)
+
 ## When to Use
 - Creating a launcher, or reviewing one that has grown overrides in its `run:` list.
 - Running a smoke, local, probe, or debug variant of an existing launcher.
@@ -56,6 +66,26 @@ dataset and fast-knob overlays on the command line — not a `_local` copy of th
 dir; its speed comes from CLI overlays (`...max_steps=6`) that die with the invocation. When the
 smoke goes green, the full submit uses the untouched template: nothing to un-patch, nothing to
 forget, and the diff between what was smoked and what ships is precisely the overlay list.
+
+## The bundled grid scripts
+`/mnt/data/xqwang/.claude/skills/launcher-template/scripts/` ships the grid machinery as a portable engine, extracted from a
+working fleet and generalized the same way `platform-queue-shepherd` ships its shepherd: the engine
+knows files and hooks, never a scheduler or a project.
+
+| script | job | hooks it needs |
+|---|---|---|
+| `grid-enqueue.sh` | checkpoint ladder -> queue rows, with the provenance guard (a checkpoint with no `config.yaml` above it cannot be scored), the one-run-root refusal (two roots is two policies on one curve), and dedup against queue AND ledger | none — pure files |
+| `grid-runner.sh` | drain the queue: budget hook admits, submit hook runs `<template> + --set <cell>` and prints a job id, the row MOVES to the ledger | `GRID_SUBMIT_CMD`, `GRID_BUDGET_CMD` |
+| `grid-reconcile.sh` | self-healing: ledger rows whose jobs read Failed/Stopped return to the queue front; Succeeded stays as the done-record; unreadable status holds (never requeue on ignorance) | `GRID_STATUS_CMD` |
+
+The move-to-ledger discipline is the load-bearing part: a runner that DELETES rows plus a scheduled
+enqueuer that only dedups against the queue re-adds every submitted cell each pass and
+double-submits the grid — measured before the ledger existed. All three state files live on shared
+storage and every input is required, no defaults (`code-no-fallbacks`).
+
+What stays in the PROJECT is the thin wrapper that generates the template itself — the eval
+launcher's `task.yaml`, the per-arm model config, the policy-class mapping — because those name
+project code. The wrapper calls (or mirrors) this engine; the engine never imports the project.
 
 ## Rules
 1. **The template carries no invocation-specific tokens.** Every token in `run:` applies to every

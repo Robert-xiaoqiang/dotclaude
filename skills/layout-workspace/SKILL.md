@@ -227,7 +227,8 @@ Never write run outputs into the project dir.
 
 ## Companions
 `naming-config` (the slot grammar for config/launcher **names** — the paired skill for the
-experiment-facing half) · `platform-run` (the flat run-control layer under `launcher/`) ·
+experiment-facing half) · `launcher-template` (the template-vs-invocation contract: variants
+are named configs or CLI overlays, with the bundled grid engine) · `platform-run` (the flat run-control layer under `launcher/`) ·
 `layout-output` (the run-output tree, the sibling `layout-` concern) · `docs-plan` (writes
 `docs/plans/…`) · `docs-arch` (maintains `docs/ARCH.md`) · `naming-descriptive` (how to name) ·
 `git-commit` (commit conventions).
