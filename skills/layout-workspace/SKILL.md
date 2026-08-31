@@ -220,6 +220,17 @@ question is theirs:
 | `references/eval-axes.md` | designing or extending an eval family: what forks a pipeline vs a scorer |
 | `references/overrides.md` | a launcher's `run:` grew a wall of `a.b.c=value` |
 
+Two components have deep-dive skills of their own; this file's statements about them stand alone,
+and the sibling carries the full contract:
+- **`naming-config-launcher`** — the launcher under `launcher/` is a frozen TEMPLATE of the full
+  standard run; smoke/local/probe/grid variants run as named configs or CLI overlays that land in
+  the frozen `config.yaml`, never as edited copies (e.g. a 90-cell checkpoint-eval grid is one
+  launcher plus `--set model.init_kwargs.path=$CK` per cell, driven by the bundled
+  enqueue/run/reconcile scripts). Principle 2 (selection vs specification) is the law it applies.
+- **`naming-config-prompting`** — prompt text is config-like data, not code: files loaded
+  byte-exact, registered under `<owner>.<role>` names, content-hashed into run provenance, ablated
+  through the owning component's config so a prompt change moves the run hash.
+
 ## Not this skill
 Run outputs (checkpoints, logs, metrics, eval) are a **separate** tree under `$OUTPUT_DIR_HOME`, not
 the agent workspace. Their layout and their resume-vs-derived classification live in `layout-output`.
@@ -227,8 +238,9 @@ Never write run outputs into the project dir.
 
 ## Companions
 `naming-config` (the slot grammar for config/launcher **names** — the paired skill for the
-experiment-facing half) · `launcher-template` (the template-vs-invocation contract: variants
-are named configs or CLI overlays, with the bundled grid engine) · `platform-run` (the flat run-control layer under `launcher/`) ·
+experiment-facing half) · `naming-config-launcher` (the template-vs-invocation contract: variants
+are named configs or CLI overlays, with the bundled grid engine) · `naming-config-prompting`
+(prompts as registered, hashed data) · `platform-run` (the flat run-control layer under `launcher/`) ·
 `layout-output` (the run-output tree, the sibling `layout-` concern) · `docs-plan` (writes
 `docs/plans/…`) · `docs-arch` (maintains `docs/ARCH.md`) · `naming-descriptive` (how to name) ·
 `git-commit` (commit conventions).

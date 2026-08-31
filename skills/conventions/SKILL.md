@@ -20,7 +20,8 @@ starting or organizing a project, or when unsure which convention applies.
 | concern | question it answers | skill |
 |---|---|---|
 | **naming** | what do I call this config / file / run? | `naming-config` (model/pipeline/dataset/launcher slot-grammar) · `naming-descriptive` (the general primitive) |
-| **launcher contract** | template vs invocation: how a smoke/local/probe/grid variant runs without copying or patching the launcher | `launcher-template` (the contract + the bundled grid enqueue/run/reconcile engine) |
+| **launcher contract** | template vs invocation: how a smoke/local/probe/grid variant runs without copying or patching the launcher | `naming-config-launcher` (deep-dive of `naming-config`: the contract + the bundled grid enqueue/run/reconcile engine) |
+| **prompting** | how is prompt text named, stored, rendered, hashed, and ablated? | `naming-config-prompting` (deep-dive of `naming-config`: prompts as registered `<owner>.<role>` files with sha8 provenance, composition bands, and output contracts) |
 | **layout** | where does this doc / script / run output live? | `layout-workspace` (`docs/`, `scripts/`, reports/plans, what's committed) · `layout-output` (the run-output tree under `$OUTPUT_DIR_HOME`) |
 | **docs** | how do I write/maintain the living docs? | `docs-plan` (`docs/plans/<date>-<topic>.md`) · `docs-arch` (`docs/ARCH.md`) · `docs-weekly` (the staged Chinese+English weekly report) |
 | **platform** | how do I set up, submit to, and match the runtime of a compute platform? | `platform-env` (env.sh / cluster setup) · `platform-run` (neutral `task.yaml` → DLC/Slurm/EAI) · `platform-runtime` (driver × image × venv × storage stack) · `platform-migrate` (moving a persistent home to another mount) · `platform-queue-shepherd` (one claim per service on a busy fleet; migrate a stuck submission only into measured empty nodes) |

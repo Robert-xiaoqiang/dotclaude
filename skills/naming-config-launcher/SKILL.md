@@ -1,9 +1,9 @@
 ---
-name: launcher-template
+name: naming-config-launcher
 description: "The launcher contract for config-driven runs: the launcher is a frozen TEMPLATE of the full standard run, and every variation — smoke, local probe, per-checkpoint grid cell, per-cluster fit — is a named config or a CLI overlay that lands in the run's frozen config, never an edit to the template and never a mode flag."
 when_to_use: "Use when adding or invoking a launcher, when a smoke/local/probe/debug variant of a run is needed, when sweeping one field across a grid (checkpoints, seeds, scales), or when the temptation arises to copy a launcher and edit one line, add a mode= flag, or hand-patch a template for a one-off. Symptoms that should send you here: two launchers that differ by one field, a run whose behavior is not in its config.yaml, a _v2/_test launcher name."
 ---
-# Skill: launcher-template
+# Skill: naming-config-launcher
 
 ## Purpose
 A launcher is a **template**: the complete, standard, full-scale run, selected by name, with zero
@@ -67,8 +67,20 @@ dir; its speed comes from CLI overlays (`...max_steps=6`) that die with the invo
 smoke goes green, the full submit uses the untouched template: nothing to un-patch, nothing to
 forget, and the diff between what was smoked and what ships is precisely the overlay list.
 
+**Commit what recurs, inline what doesn't.** `naming-config` teaches the committed `<arm>_smoke`
+launcher; this file teaches the CLI-overlay smoke; both are right, at different repetition counts.
+A standing pre-flight gate that many hands run before every submit is a committed variant launcher —
+a TEMPLATE of the smoke run, whose file carries its overrides so no hand can mistype them. A one-off
+probe, or a machine-generated grid cell, is an inline overlay that dies with the invocation. In both
+forms every delta lands in the frozen `config.yaml`; the choice is only about who repeats the typing.
+Two more committed-variant cases the taxonomy owns:
+- **`resume`**: a committed variant whose overrides name the checkpoint chain — recurring by nature.
+- **`_local` with a different CODE PATH** (e.g. `use_vllm=false` because the box lacks the engine):
+  a genuinely different code path is a different config and earns a name. A `_local` that only
+  shrinks numbers is the anti-pattern; where a run happens is a verb (`make run`), not a file.
+
 ## The bundled grid scripts
-`/mnt/data/xqwang/.claude/skills/launcher-template/scripts/` ships the grid machinery as a portable engine, extracted from a
+`/mnt/data/xqwang/.claude/skills/naming-config-launcher/scripts/` ships the grid machinery as a portable engine, extracted from a
 working fleet and generalized the same way `platform-queue-shepherd` ships its shepherd: the engine
 knows files and hooks, never a scheduler or a project.
 
@@ -120,5 +132,6 @@ project code. The wrapper calls (or mirrors) this engine; the engine never impor
 `naming-config` (the slot grammar for the names of templates, tags, and groups — including that the
 launcher name alone states what runs) · `layout-workspace` (selection-vs-specification, where the
 launcher lives, and `references/overrides.md` for classifying a long submit line) · `platform-run`
-(how the template renders and submits to a scheduler) · `code-no-fallbacks` (why a required
-invocation value fails loudly instead of defaulting).
+(how the template renders and submits to a scheduler) · `naming-config-prompting` (the sibling
+deep-dive: the same frozen-template-plus-overlay doctrine applied to prompt text) ·
+`code-no-fallbacks` (why a required invocation value fails loudly instead of defaulting).
