@@ -40,3 +40,13 @@ qs_submit() {  # <cluster> <launcher>
 qs_kill() {  # <cluster> <job_id>
     _sky kill --cluster "$1" "$2" >/dev/null 2>&1
 }
+
+qs_queue_ahead_gpus() {  # <cluster> -> accelerators demanded by jobs queued there (approximation)
+    # The pod listing has no per-job accelerator column, and querying every queued job's detail
+    # is hundreds of API calls per tick. The capacity table carries card-denominated `used` and
+    # `submitted` totals, so submitted-minus-used is the demand a fresh submit waits behind.
+    # APPROXIMATE on purpose: it counts every non-running ask, not strictly the ones scheduled
+    # ahead of ours — a conservative over-estimate, which is the safe direction for a veto.
+    _sky capacity --cluster "$1" 2>/dev/null | tail -1 \
+        | awk '{u=$(NF-2); s=$(NF-1); d=s-u; if (d<0) d=0; print d}'
+}

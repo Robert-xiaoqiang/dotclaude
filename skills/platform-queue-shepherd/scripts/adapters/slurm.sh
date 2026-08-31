@@ -43,3 +43,9 @@ qs_submit() {  # <partition> <launcher>
 qs_kill() {  # <partition> <job_id>
     scancel "$2" >/dev/null 2>&1
 }
+
+qs_queue_ahead_gpus() {  # <partition> -> GPUs requested by PENDING jobs there
+    squeue -h -p "$1" -t PD -O 'tres-alloc' 2>/dev/null \
+        | grep -oE 'gres/gpu[^,]*=([0-9]+)' | grep -oE '[0-9]+$' \
+        | awk '{s+=$1} END {print s+0}'
+}

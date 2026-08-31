@@ -21,11 +21,23 @@
 #   QS_STUCK_SECS     optional, default 7200. Queue-position is worth hours, not minutes.
 #   QS_INTERVAL_SECS  optional, default 3600. `watch` sleeps this long between ticks.
 #   QS_SETTLE_SECS    optional, default 45. Wait before re-querying after a submit.
+#   QS_AHEAD_MAX_GPUS optional, default unset (disabled). Migrate only when the TARGET cluster's
+#                     queued-ahead accelerator demand is at most this. Killing a claim forfeits
+#                     the position it holds and a fresh submit joins the BACK of the target's
+#                     queue — so a target with room today but a deep queue is not a seat, it is
+#                     a second wait bought with the first one's position.
+#   QS_AHEAD_MAX_RATIO optional, default unset (disabled). Same veto, expressed relative to the
+#                     job's own accelerator ask (needs the manifest's 4th field): migrate only
+#                     when ahead_demand <= ratio * own_gpus. Either knob may veto; both may be
+#                     set. With neither set the decision is empty-nodes-only, as before.
 #
 # THE ADAPTER CONTRACT. Source-able bash defining exactly these, each printing to stdout and
 # returning non-zero only on a hard error:
 #   qs_job_status  <cluster> <job_id>      -> Running|Queuing|Stopped|Failed|Succeeded|Unknown
 #   qs_empty_nodes <cluster>               -> integer, WHOLE EMPTY NODES (not free cards)
+#   qs_queue_ahead_gpus <cluster>          -> OPTIONAL: accelerators demanded by jobs already
+#                                             queued there (what a fresh submit waits behind).
+#                                             Undefined -> the ahead-demand knobs are inert.
 #   qs_find_job    <cluster> <name_prefix> -> "<job_id> <status>" for the newest match, or ""
 #   qs_submit      <cluster> <launcher>    -> submits; adoption is the engine's job, not yours
 #   qs_kill        <cluster> <job_id>      -> stops the job
@@ -41,6 +53,8 @@ set -euo pipefail
 : "${QS_MANIFEST:?required: path to the service manifest. See services.example.conf.}"
 : "${QS_STATE_DIR:?required: claim directory on SHARED storage. A claim on node-local disk is invisible to the next box and the shepherd will double-submit.}"
 STUCK_SECS="${QS_STUCK_SECS:-7200}"
+AHEAD_MAX_GPUS="${QS_AHEAD_MAX_GPUS:-}"
+AHEAD_MAX_RATIO="${QS_AHEAD_MAX_RATIO:-}"
 INTERVAL_SECS="${QS_INTERVAL_SECS:-3600}"
 SETTLE_SECS="${QS_SETTLE_SECS:-45}"
 
@@ -102,6 +116,33 @@ seats_available() {  # <cluster> <nodes_needed> -> 0 if it can seat the job righ
     [ "$n" -ge "$2" ]
 }
 
+# ahead_demand_ok <cluster> <own_gpus> -> 0 when the target's queued-ahead accelerator demand
+# does not veto a migration. THE ECONOMICS THIS ENCODES: a kill spends the position the claim
+# already holds, and the resubmit starts LAST on the target — so empty nodes are necessary but
+# not sufficient; a target whose queue already demands more than the configured bound would
+# seat the jobs ahead first and the migration buys a second wait with the first one's position.
+# Inert (returns ok) when neither knob is set or the adapter has no qs_queue_ahead_gpus.
+ahead_demand_ok() {
+    local cluster="$1" own="$2" ahead
+    [ -n "$AHEAD_MAX_GPUS$AHEAD_MAX_RATIO" ] || return 0
+    declare -F qs_queue_ahead_gpus >/dev/null || return 0
+    ahead="$(qs_queue_ahead_gpus "$cluster" 2>/dev/null || true)"; ahead="${ahead//[$' \t\r\n']/}"
+    if ! [[ "$ahead" =~ ^[0-9]+$ ]]; then
+        warn "cannot read queued-ahead demand of $cluster; not vetoing on an unreadable number"
+        return 0
+    fi
+    if [ -n "$AHEAD_MAX_GPUS" ] && [ "$ahead" -gt "$AHEAD_MAX_GPUS" ]; then
+        say "ahead-demand veto: $cluster has ${ahead} accelerators queued ahead (> $AHEAD_MAX_GPUS)"
+        return 1
+    fi
+    if [ -n "$AHEAD_MAX_RATIO" ] && [[ "$own" =~ ^[0-9]+$ ]] && [ "$own" -gt 0 ] \
+       && [ "$ahead" -gt $(( AHEAD_MAX_RATIO * own )) ]; then
+        say "ahead-demand veto: $cluster queues ${ahead} accelerators ahead (> ${AHEAD_MAX_RATIO}x our $own)"
+        return 1
+    fi
+    return 0
+}
+
 # ---------------------------------------------------------------- verbs
 cmd_submit() {
     local svc="${1:?usage: submit <service>}" alts alt cluster launcher nodes
@@ -112,7 +153,7 @@ cmd_submit() {
         return 1
     fi
     for alt in $alts; do
-        IFS=: read -r cluster launcher nodes <<<"$alt"
+        IFS=: read -r cluster launcher nodes _gpus <<<"$alt"
         if seats_available "$cluster" "$nodes"; then
             adopt_after_submit "$svc" "$cluster" "$launcher" && return 0
         else
@@ -121,7 +162,7 @@ cmd_submit() {
     done
     # Nothing can seat it. Queue on the PREFERRED alternative rather than not running at all:
     # a queued claim holds position, and position is the thing migration spends.
-    IFS=: read -r cluster launcher nodes <<<"${alts%% *}"
+    IFS=: read -r cluster launcher nodes _gpus <<<"${alts%% *}"
     say "no alternative has capacity; queueing on preferred cluster $cluster"
     adopt_after_submit "$svc" "$cluster" "$launcher"
 }
@@ -152,15 +193,25 @@ cmd_tick() {
                 fi
                 moved=0
                 for alt in $(alts_for "$svc"); do
-                    IFS=: read -r acl alau anodes <<<"$alt"
+                    IFS=: read -r acl alau anodes agpus <<<"$alt"
                     [ "$acl" = "$cluster" ] && continue
-                    if seats_available "$acl" "$anodes"; then
-                        say "$svc: stuck ${age}s; $acl has >= $anodes empty nodes -> migrating"
-                        qs_kill "$cluster" "$id" || warn "kill of $id on $cluster reported failure"
-                        drop_claim "$svc"
-                        adopt_after_submit "$svc" "$acl" "$alau" && moved=1
-                        break
-                    fi
+                    seats_available "$acl" "$anodes" || continue
+                    ahead_demand_ok "$acl" "${agpus:-0}" || continue
+                    say "$svc: stuck ${age}s; $acl has >= $anodes empty nodes -> migrating"
+                    qs_kill "$cluster" "$id" || warn "kill of $id on $cluster reported failure"
+                    # A QUIET KILL IS NOT A KILL. A stop with a wrong flag can print nothing,
+                    # exit zero and do nothing (measured 2026-08-29 on a pod scheduler) — and a
+                    # resubmit beside a still-live job is the two-copies collision this whole
+                    # tool exists to prevent. Verify terminal state before submitting.
+                    _kst="$(qs_job_status "$cluster" "$id" 2>/dev/null || echo Unknown)"
+                    case "$_kst" in
+                        Stopped|Failed|Succeeded|"") ;;
+                        *) warn "$svc: $id still '$_kst' after kill; holding claim, no resubmit"
+                           continue 2 ;;
+                    esac
+                    drop_claim "$svc"
+                    adopt_after_submit "$svc" "$acl" "$alau" && moved=1
+                    break
                 done
                 [ "$moved" = 1 ] || say "$svc: stuck ${age}s but no alternative can seat it -> holding position" ;;
             *)
@@ -199,7 +250,7 @@ cmd_doctor() {
     say "state   : $QS_STATE_DIR"
     for svc in $(all_services); do
         for alt in $(alts_for "$svc"); do
-            IFS=: read -r cluster launcher nodes <<<"$alt"
+            IFS=: read -r cluster launcher nodes _gpus <<<"$alt"
             if ! [[ "$nodes" =~ ^[0-9]+$ ]]; then
                 warn "$svc: '$alt' has a non-numeric node count"; bad=1; continue
             fi
