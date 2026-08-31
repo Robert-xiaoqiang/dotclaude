@@ -80,7 +80,18 @@ invisible to the next box, which is the same as having no claim at all.
 ## Migratability is a property, not a preference
 A service can move only if everything it needs exists at the destination: the built environment,
 the accelerator ABI it was compiled against, the data staged on that filesystem. That is a fact
-about the service, so it is recorded as one. In the manifest, **the number of alternatives is the
+about the service, so it is recorded as one.
+
+**The storage mounts are the first gate, and the one that lies.** Two clusters sharing a home
+mount can still differ radically on the IO tier: on the fleet that produced this paragraph,
+/mnt/data is common to both while /mnt/cpfs -- the tier carrying the model hub, the run
+outputs, and the service's publish path -- is a different filesystem per cluster. A pool
+migrated across that boundary finds no weights to load and publishes its endpoint where no
+client on the origin cluster resolves it (caught 2026-08-30 before any migration fired, only
+because the mount topology was stated by a human). Verify every path the service READS
+(model snapshots, datasets) and WRITES (outputs, published endpoints) resolves to the same
+storage on the target; when the IO tier diverges, the manifest goes single-alternative and
+the tick degrades to a pure status monitor. In the manifest, **the number of alternatives is the
 policy**: two or more means migratable, exactly one means pinned and watch-only, absent means the
 shepherd refuses to guess a placement.
 
@@ -160,6 +171,8 @@ guessing a state directory would shepherd a fleet you did not mean.
 7. **Adoption follows a fresh listing, not an exit code.**
 8. **The claim directory lives on shared storage**, or the next box cannot see the claim.
 9. **A service with no alternative it can actually run is pinned**, and the manifest says so.
+    A divergent IO tier (model hub, output root, or publish path on different storage at the
+    target) disqualifies an alternative outright, whatever the queue looks like.
 10. **One shepherd per manifest.** Two shepherds over one fleet fight.
 
 ## Anti-patterns
