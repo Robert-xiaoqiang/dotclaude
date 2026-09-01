@@ -55,11 +55,22 @@ Some words read as generic AI or corporate filler in a finished document. Prefer
     header, and the fix is to label each row with the thing that actually varies down the column.
 16. `ruler`, `crutch`, `channel`, `reading`, `threshold` and the rest of that family, used for an
     object that already has a name, become that name.
-17. `projected`, `estimated`, `derived` and `simulated`, used as a **bare provenance tag on a number
+17. `projected`, `estimated`, `derived` and `simulated`, used as a **bare source tag on a number
     nobody measured**, become a statement of what happened: `not run, scaled from <source>`. A
     one-word tag names a technique, so the column reads as two kinds of result and the reader cannot
-    see that one of them was never run. The words are fine in their ordinary sense; the ban is on
-    using one as the label in a provenance column.
+    see that one of them was never run. The words are fine in their ordinary sense, and the ban is
+    only on using one as the label in the column that says where a number came from.
+18. `hygiene`, used as a metaphor for keeping something tidy (code hygiene, language hygiene),
+    becomes the practice itself. Say what is checked and what fails the check, because
+    the metaphor is what lets a section promise a standard without naming one.
+19. `provenance`, used as a vague label for where a claim came from, becomes the source itself,
+    the run that produced it or the paper that reported it. Keep the word where it names a
+    recorded artifact that exists, a provenance manifest or the hash a run writes into its own
+    config, and see rule 17 for the tag on an unmeasured number.
+20. `commit and push`, fused into one instruction in a plan, runbook or README, gets split. They are
+    two decisions, and the second one publishes. A document that welds them tells whoever reads it
+    next, human or agent, to push without anyone deciding to. Write the commit as the step, and
+    give the push its own line and its own reason.
 
 Technical terms keep their meaning. Words like robust, comprehensive, significant, novel, scalable, and state-of-the-art carry a precise claim in scientific and ML writing, for example robust to outliers, statistically significant, and a comprehensive benchmark. Use them freely when they make a real technical point. Avoid them only when they are vague praise, and never drop a correct technical term just to dodge a filler word.
 
