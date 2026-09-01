@@ -52,7 +52,8 @@ README.md  pyproject.toml            # what this is + how to install it
 docs/
   ARCH.md                            # single architecture reference (see docs-arch)
   plans/<YYYY-MM-DD>-<topic>.md       # timestamped task/design plans (see docs-plan)
-  reports/<topic>.md | .html          # walkthroughs/figures that explain the system
+  reports/<YYYY-MM-DD>-<topic>.md    # a FINDING as of a date: results, walkthroughs, handovers
+  reports/<topic>.md | .html         # the exception: a LIVING reference maintained in place
 scripts/
   README.md                          # what's here + the convention
   checks/                            # re-runnable verification/smoke scripts (committed)
@@ -164,8 +165,20 @@ also when the coupling first does damage.
   launcher spec is a second, hand-maintained source of truth.
 - **One shared entrance, not one per launcher.** The per-launcher `task.yaml` is the only per-run file.
 - **One flat platform layer.** Do not split platform logic across a top-level dir *and* a package dir.
-- **Plans** → `docs/plans/<YYYY-MM-DD>-<topic>.md` · **reports** → `docs/reports/` · **architecture**
-  → a single `docs/ARCH.md`, kept current.
+- **Plans** → `docs/plans/<YYYY-MM-DD>-<topic>.md` · **reports** → `docs/reports/`, dated the same
+  way unless the document is a living reference · **architecture** → a single `docs/ARCH.md`, kept
+  current.
+- **A report is dated when re-reading it later needs to know WHEN it was true.** Results, sweep
+  walkthroughs, verifications, handovers and design snapshots all describe a world that has since
+  moved; a bare `comparison_table.md` claims to be current forever and quietly becomes a lie. The
+  test is one question: *would updating this file in place make its name wrong?* If yes it is a
+  finding and takes the date. If no — a runbook, a related-work section, a conventions reference —
+  it is living, it is maintained in place, and a date on it would falsely imply a snapshot.
+  Date by LAST UPDATE, not first draft (`git log -1 --format=%ad --date=short -- <file>`), because
+  that is the moment the content was last true.
+- **A report is prose about the system, not an artifact of it.** A job spec, a config, a `.job` or
+  a raw metric dump under `docs/reports/` is misfiled: specs live in `launcher/`, outputs live under
+  `$OUTPUT_DIR_HOME`. `docs/reports/` is what you would hand a colleague to read.
 - **Session scripts** → `scripts/<purpose>/` as durable checkpoints, never left in `/tmp`. Header each
   with **what · when · usage**. Commit reusable ones; git-ignore machine-specific or secret ones.
 - Name everything descriptively (`naming-descriptive`) — never `v1`/`Px`/`tmp`/`final2`.
@@ -204,6 +217,11 @@ blindfold.
 - **A pipeline config duplicating another except one flag.** That flag is an axis; give it a group.
 - **A hand-chosen `log:` path** in a launcher spec — the run dir already knows.
 - **`_v2` / `_baseline` / `_test` names** — say what *differs* in a slot (`naming-config`).
+- **An undated report of a dated finding.** `comparison_table.md`, `fixes_verification.md`,
+  `00-A2C-MetaRL.md`: the first two claim permanence they never had, and the third orders by an
+  opaque counter (`naming-descriptive`). A reader cannot tell which of two comparison tables is the
+  live one, and neither can the author six weeks later. (Cost of learning this: 16 files renamed at
+  once on 2026-09-01, and every link to them across docs and analysis scripts repointed by hand.)
 - **Empty or stale package dirs** left by a refactor. Git does not track empty dirs, so they survive a
   `git mv` invisibly and read as real structure. Sweep after every move.
 
