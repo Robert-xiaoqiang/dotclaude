@@ -61,6 +61,28 @@ tokens were produced, or every new decoder forks the eval family for no measurem
 thing that would justify an eval-side fork is decoder-specific *instrumentation*, and that is a
 different measurement, not a different decoder.
 
+**Latent internal computation is a model property too — and it is the tempting exception.** When a
+model's reasoning steps are not tokens (a looped transformer re-running a block, continuous "latent
+thoughts", a test-time-updated fast-weight store), the pull toward an `eval_latent_*` twin of the
+generation pipeline is strong, because the model feels categorically different. It is not, on the
+axes that matter: one attempt still consists of *produce a completion, extract an answer, compare* —
+identical control flow, so identical protocol. Sequence-level metrics stay comparable across explicit
+CoT and latent CoT precisely because the protocol did not fork; forking it is how a latent arm and
+its explicit baseline stop being commensurable.
+
+What such a model DOES add is instrumentation only it can report — mean depth spent, read/gate rates,
+address geometry of its store. Per the rule above that is a *different measurement*: let the policy
+expose the fields and have the scorer record them, or write a separate probe pipeline whose protocol
+really is different (a single teacher-forced scoring forward is a different protocol from a decode
+loop, and earns its own name). Two consequences worth stating because both have bitten:
+* **Teacher-forced scoring and autoregressive generation are different protocols, and you need both.**
+  A latent-reasoning checkpoint can score unremarkable teacher-forced CE while being unable to
+  generate at all — measured once as a *negative* distillation margin whose real cause was that the
+  model emitted token salad. Only the generation protocol sees that.
+* **Name the protocol, never the model family.** `eval_<model-family>_*` reads as an eval that only
+  works for one architecture, and the day a baseline needs the same measurement there is no name left
+  for it. The model belongs in the launcher's model slot.
+
 **State carry deserves its own name.** "The sampler accumulates experience" sounds like a loading
 concern; it is not. If item *i* may depend on items before it, the score depends on item ORDER, two
 shards disagree, and resume stops being idempotent. Naming it (`state: none | accumulating`) means an
