@@ -39,7 +39,7 @@ than per decision. It appears in every launcher of its kind and is still correct
 "all launchers pass it" test does NOT apply to it. Ask instead: *does this name a choice, or an
 instance?* A choice belongs in config, an instance belongs on the command line.
 
-Distinguish these at the platform layer by deriving the job name from the override, never by minting a
+Distinguish these at submit time by deriving the job name from the override, never by minting a
 launcher per checkpoint (`eval-launchers.md`).
 
 ## Smoke runs

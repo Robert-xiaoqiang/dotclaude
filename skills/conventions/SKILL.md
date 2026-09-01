@@ -55,8 +55,9 @@ starting or organizing a project, or when unsure which convention applies.
   typesetting fails silently and the failure is only visible from the back of the room.
 - **platform** — working on a compute platform means setting up a persistent env on it
   (`platform-env`), submitting a platform-neutral run spec that is rendered per scheduler with
-  IDs kept in a profile (`platform-run`), and matching the job's runtime stack of driver, image,
-  and venv (`platform-runtime`). Leaving one again is `platform-migrate`, where the lesson is
+  account, quota and image IDs resolved from the cluster's shared stack (`platform-run`), and
+  matching the job's runtime stack of driver, image and venv (`platform-runtime`). Leaving one
+  again is `platform-migrate`, where the lesson is
   that file count rather than size predicts transfer time, and that the exclusions matter more
   than the copy.
 - **outputs** — the `layout-output` tree is read by `output-analysis` to compare runs across
@@ -67,9 +68,9 @@ starting or organizing a project, or when unsure which convention applies.
 
 ## How the concerns connect at a launcher
 A single launcher ties three of them together: `naming-config` fixes its **name** and its
-model/pipeline/dataset triple; `platform-run` fills its **`task.yaml`** (neutral spec) and
-renders it; `layout-workspace` says the launcher and `platforms/` profiles live at repo
-top-level. Output dirs derive mechanically under `OUTPUT_DIR_HOME` (never the project dir).
+model/pipeline/dataset triple; `platform-run` fills its **`task.yaml`**, the project's ONLY
+run-control file; `layout-workspace` says `launcher/` lives at repo top-level. Output dirs
+derive mechanically under `OUTPUT_DIR_HOME` (never the project dir).
 
 ## Companions
 Every skill in the family should link back here. Non-family skills (`git-commit`,

@@ -52,7 +52,7 @@ related but not identical, and only the run dir carries the component. The gramm
 
 **What legitimately stays a CLI override** is a value the (pipeline, model, dataset) triple genuinely
 cannot express: which checkpoint STEP of that one run to score. Same trainer, same lineage, same eval,
-only the snapshot moves. Distinguish those submissions at the platform layer by deriving the job name
+only the snapshot moves. Distinguish those submissions at submit time by deriving the job name
 from the override, never by minting launcher segments.
 
 ## Every model in the chain must be config

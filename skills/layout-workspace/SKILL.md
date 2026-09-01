@@ -1,13 +1,13 @@
 ---
 name: layout-workspace
-description: "Lay out a config-driven research project end to end: config/ mirroring the package tree, launcher/, one flat platform layer, plus docs/ and session scripts/."
+description: "Lay out a config-driven research project end to end: config/ mirroring the package tree, launcher/, plus docs/ and session scripts/."
 when_to_use: "Use when standing up or auditing such a project, or when deciding where a hyperparameter, launcher, plan or one-off script belongs."
 ---
 # Skill: layout-workspace
 
 ## Purpose
 Lay out a research project's **workspace** end to end — the *experiment-facing* half
-(`config/` + `launcher/` + a single flat platform layer) and the *agent-facing* half
+(`config/` + `launcher/`) and the *agent-facing* half
 (`docs/` + session `scripts/`) — so both a config's purpose and a session's artifacts are
 **predictable and recoverable**, not buried in a recipe script or a chat scratchpad. Config
 **names** follow `naming-config`; the run-control layer follows `platform-run`; run **outputs**
@@ -21,7 +21,7 @@ follow `layout-output`. This skill is the map that ties launcher → config → 
 
 ## The layout
 ```
-# ── Experiment-facing: config → launcher → platform (names per naming-config) ──
+# ── Experiment-facing: config → launcher (names per naming-config) ──
 # config/ MIRRORS the implementation tree, one level deeper. Read a config path, predict the import
 # path; read a module path, predict where its configs live. The mirror is the layout's core invariant.
 <pkg>/
@@ -39,14 +39,10 @@ follow `layout-output`. This skill is the map that ties launcher → config → 
     agent/
       model/  tool/                    # an agent owns ITS model and tools — the nesting RECURSES,
                                        #   and config mirrors it at every depth
-  platform/                            # PURE-PYTHON translation: jobspec, profile, translate/<p>.py
   utils/config.py                      # the config system (group merge + run-dir derivation)
 launcher/
   launch.sh                          # ONE shared in-pod entrance for EVERY pipeline (env → runner)
   <launcher-name>/task.yaml          # neutral run spec; run: is an argv LIST of k=v, no shell string
-platform/                            # TOP-LEVEL, because it is on the critical path of "how a run
-  <platform>.sh  _common.sh          #   starts" — thin native submit/status/logs + shared follow loop
-  <platform>.yaml                    #   the profile: account / quota / image / data sources
 README.md  pyproject.toml            # what this is + how to install it
 # ── Agent-facing: docs + durable session scripts ──
 docs/
@@ -62,10 +58,8 @@ scripts/
 
 **`scripts/` vs top-level: relevance, not file type.** `scripts/` is for work *incidental* to the
 main workflow — run once or occasionally, and the project still trains without it. Anything on the
-critical path of starting a run is top-level and named for what it is: `launcher/`, `platform/`.
-Burying the submit adapter in `scripts/` misfiles the entrance as a chore. The *pure-python* half of
-the platform layer still lives in the package so it is importable and unit-testable without a shell —
-one layer with two roles, not two layers.
+critical path of starting a run is top-level and named for what it is: `launcher/`. Burying the
+entrance in `scripts/` misfiles it as a chore.
 
 ## The five principles
 Each exists to make a class of mistake impossible.
@@ -164,7 +158,6 @@ also when the coupling first does damage.
   dir and tees into it, so config, checkpoints, metrics and log are one directory. A `log:` field in a
   launcher spec is a second, hand-maintained source of truth.
 - **One shared entrance, not one per launcher.** The per-launcher `task.yaml` is the only per-run file.
-- **One flat platform layer.** Do not split platform logic across a top-level dir *and* a package dir.
 - **Plans** → `docs/plans/<YYYY-MM-DD>-<topic>.md` · **reports** → `docs/reports/`, dated the same
   way unless the document is a living reference · **architecture** → a single `docs/ARCH.md`, kept
   current.
@@ -212,8 +205,6 @@ blindfold.
 - **Hyperparameters inline** in a `run:` block or a `train_*.sh` recipe — a config in disguise.
 - **A whitelisting `build_config()`.** Whatever it omits is unreachable, and the failure is silent:
   the run trains on defaults and looks fine. (Cost of learning this: four arms × 12h, all flat.)
-- **Duplicated platform logic** — two renderers, two follow loops, or a second spec dialect. This is
-  about duplicated *logic*, not language: python translation plus a thin native adapter is one layer.
 - **A pipeline config duplicating another except one flag.** That flag is an axis; give it a group.
 - **A hand-chosen `log:` path** in a launcher spec — the run dir already knows.
 - **`_v2` / `_baseline` / `_test` names** — say what *differs* in a slot (`naming-config`).
