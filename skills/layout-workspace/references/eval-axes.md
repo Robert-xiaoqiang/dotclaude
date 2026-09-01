@@ -82,6 +82,35 @@ loop, and earns its own name). Two consequences worth stating because both have 
 * **Name the protocol, never the model family.** `eval_<model-family>_*` reads as an eval that only
   works for one architecture, and the day a baseline needs the same measurement there is no name left
   for it. The model belongs in the launcher's model slot.
+* **You cannot teacher-force a latent, so say WHICH AXIS a protocol forces.** A latent-reasoning model
+  has two recurrences, and forcing is meaningful on only one. On the TOKEN axis (position *t* → *t+1*)
+  the next input can be the reference token instead of the model's own argmax — that is teacher
+  forcing. On the DEPTH axis (loop iteration *k* → *k+1*) the model feeds back its own hidden state and
+  **there is no gold latent to supply**, so no protocol forces anything there. The consequence is that
+  a forced protocol and a generation protocol differ *only* on the token axis and are identical on the
+  depth axis, both self-fed — which is exactly why they stay comparable.
+  So a bare `eval_forced` under-specifies, and in a codebase about latent computation it can invert:
+  if the model layer already spells latent-path overrides `forced_full_depth()` / `forced_read()`
+  (force the router to skip nothing, hold the memory gate open), then `eval_forced` reads as "the eval
+  where the LATENT path is forced" — the opposite of what it does. `eval_token_forced` costs one
+  segment and cannot be misread. **Check the word you are about to reuse against the vocabulary the
+  model layer already established**; a protocol name that collides with a mechanism name is a name
+  that teaches the wrong model of the system. (Cost of learning this: the author of the architecture
+  read the name and asked why a self-fed latent path was being called forced.)
+
+  The same trap caught a COMPONENT name an hour later in the same refactor, so treat it as a class of
+  error rather than one slip. A train-side component deciding how batches reach the optimizer step was
+  called `loop` — in a repo whose model is a *loop transformer* (`n_loops`, `LoopSegment`, weight-tied
+  depth recurrence). The reviewer's question was "what does the loop module do in the eval pipeline?",
+  whose answer is *nothing, it is train-side only* — the name had invented a component the eval was
+  presumed to have. Renamed to `batching`. Two properties made the fix cheap and are worth copying:
+  the run-dir segment carries the component's VALUE (`packed` / `stream`) rather than the group name,
+  so no existing run became unfindable; and the group registry is the single place a selector is
+  declared, so the rename was one table row plus a mechanical substitution.
+* **Which layer's hidden state is fed back is a MODEL property, not a protocol one.** Feeding the final
+  layer's state versus an intermediate layer's (as System-1.5 does) changes the model class; both
+  protocols call `model(...)` and `model.generate(...)` identically and neither knows the difference.
+  Same rule as the decoder: it changes what the policy IS, not what one attempt consists of.
 
 **State carry deserves its own name.** "The sampler accumulates experience" sounds like a loading
 concern; it is not. If item *i* may depend on items before it, the score depends on item ORDER, two
