@@ -339,6 +339,75 @@ human-edited doc, so they are what a careful editor actually leaves behind:
 
 ---
 
+## Match a reference draft, when the author has edited one
+
+Once the author has hand-edited a version of the report, **that file is the spec**, not this skill.
+Read it before writing, and match it on three measurable things.
+
+### Length: 1.3x the reference, and you know what to cut first
+
+Measured on one pair: the reference ran 21,771 characters and the generated draft 45,062, **2.07x**.
+The overflow was not spread evenly. It sat in two places, and both are the same mistake — pasting an
+artifact instead of reporting what it does:
+
+| what inflated it | what the reference had instead |
+|---|---|
+| three prompt templates and four JSON schemas quoted in full | two tables (the diagnosis items, the action set) |
+| a full worked case: rollout excerpts, regrade table, two rounds of JSON | the section heading, and nothing yet |
+
+**Prompts, schemas and full traces are appendix material.** In the body, a prompt becomes the table of
+what it asks for, and a trace becomes the one line that says what changed. If the draft is over 1.5x,
+cut those before touching anything else — no amount of sentence editing closes a 2x gap.
+
+### Section order: heading, one line, figure, table, bullets
+
+The reference opens a section with the picture, not with prose. Prose that arrives before the figure
+is prose the reader skips to get to the figure, then re-reads.
+
+```
+### 路线 A：通过 Guidance / Rollout Intervention 改善探索
+核心思路是：**在给定 reward 下扩大或引导 policy 的探索空间……**      <- one line, optional
+<img src="..." width="768">                                          <- the figure
+| 类型 | 代表工作 | 核心机制 |                                        <- the table
++ **claim**：数值                                                    <- the reading
+```
+
+### The caption names the figure; the bullets read it
+
+When the image itself is embedded, **the caption line carries the figure name and its path and
+stops**. Everything a reader should conclude from the picture goes in the bullets under it, where it
+can carry its numbers. A caption that runs to four ｜-separated clauses is a paragraph wearing a
+caption's clothes, and the reference has none.
+
+### Group the analysis under one heading, nest the rest
+
+Parallel `###` sections named 消融分析 / 效率分析 / 样例分析 read as three unrelated appendices. The
+reference collapses them into one `### 分析` and nests: `#### Failure pattern 动态`,
+`#### 控制端口`, `#### 额外开销`, and under that last one `##### 摊还成本` / `##### 成本效益` /
+`##### 优化策略`. Depth carries the grouping — the same rule as §Headings, applied to results.
+
+### Two comparisons per headline result, not one
+
+A best-result claim reports **both** the gain over base and the gain over the strongest baseline.
+Against base alone the number is unfalsifiable as a contribution claim: base is what everyone beats.
+
+```
++ HarnessRL 两列都最好：
+    - 对比 base：in-domain +0.0395，OOD +0.0434
+    - 对比 AMARIS：in-domain +0.0275，OOD +0.0324
+```
+
+### A cost section ends with what to do about it
+
+Any 成本 / 效率 analysis closes with a short 优化策略 subsection: two or three executable directions.
+A cost table with no exit reads as an apology.
+
+### When a component list enumerates parts, the heading says what each part fixes
+
+`x_t`, `g_t`, `c_t` are not self-explaining. The reference titles them with the failure each one
+repairs — 样本演化（解全 1）, guidance 演化（解全 0）, 诊断维度与原子动作（解虚假 reward）— so the
+list doubles as the argument for why there are three.
+
 ## Tables, and the prose around them
 
 > **One quantity, one table. A number has one home. The prose beside a table adds a judgment, never a
@@ -849,6 +918,20 @@ because a terminal section restating delivered conclusions is a second copy of t
    claim stated twice, keep the copy next to its evidence, and delete whole sections that turn out to be
    second copies — reworking the duplicate is not a fix. Then run §After a deletion over the diff rather
    than the draft, and grep for surviving `§` and 〈第.
+
+## Judging a draft against the reference
+
+When a reference draft exists, the check is mechanical enough to hand to a fresh session that carries
+none of the writing context and cannot be argued into agreeing. Give it the reference, the draft and a
+rubric whose every row is countable — length ratio, prose paragraphs over three lines, bullets carrying
+more than three numbers, caption lines over one line, parallel `###` that should nest, banned words,
+negation pivots, document-self-description sentences — and require an evidence quote from BOTH files
+for every finding. A rubric row that cannot be counted will be answered with an impression.
+
+Have it end on a three-way verdict (adopt / revise / rewrite) and the three highest-priority fixes,
+because a list of thirty findings does not say where to start. One worked harness lives at
+`BrainStorm/0903/style-judge/` (`rubric.md` plus `judge.sh`, which runs `claude -p --model opus` or
+`codex exec` on the pair).
 
 ## Companions
 `writing-style` (**`en` mode only**) · `writing-style-zh` (**`zh` mode only** — the Chinese word,
