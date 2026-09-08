@@ -10,6 +10,15 @@ Decide **what a figure may and may not contain** when it is destined for a docum
 whatever pipeline fits (TikZ, Mermaid, HTML/SVG, matplotlib). Owns figure *content and style*. It does
 not own which runs to compare (`output-analysis`) or how a report references a figure (`docs-weekly`).
 
+## Contents
+- [When to Use](#when-to-use)
+- [The one rule](#the-one-rule)
+- [Diagrams (TikZ · Mermaid · HTML/SVG)](#diagrams-tikz--mermaid--htmlsvg)
+- [Data figures (matplotlib)](#data-figures-matplotlib)
+- [Reproducibility](#reproducibility)
+- [Anti-patterns](#anti-patterns)
+- [Companions](#companions)
+
 ## When to Use
 - Drawing a workflow, architecture, or formulation diagram for a paper, report, or design doc.
 - Producing an experiment-section plot: bars, curves, violins, heatmaps, Venn / UpSet, scatter.
@@ -102,6 +111,43 @@ lossy version. Emit vector (`pdf`) for LaTeX and a raster preview only for revie
 - **Check the render, never the source.** Box collisions, arrows entering the wrong edge, and labels
   landing on lines are invisible in `.tex` and obvious in the image.
 - Route so nothing crosses. A crossing is a layout failure, not a fact about the system.
+- **Prefer orthogonal routing, and let the layout earn it.** A diagram full of diagonals reads as
+  scribble even when nothing overlaps. Arrange the nodes so every connector is horizontal or vertical:
+  down inside a stage, sideways between stages. When a diagonal is unavoidable, it should be a
+  deliberate fan-out (one source to two branches), never the default.
+- **An arrow needs a visible tail.** If the gap between two node borders is only a little longer than
+  the arrowhead, all that renders is a head pressed against a box and the edge reads as absent. Leave
+  at least three times the head length between borders, and shorten the path a fraction of a
+  millimetre at each end so the head sits beside the border rather than merging into it.
+- **Size arrowheads for the room, not for the source file.** A head that looks right at 100% is
+  invisible once the figure is scaled to a slide width. Set the head explicitly and check it in the
+  render at final size.
+- **Spend space on the connectors, not on empty box interiors.** Oversized boxes with cramped arrows
+  between them is the commonest way a diagram becomes unreadable: shrink the boxes to their contents
+  and give the gaps to the edges.
+- **A label on an edge must clear the edge and both boxes.** Centring a label on a short connector
+  hides the connector under the label's own background. Move it beside the line, or shorten the label
+  to two characters, or lengthen the edge.
+- **One line style per kind of relation, and only one meaning per style.** A connector that says
+  "this module is applied here" must not look like a connector that says "the data flows here next".
+  Give it its own colour and dash pattern and name the distinction in the panel label.
+- **Draw the construction, not a paraphrase of it.** If the mechanism is a split, two additive
+  couplings and a concat, then draw split, ⊕, ⊕, concat. A box labelled with the mechanism's name
+  teaches nothing the caption did not already say. The test: could a reader reimplement the step from
+  the picture?
+- **Follow the source's own drawing idiom** when the figure explains a published mechanism. Reversible
+  networks are drawn as two vertical rails; segment recurrence is drawn as shaded segment blocks with
+  a carry arrow between them. Inventing a fresh layout for a well-known picture costs the reader the
+  recognition they already had.
+- **Do not draw the inverse as a second figure** when the same drawing read backwards is the inverse.
+  One diagram plus both sets of equations beats two diagrams the reader must diff.
+
+**CJK-specific traps, both silent:**
+- Justification stretches CJK to fill a fixed-width node, so a two-character label renders as
+  `注 意 力 块`. Set `align=flush center` (ragged) rather than `align=center` in the shared node style,
+  and it is fixed everywhere at once.
+- `\par` inside a TikZ node does nothing unless the node has `text width` or an `align` key. A
+  three-line label silently collapses to one line, and the source looks correct.
 
 ---
 
@@ -161,6 +207,13 @@ A figure is regenerated whenever a run updates, so the generator is an artifact,
 - **A legend key that is a sentence.**
 - **A difference plotted with no null, chance line, or error band.**
 - **Fixed coordinates in a diagram**, then a silent overlap after a label change.
+- **A diagram of diagonals.** Nothing overlaps, and it still reads as scribble.
+- **The headless arrow.** The gap is shorter than the arrowhead, so the edge renders as a dot on a
+  border and the reader does not see a connection at all.
+- **Big boxes, starved arrows.** Half the panel is empty box interior while the connectors have no
+  room to be seen.
+- **A connector crossing a box it has nothing to do with**, which reads as a relation that does not
+  exist.
 - **Reviewing the source instead of the render.**
 - **A figure whose generator exists only in the conversation.**
 
@@ -171,4 +224,5 @@ A figure is regenerated whenever a run updates, so the generator is an artifact,
 report references a figure and what a placeholder spec contains) · `docs-slides` (how a figure reaches
 a slide: cropping a published one to the panel that carries the argument, rather than redrawing it) · `dataviz` (palette and mark detail for
 richer or interactive charts, whose default is a standalone dashboard, so strip its title and caption) ·
-`layout-workspace` (where generators live) · `conventions` (family index).
+`layout-workspace` (where generators live) · `writing-style-zh` (the prose rules a Chinese figure's
+labels obey, and where the one-name-one-object rule lives) · `conventions` (family index).

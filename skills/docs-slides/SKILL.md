@@ -28,6 +28,7 @@ README.
 - [Style: what a slide looks like](#style-what-a-slide-looks-like)
 - [What to remove](#what-to-remove)
 - [What to preserve](#what-to-preserve)
+- [A section needs an entry before it needs content](#a-section-needs-an-entry-before-it-needs-content)
 - [Citations and the cover](#citations-and-the-cover)
 - [Figures: clip the paper's own](#figures-clip-the-papers-own)
 - [Speaker notes are the script](#speaker-notes-are-the-script)
@@ -156,6 +157,16 @@ dead weight, because the speaker is already saying it.
 - **Editorial callout labels.** "Read a result as a triple", "What the recipe bought", "Why this one
   matters". Delete the label and often the whole block.
 - **Column headings that editorialise**, and every "What x" / "How x" / "Why x" label.
+- **The section that opens on a case.** The room meets an example before it knows what the example is
+  an example of, and spends the next two slides catching up.
+- **The inherited number.** It survived three revisions because nobody asked where it came from, and
+  it is not in the paper.
+- **Bar heights read off a plot and stated as the paper's numbers.**
+- **The full-then-short citation.** Correct in a paper, an inconsistency in a deck, where slides are
+  seen one at a time.
+- **Settings stranded on a method slide.** The committee wants them next to the data and the
+  baselines, and the method slide wants the space.
+- **The four-name object.** hint / 短提示 / 提示 m / 经验 for one thing, across one deck.
 - **The two-headed pane.** A left-right split with a small-text heading banding each side. Use
   hierarchical bullets on one side and a figure or a table on the other.
 - **Chrome the author did not write.** A kicker, a heading over a list that is obviously a list, a
@@ -192,6 +203,28 @@ Stripping is not the goal; legibility is. These earn their place and should surv
   is what makes the rest credible — attribution of a source's own doubt, not a hedge on your own
   rows, which the pitch register bans.
 
+## A section needs an entry before it needs content
+
+A deck that jumps from one project into the next leaves the room reconstructing why this slide follows
+that one. Every section opens the same way and in this order: **where it sits** (the outline again,
+current section highlighted), **the problem it solves** stated as a difficulty, **one concrete case**
+as evidence, then the mechanism. Opening on the case is the common inversion — the audience meets an
+example before they know what it is an example of.
+
+**Name the difficulty in the title of every slide that answers it.** When a section has three threads,
+say so once on an overview slide and then carry the label: `优化挑战，加性耦合让层可逆` /
+`工程挑战一，超长文档放不进单次训练窗口` / `工程挑战二，单一 ⟨c,q⟩ 覆盖不了一个文档`. A reader who
+looks up mid-talk gets back the thread from the title alone. This is cheap and it is the single
+highest-leverage structural edit a review pass finds.
+
+**A slide's settings belong on the settings slide.** Backbone, LoRA rank, epochs, GPU hours are
+experimental setup, not method. Left on a method slide they read as clutter; gathered on one setup
+slide beside the data and the baselines they are what a committee actually wants.
+
+**An example must be an example.** A single clause is not a document, and one sentence is not a
+paragraph — a hierarchy slide that shows a four-sentence passage at the document level and one clause
+at the sentence level shows the hierarchy. Truncating every level to a fragment shows nothing.
+
 ## Citations and the cover
 
 One bibliography, cited by key. An unknown key is a build error. Never write a citation into slide
@@ -205,6 +238,19 @@ affiliation. A cover that gives only the short name states the label but not the
 **A field the bibliography does not carry is omitted, never described.** Printing "affiliations not
 listed on the preprint" states an absence the audience did not ask about and cannot act on. Leave the
 line blank.
+
+**One citation format for the whole deck.** The academic habit of a full citation on a section's
+first slide and a short form after it looks tidy in a paper and reads as an inconsistency in a deck,
+where slides are seen out of order and one at a time. Pick the full form and use it on every slide
+that cites. If it does not fit, the citation is too long, not the rule.
+
+**Several sources on one slide go one per line**, and the page number is bottom-aligned with the last
+of them, not with the first. Two things follow from a multi-line footer. Beamer fixes the footline
+height before the frame body runs, so a `\source` set inside the body cannot grow it — the extra lines
+run off the bottom of the page with no warning; draw the citation block from the shipout-time
+background layer instead. And once the page number and the citation are produced by two different
+templates they will not share a baseline: measure it in the rendered PDF rather than trusting that
+they look aligned in the source.
 
 **The footer is a fixed strip and must fit.** A slide citing eight sources sets three lines into a
 two-line box. Shrink a step, then elide with "+ N more". Nothing is lost, because the references slide
@@ -266,6 +312,20 @@ fifty crawled rows to support fifteen is an expensive way to be slow, and it was
 Default to refuted when a source cannot be opened. A number that is close but attached to a different
 subset, model, harness or metric is refuted, not confirmed. Check what a claim is attached to, not
 just its value: the same figure has meant a paper's headline and its confidence-interval bound.
+
+**Numbers inherited from an earlier deck are unverified numbers.** Building on someone else's slides,
+or on your own from a previous talk, imports their claims at full confidence and none of their
+provenance. Re-derive every figure against the source before it survives a rewrite. A real case: a
+deck carried "综合表现提高 10.3 个百分点" and "检索延迟由 1453 ms 降至 360 ms" through several revisions;
+the paper reports **no numeric result at all** for that experiment — everything is in one radar chart
+whose own caption says the axes are min-max rescaled per metric. Both numbers would have been stated
+to a committee.
+
+**When the source has only a figure, show the source's figure and quote only its prose.** Reading bar
+heights off a plot — even correctly, even from the vector geometry — produces numbers that appear
+nowhere in the paper, and an examiner who checks will find you asserting more precision than the
+authors did. Two related habits: say so on the slide when the axis is truncated, and check the prose
+against the plot, because they disagree more often than you would expect.
 
 Verification pays. Real defects it has caught: a table that did not exist because the post used charts,
 a footnote misattributed to a table, a generalisation refuted by the same leaderboard it came from, a
@@ -331,9 +391,19 @@ title long enough to wrap, an uncited number, and the timing estimate against th
 16. **To recover time, cut slides or tighten the script**, never trim body text.
 17. **Verify every number quoted from a source before it reaches a slide**, scoped to what is
     printed, defaulting to refuted; the deck's own arms follow rule 19.
-18. **Ship the agent's operating manual in the repository.** Build command, per-finding fixes, and the
+18. **Every section opens with position, problem, case, then mechanism**, and each slide's title names
+    the difficulty it answers.
+19. **One citation format across the whole deck**, several sources one per line, page number aligned
+    to the last line, and the block drawn where it can grow.
+20. **Re-derive every inherited number.** A figure carried over from a previous deck has no provenance
+    until you check it against the source.
+21. **Never read values off a published plot and state them as the paper's.** Show the paper's figure
+    and quote its prose.
+22. **One object one name, one symbol one meaning, across the whole deck.** Grep for both before
+    shipping.
+23. **Ship the agent's operating manual in the repository.** Build command, per-finding fixes, and the
     instruction to look.
-19. **A pitch deck claims in the confirmative.** No "mock", "projected", "forged", "illustrative" or
+24. **A pitch deck claims in the confirmative.** No "mock", "projected", "forged", "illustrative" or
     "not yet run" on a slide or in its notes; run status lives in the working notes, never in the
     deliverable.
 
@@ -369,9 +439,11 @@ title long enough to wrap, an uncited number, and the timing estimate against th
   part the room remembers.
 
 ## Companions
-`docs-figure` (what a figure may contain and which pipeline draws it, where this skill says how a
-figure reaches a slide and how much of it to show) · `writing-style` (the punctuation and prose rules
-the slide text and the speaker notes obey) · `docs-weekly` (the other spoken-argument deliverable,
+`docs-figure` (what a figure may contain and which pipeline draws it, plus the connector, arrowhead
+and spacing geometry a slide figure has to survive, where this skill says how a figure reaches a slide
+and how much of it to show) · `writing-style` (the punctuation and prose rules the slide text and the
+speaker notes obey) · `writing-style-zh` (the same for a Chinese deck, including the declarative-title
+and no-invented-takeaway rules the slide titles obey) · `docs-weekly` (the other spoken-argument deliverable,
 which carries an argument rather than a log) · `naming-descriptive` (naming the talk directory and its
 assets) · `code-no-fallbacks` (why an unknown cite key and an out-of-range crop fail loudly rather
 than defaulting).
