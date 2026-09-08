@@ -1,14 +1,22 @@
 ---
 name: writing-paper
-description: "Write or revise a research paper in LaTeX: where a citation attaches, how related work is grouped by theme rather than listed paper by paper, and how the method and experiments sections are built. A method opens with the modeling choice and each subsection with the limitation it fixes; a results paragraph takes a finding as its subject, never a table. Inherits the punctuation and word rules of writing-style."
+description: "Write or revise a research paper in LaTeX: where a citation attaches, how related work is grouped by theme rather than listed paper by paper, and how the method and experiments sections are built. A method opens with the modeling choice and each subsection with the limitation it fixes; a results paragraph takes a finding as its subject, never a table. Load alongside writing-style, which is the word- and token-level layer this sits on top of, or writing-style-zh for a Chinese paper."
 when_to_use: "Use when drafting or editing any section of a paper, when placing citations, when a method section reads as a derivation with no choices in it, when a results paragraph opens with Table 1 shows, when related work is a list of summaries, or when a reviewer says the contribution is hard to locate."
 ---
 # Skill: writing-paper
 
 ## Purpose
-A paper is an argument, and every convention here exists to keep the argument legible. `writing-style`
-governs punctuation and word choice in any authored document. This skill adds what a paper needs on
-top of that: citations that attach to the concept they support, related work grouped by theme rather
+A paper is an argument, and every convention here exists to keep the argument legible.
+
+**Load `writing-style` alongside this skill, and `writing-style-zh` instead of it when the paper is
+in Chinese.** Those skills are the word- and token-level layer: which characters are forbidden, which
+words read as filler, which sentence shapes to avoid. This skill is the argument-level layer above
+them. They constrain the sentence. This constrains what the sentence is for. Neither substitutes for
+the other, and a draft that satisfies only one of them still fails: prose can be free of em-dashes
+and still open every paragraph by announcing its own title, and prose can lead with a finding in
+every paragraph and still be unreadable for punctuation.
+
+On top of that layer, this skill adds: citations that attach to the concept they support, related work grouped by theme rather
 than recited paper by paper, and paragraphs that open with a claim instead of a topic announcement.
 
 The failure this guards against is prose that is fluent, grammatical, and carries no information in
@@ -39,8 +47,11 @@ entries at inference time" has spent it setting up the gap the paper fills.
 - [Companions](#companions)
 
 ## What this adds to writing-style
-Everything in `writing-style` holds: no em-dashes, no semicolons, colons used sparingly, and the same
-list of filler words to avoid. Three additions are specific to papers.
+Everything in `writing-style` holds and is checked first, because it is mechanical and a draft can be
+scanned for it: no em-dashes or en-dashes, no semicolons in prose, colons used sparingly, no bulleted
+lists unless asked, and the curated list of filler words and sentence shapes to avoid. For a
+Chinese-language paper `writing-style-zh` replaces it and governs the same layer. Three additions are
+specific to papers.
 
 **Concise.** No sentence may exist only to announce the next one. "In this section we describe our
 method" and "We now turn to the experimental results" carry nothing a section heading has not already
@@ -366,7 +377,7 @@ gain sits on a small base, because "50\% relative improvement" on a base of 4\% 
 - **A contribution in the abstract with no experiment.** The fastest way to lose a reviewer.
 
 ## Companions
-`writing-style` (the punctuation, word, and sentence-structure rules this inherits) · `docs-figure`
+`writing-style` (the punctuation, word, and sentence-structure rules this inherits, load it alongside) · `writing-style-zh` (the same layer for a Chinese-language paper) · `docs-figure`
 (what a figure may contain and how to render it) · `naming-descriptive` (naming a method or an arm so
 the name states what it is) · `output-analysis` (producing the tables and curves the experiments
 section reports) · `conventions` (the map).
