@@ -196,9 +196,21 @@ a mechanism, it belongs in the detailed zone and is probably still too short.
 ## Style
 
 ### Vocabulary, both modes
-Technical terms stay English and unbolded, in their field-standard form: `rubric`, `reward`, `policy`,
-`rollout`, `GRPO`, `advantage`, `Blind / Spurious / Inversion`, `harness`, `criterion`, `curriculum`.
-Do not translate a term the reader will meet again in a paper.
+Technical terms stay English and unbolded, in their field-standard form: `rubric`, `criterion`,
+`criteria`, `guidance`, `reward`, `policy`, `rollout`, `GRPO`, `advantage`,
+`Blind / Spurious / Inversion`, `harness`, `curriculum`. Do not translate a term the reader will meet
+again in a paper.
+
+**This list is authoritative for `criterion` and `criteria`, and `writing-style-zh` now agrees.** It
+did not for a long time: that skill's four-question table resolved `criterion` to 判据 and declared it
+the project's fixed Chinese form, while this line already said it stays English. Nothing failed
+loudly, which is the whole problem with two skills owning one word. A 26-page defense deck went out
+written 判据 throughout before the author caught it. If a term appears in both files again, fix both
+in the same commit rather than picking the nearer one.
+
+`rubric` is the whole scoring standard, `criterion` one entry in it, `criteria` the plural. A Chinese
+modifier attaches straight to the English noun with no 的 and no translated head: `静态 guidance`,
+`动态 rubric`, `初始 rubric`, never `静态指导` or `动态判据`.
 
 ### `zh` mode
 
