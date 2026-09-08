@@ -119,10 +119,39 @@ at full size the moment the categories moved into a column.
 
 ## Style: what a slide looks like
 
-**Titles are short claims, not topics.** Under about 46 characters, sentence case, stating the finding.
-Equation-shaped titles are good where they fit: `Agent = model + scaffold + harness` says more than
-"An agent is a model, a scaffold, and the harness that runs them" and fits on one line. A title that
-wraps eats a line of body.
+**What a title does depends on the register, and the two registers want opposite things.** Getting this
+backwards is the single most visible way a deck reads wrong, because the title is the largest text on
+every page.
+
+- **A pitch, proposal or ideation deck**: titles are **short claims** under about 46 characters,
+  sentence case, stating the finding. The room is being persuaded once, in order, and will not look
+  anything up. Equation-shaped titles are good where they fit: `Agent = model + scaffold + harness`
+  says more than "An agent is a model, a scaffold, and the harness that runs them" and fits on one
+  line. See *The register of a pitch deck* below.
+- **A research talk, defense or technical review**: titles are **noun phrases naming the object and
+  which facet of it the page covers**. `参数化记忆的优化目标与不可靠根源`, `R³Mem：工程挑战一，超长文档放不进单次训练窗口`,
+  `Mem-π：阶段一——经验蒸馏`, `HarnessRL：端口消融与训练成本`. The audience navigates, looks up
+  mid-talk, and keeps the deck as a reference, so the title's job is to say where you are.
+
+**The failure is writing pitch titles into a research deck**, and it is easy to do because claim
+titles feel sharper in isolation. Recorded: a 30-page defense deck came back with every title rewritten
+as a finding — `GSM8K 上与 CoT 持平，收益落在 26 步降到 2 步的效率一侧`, `R³Mem：域内 F₁ 从 38 到 53，替换记忆模块后四项指标领先` —
+against a 49-page deck by the same author whose titles were all nominal. The author's verdict was that
+the short version's titles were "全都是瞎写". Two costs, beyond register: a claim title spends the
+finding before the evidence is on screen, so the body has nothing left to deliver; and every page
+competing to announce a result flattens the ones that carry a real result.
+
+Three things follow for a research deck.
+
+- **No numbers in a title.** `38 到 53`, `37.9%`, `862 token` belong in the bullet under the figure
+  that shows them. A number in the title decides the page before the audience reads it.
+- **Carry the section's own index in the titles.** When a section enumerates its difficulties, the
+  method pages name which one they answer: `优化挑战`, `工程挑战一`, `工程挑战二`. A reader who looks
+  up mid-talk gets the thread back from the title alone, and compressing a long deck must not drop it.
+- **The colon test**: delete everything before the colon. If what remains is only restating the deleted
+  half, the title is empty.
+
+A title that wraps eats a line of body, in either register.
 
 **Consecutive slides on one topic share a title verbatim.** This is deliberate, not a bug. Three
 slides that all develop "Execution: gold = a frozen human leaderboard" tell the room they are still in
@@ -167,6 +196,8 @@ dead weight, because the speaker is already saying it.
 - **Settings stranded on a method slide.** The committee wants them next to the data and the
   baselines, and the method slide wants the space.
 - **The four-name object.** hint / 短提示 / 提示 m / 经验 for one thing, across one deck.
+- **Pitch titles in a research deck.** Every page announces a finding, so the body has nothing left to
+  say and the pages with real results no longer stand out. The tell is a number in the title.
 - **The two-headed pane.** A left-right split with a small-text heading banding each side. Use
   hierarchical bullets on one side and a figure or a table on the other.
 - **Chrome the author did not write.** A kicker, a heading over a list that is obviously a list, a
@@ -366,8 +397,9 @@ title long enough to wrap, an uncited number, and the timing estimate against th
    as well: off-slide, overlapping, and column tops that disagree.
 3. **An error-severity lint finding fails the build.** Do not pass a keep-going flag to make the red
    go away.
-4. **Titles are short claims under about 46 characters**, and consecutive slides on one topic share a
-   title verbatim.
+4. **Title register follows the deck's purpose**: short claims for a pitch deck, noun phrases naming
+   object and facet for a research talk or defense, and never a number in either. Consecutive slides
+   on one topic share a title verbatim.
 5. **A column has one left edge.** Body text, table cells and callout content line up, and outer cell
    edges carry no padding.
 6. **The body is centred by a rule with no threshold in it**, so the page does not move under a pinned
@@ -411,6 +443,8 @@ title long enough to wrap, an uncited number, and the timing estimate against th
 
 - **Trusting overflow lint on a semantic backend.** The build is green, the PDF is clipped, and the
   linter measured a layout that was never rendered.
+- **Pitch titles in a research deck.** Every page announces a finding, so the body has nothing left to
+  say and the pages with real results no longer stand out. The tell is a number in the title.
 - **The two-headed pane.** Both halves banded with a small-type heading, so the slide has two
   competing entry points and neither is the content.
 - **The caption that is the script.** A figure captioned with the sentence the speaker is about to
