@@ -109,6 +109,7 @@ when_to_use: "Use when producing or revising a Chinese-language document for the
 | 实测 | 跑过 |
 | 推演 / 投影 | 没跑，按 X 换算 |
 | 命中矩阵 | judge 逐条 `criterion` 的判定 |
+| 命中 / 未命中 / 命中率（指 `criterion` 是否成立） | 满足 / 未满足 / 满足率 |
 | 噪声 | 噪音 |
 | 冻结 / 冻结的（指参数不更新） | `fixed` |
 | 预研诊断 / 折算 / 本消融的 base 行 | 见下面「内部报告的结构和词都不进对外文档」 |
@@ -145,7 +146,7 @@ when_to_use: "Use when producing or revising a Chinese-language document for the
    |---|---|
    | 量出 X 的影响 | 衡量 X 的影响 |
    | 从对话里读出答案 | 答案取自对话 |
-   | judge 判出命中矩阵 | judge 判定命中矩阵 |
+   | judge 判出满足情况 | judge 判定是否满足 |
    | 从轨迹蒸出 hint | 从轨迹蒸馏 hint |
    | 新域上跑出的轨迹 | 新域上的轨迹 |
    | 上一段写出的 token | 上一段输出的 token |
@@ -393,6 +394,24 @@ when_to_use: "Use when producing or revising a Chinese-language document for the
 原话照抄。**自己编一个例子填进「样例」位是最坏的一种**：它既不具体也不可核对，而真实
 的 rollout、真实的 bench 题目通常就在手边。
 
+### 「命中」不是 criterion 的动词，「满足」才是
+
+`criterion` 说的是一条要求成立没成立，成立就是**满足**。「命中」是打靶与检索的词
+（hit rate、cache hit），拿来说一条评分要求，读者要先把它翻回「满足」才懂，而且
+HealthBench 与 AMARIS 这一类工作在自己的字段里写的就是 `criteria_met`。
+
+| ✗ | ✓ |
+|---|---|
+| 8 条 rollout 全部命中 | 8 条 rollout 全部满足 |
+| 一条 criterion 都没命中 | 一条 criterion 都不满足 |
+| 命中率 / 命中数 | 满足率 / 满足的条数 |
+| 按命中率挑 targets | 按满足率挑 targets |
+
+这一条是反过来改的：本文件的四问表从前把 `hit` 列在「中文里有对应词」那一行，
+译作「命中」，于是一份 deck 里出现了十处。`hit` 在检索与缓存里确实是命中，
+**但 rubric 里的那个量不是 hit，是 met**，四问的第 3 问问的也是「本领域论文真的在用
+的词」——写 rubric 的论文用的是 met／satisfied。
+
 ### 一条带例外的禁令，等于没有禁令
 
 「口径」原来是有条件禁的：作「先说 X 的口径」这类开场白时禁，作「统一口径」时保留。
@@ -430,7 +449,7 @@ when_to_use: "Use when producing or revising a Chinese-language document for the
 |---|---|---|---|
 | 1 | 它是标识符、字段名、专有名词或 bench 名吗 | 英文，原样照抄 | `slot_id`、`split == train`、HealthBench、MedQA |
 | 2 | 这个**动作**在英文里有固定说法吗 | 英文动词 | `pull image`、`checkout` 到某个 commit、`mount`、`backward` |
-| 3 | 中文里有本领域论文**真的在用**的对应词吗 | 中文 | visit → 访问；response → 回答；hit → 命中 |
+| 3 | 中文里有本领域论文**真的在用**的对应词吗 | 中文 | visit → 访问；response → 回答；satisfy → 满足 |
 | 4 | 以上都不是 | 英文 | rubric、criterion／criteria、guidance、policy、rollout、GRPO、advantage、harness、scope、gap |
 
 **第 3 问卡死在「论文真的在用」，而非「翻得出来」。** rubric 翻成「评分表」翻得出来，但这一行没人这么写；advantage 翻成「优势」会与日常的优势混掉；rollout 翻成「展开」会与数学上的展开混掉。**翻得出来但没人用，或者一翻就歧义，都按第 4 问处理。**
@@ -474,12 +493,12 @@ when_to_use: "Use when producing or revising a Chinese-language document for the
 | **表格下面逐行解读的 bullet** | `+ **依赖度**：adaptive 两种策略都把依赖度压到 0.004 以下，JIT 略好于按步` | 表已经说了。表后至多一句，且只写表里没有的条件或前提；一行一条 bullet 是最明显的填充 |
 | **「粗体断言：数字复述」** | `+ **OOD 上编辑最高**：0.5285 对组合的 0.5231` | 数字在表里；删掉整条 |
 | **表前的引入句** | `evolver 第二次调用读 Δ_g，给出 scheduler 的决定，是一个三路门：` | 表头已经说了；直接放表 |
-| **case 后面的「解释」段** | `**解释**  8 条 rollout 在 c1 到 c3 上全部命中，c4 是 5/8：拼接进来的那一半立刻饱和……` | case 只摆 prompt、rubric、rollout、判定；读者自己读。见第 14 条 |
+| **case 后面的「解释」段** | `**解释**  8 条 rollout 在 c1 到 c3 上全部满足，c4 是 5/8：拼接进来的那一半立刻饱和……` | case 只摆 prompt、rubric、rollout、判定；读者自己读。见第 14 条 |
 | **case 的脚手架标签** | `**parent** / **检索得到** / **child** / guidance：无。/ rollout（8 条）` | 一个引文块前只留一个名字或时间戳 |
 | **整个「结果」「样例」子节，数是造的** | 为 reweight / composer / specifier 各造一张表，再造一张 $u$ 更新前后的表 | 没跑的数只进主表一次，作者点名要补的那一格才补；导师用一篇真实论文的截图替掉了整节 |
 | **标题后面挂一个从句** | `衰减策略：内容与强度两条轴，作用在整组` | 标题是名词短语：`衰减策略：内容与强度两条轴` |
 | **说不清操作的动词** | `由目标 criterion 改写而来` | 作者在「改写」上打了括号。写出操作和保留了什么：转成过程要求，不带原文 |
-| **说不清条件的形容词** | `命中同类 criterion` | 作者补了「（语义检索）」。检索的键要写出来是什么 |
+| **说不清条件的形容词** | `满足同类 criterion` | 作者补了「（语义检索）」。检索的键要写出来是什么 |
 | **行内公式的写法与文件不一致** | `$\langle$hard rule` | 这份文件的行内公式是 `$ \langle $`，两侧带空格；照文件的写法 |
 
 一句话版本：**给导师的稿子里，作者留下的全是能被核对的东西，删掉的全是替读者读表的东西。**先把表、图、公式、原文摆齐，再决定哪一句非写不可。
