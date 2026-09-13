@@ -110,6 +110,9 @@ when_to_use: "Use when producing or revising a Chinese-language document for the
 | 推演 / 投影 | 没跑，按 X 换算 |
 | 命中矩阵 | judge 逐条 `criterion` 的判定 |
 | 命中 / 未命中 / 命中率（指 `criterion` 是否成立） | 满足 / 未满足 / 满足率 |
+| 档 / 档位（指一个取值来自哪里） | 直接叫它的名字：on-policy 来源、hindsight 来源 |
+| 重打分 / 重采 / 重采出的 | `re-grade` / `re-sample` |
+| 再判一次 | 第二次调用重新决定 |
 | 噪声 | 噪音 |
 | 冻结 / 冻结的（指参数不更新） | `fixed` |
 | 预研诊断 / 折算 / 本消融的 base 行 | 见下面「内部报告的结构和词都不进对外文档」 |
@@ -393,6 +396,24 @@ when_to_use: "Use when producing or revising a Chinese-language document for the
 原文太长就截断并标明截断（`……（大段机制）`），不要改写成概括。数值、专名、引号里的
 原话照抄。**自己编一个例子填进「样例」位是最坏的一种**：它既不具体也不可核对，而真实
 的 rollout、真实的 bench 题目通常就在手边。
+
+### 一个工程动作有英文原名时，别造一个中文双字词
+
+`re-grade`（换一份 rubric 给同一批回答重新打分）与 `re-sample`（换一份 guidance
+重新采一组）是这套流程里两个有名字的动作。压成「重打分」「重采」读着像速记，
+而且「重采出的 $o'_t$」还犯了第 9 条的动补结构。这属于四问的第 2 问：**动作在英文里
+有固定说法，就用英文动词。**
+
+| ✗ | ✓ |
+|---|---|
+| 固定回答重打分 | 固定已记录的回答 `re-grade` |
+| 按 $g'$ 重采一组 | 按 $g'$ `re-sample` 一组 |
+| 重采出的 $o'_t$ | `re-sample` 得到的 $o'_t$ |
+| 再判一次 | 第二次调用重新决定 |
+
+**「档」「档位」同理，是给一个有名字的东西造的量词。** on-policy、hindsight、
+foresight 本来就是三个来源的名字，写「foresight 这一档」等于先把名字收起来
+再用一个量词去指它，读者要多绕一道。写 `foresight 来源`，或者直接写 `foresight`。
 
 ### 「命中」不是 criterion 的动词，「满足」才是
 
