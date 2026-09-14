@@ -88,6 +88,7 @@ when_to_use: "Use when producing or revising a Chinese-language document for the
 | 诚实清单 | 本周结论与未决项 / 已有与未有 |
 | 我们在哪里 / 这条线在追什么 | 直接说位置，或直接问那个问题 |
 | 判读 | 结果 |
+| 判定（指 judge 给出的结果） | 打分结果 |
 | 读法（指「该怎么理解这个结果」） | 直接把结论写出来 |
 | 落差 | `gap` |
 | 尺子 / 判据 | `rubric`；单条时 `criterion`，复数 `criteria` |
@@ -109,7 +110,7 @@ when_to_use: "Use when producing or revising a Chinese-language document for the
 | 口径（任何用法） | 评价方式 / 评分标准 / 统一的评价方式 |
 | 实测 | 跑过 |
 | 推演 / 投影 | 没跑，按 X 换算 |
-| 命中矩阵 | judge 逐条 `criterion` 的判定 |
+| 命中矩阵 | judge 逐条 `criterion` 的打分结果 |
 | 命中 / 未命中 / 命中率（指 `criterion` 是否成立） | 满足 / 未满足 / 满足率 |
 | 档 / 档位（指一个取值来自哪里） | 直接叫它的名字：on-policy 来源、hindsight 来源 |
 | 重打分 / 重采 / 重采出的 | `re-grade` / `re-sample` |
@@ -150,7 +151,7 @@ when_to_use: "Use when producing or revising a Chinese-language document for the
    |---|---|
    | 量出 X 的影响 | 衡量 X 的影响 |
    | 从对话里读出答案 | 答案取自对话 |
-   | judge 判出满足情况 | judge 判定是否满足 |
+   | judge 判出满足情况 | judge 给出的打分结果 |
    | 从轨迹蒸出 hint | 从轨迹蒸馏 hint |
    | 新域上跑出的轨迹 | 新域上的轨迹 |
    | 上一段写出的 token | 上一段输出的 token |
@@ -175,9 +176,9 @@ when_to_use: "Use when producing or revising a Chinese-language document for the
 
 13. **不写「不带 X，不带 Y」这类否定清单。** 一句话说清它是什么，读者自然知道它没有什么；列举缺席项是把设计意图写成了辩解。「只引 policy 自己在同一类 criterion 上写过的话，不带数字，不带 criterion 文本」→「policy 的历史输出」。删掉「不带 xxx」，只留那个名词。
 
-14. **引了原文，就不再转述原文。** 原文（prompt、rollout、guidance turn、criterion）摆在引文块里，读者自己会读；在它前后加一句「thinking 把 turn 复述成核对表，正文再抄一遍同一句话」是废话，也是替读者下判断。引文块前只留一个名字或一个时间戳（`rollout（t=66）`），引文块后只写判定结果与数值。
+14. **引了原文，就不再转述原文。** 原文（prompt、rollout、guidance turn、criterion）摆在引文块里，读者自己会读；在它前后加一句「thinking 把 turn 复述成核对表，正文再抄一遍同一句话」是废话，也是替读者下判断。引文块前只留一个名字或一个时间戳（`rollout（t=66）`），引文块后只写打分结果与数值。
 
-15. **case 文档里什么都不省。** 一个 case 要把 prompt 全文、全部 rollout（八条就八条）、全部 criteria 及其权重、每条 rollout 逐 criterion 的判定、以及每一步演化前后的 guidance / rubric / sample 原文都摆出来。英文原文照抄，每段原文之后紧跟一段中文翻译，用引文块分开。不要「其余类似」「略」「……」，也不要只挑最好看的一条。
+15. **case 文档里什么都不省。** 一个 case 要把 prompt 全文、全部 rollout（八条就八条）、全部 criteria 及其权重、每条 rollout 逐 criterion 的打分结果、以及每一步演化前后的 guidance / rubric / sample 原文都摆出来。英文原文照抄，每段原文之后紧跟一段中文翻译，用引文块分开。不要「其余类似」「略」「……」，也不要只挑最好看的一条。
 
 17. **疑问词不能当名词用，把那个东西说出来。** 「差在哪」「改在第几条上」「取哪一段」——
    把一个疑问句塞进名词的位置，读者得先在心里把它改写成陈述句才能接着读。这与第 8 条
@@ -191,7 +192,7 @@ when_to_use: "Use when producing or revising a Chinese-language document for the
    | 这一步用的原子操作，改在第几条上 | 本次改动用的原子操作与落点 |
    | 取哪一段历史 | 历史的截取范围 |
    | 决定学下一条什么 | 决定下一步的样本 |
-   | 看这条 criterion 是不是一直是 0 | 这条 criterion 的历次判定 |
+   | 看这条 criterion 是不是一直是 0 | 这条 criterion 的历次打分结果 |
 
    **判断方法：这个短语能不能加一个问号单独成句？能就是疑问词当名词用。**
    同一句里的「多少」「几个」「哪些」照此处理，除非它真的在问一个数。
@@ -536,7 +537,7 @@ HealthBench 与 AMARIS 这一类工作在自己的字段里写的就是 `criteri
 | **表格下面逐行解读的 bullet** | `+ **依赖度**：adaptive 两种策略都把依赖度压到 0.004 以下，JIT 略好于按步` | 表已经说了。表后至多一句，且只写表里没有的条件或前提；一行一条 bullet 是最明显的填充 |
 | **「粗体断言：数字复述」** | `+ **OOD 上编辑最高**：0.5285 对组合的 0.5231` | 数字在表里；删掉整条 |
 | **表前的引入句** | `evolver 第二次调用读 Δ_g，给出 scheduler 的决定，是一个三路门：` | 表头已经说了；直接放表 |
-| **case 后面的「解释」段** | `**解释**  8 条 rollout 在 c1 到 c3 上全部满足，c4 是 5/8：拼接进来的那一半立刻饱和……` | case 只摆 prompt、rubric、rollout、判定；读者自己读。见第 14 条 |
+| **case 后面的「解释」段** | `**解释**  8 条 rollout 在 c1 到 c3 上全部满足，c4 是 5/8：拼接进来的那一半立刻饱和……` | case 只摆 prompt、rubric、rollout、打分结果；读者自己读。见第 14 条 |
 | **case 的脚手架标签** | `**parent** / **检索得到** / **child** / guidance：无。/ rollout（8 条）` | 一个引文块前只留一个名字或时间戳 |
 | **整个「结果」「样例」子节，数是造的** | 为 reweight / composer / specifier 各造一张表，再造一张 $u$ 更新前后的表 | 没跑的数只进主表一次，作者点名要补的那一格才补；导师用一篇真实论文的截图替掉了整节 |
 | **标题后面挂一个从句** | `衰减策略：内容与强度两条轴，作用在整组` | 标题是名词短语：`衰减策略：内容与强度两条轴` |
