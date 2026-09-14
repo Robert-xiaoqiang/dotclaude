@@ -91,6 +91,8 @@ when_to_use: "Use when producing or revising a Chinese-language document for the
 | 判定（指 judge 给出的结果） | 打分结果 |
 | 读法（指「该怎么理解这个结果」） | 删掉这一栏，把话并进它右边那一栏 |
 | 测到的 X / 量到的 X（X 本身就是测量结果） | X |
+| 别处 / 那个 / 那条 / 它（指一个有名字的对象） | 写出名字，或用「其」接在名字后面 |
+| 跑 N 个 epoch / 跑一遍（指训练或推理） | 训练 N 个 epoch / 推理一遍 |
 | 落差 | `gap` |
 | 尺子 / 判据 | `rubric`；单条时 `criterion`，复数 `criteria` |
 | 拐杖 | `guidance` |
@@ -393,6 +395,20 @@ when_to_use: "Use when producing or revising a Chinese-language document for the
 | `原样搬运的 prompt` | `prompt` |
 
 同族的还有「如实记录」「不加修饰地呈现」。
+
+### 指代词不是名字
+
+第 18 条管的是「那一X」这种带量词的指代，同族还有一批不带量词的：**别处、那个、那条、它**。
+它们在写的人手上有明确所指，在读者手上没有——读者得回头找上一个名词，而幻灯片上很可能已经翻页了。
+
+| ✗ | ✓ |
+|---|---|
+| 与本组失败 rollout 相近的答案，看它在别处按什么 rubric 得到 positive | 与本组失败 rollout 相近的 rollout，取回其对应的样本 query 与 rubric |
+| 整列 negative 的那条 criterion | 整列 negative 的那个 $k$ |
+| 取回它所在样本的写法 | 取回其写法 |
+
+**改法有两种：把名字写出来，或者用「其」接在名字后面。**「其」是所有格，它必须紧跟在被指对象
+之后，所以不会像「它」那样跨句飘走。
 
 ### 「读法」那一栏，删掉而不是改名
 
