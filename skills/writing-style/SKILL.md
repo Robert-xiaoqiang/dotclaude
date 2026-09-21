@@ -90,5 +90,6 @@ skill does not govern Chinese deliverables) ·
 `writing-paper` (the paper-specific layer: citation placement, related work, section openers) ·
 `docs-weekly` (the staged weekly report) · `docs-slides` (slide text and speaker notes, which obey
 these rules and add the constraint that the notes must be speakable aloud) · `docs-plan` and
-`docs-arch` (the living project docs) · `git-commit` (version-control text, which these rules
-deliberately do not govern).
+`docs-arch` (the living project docs) · `writing-chatgpt` (the writer tool whose prompt stack
+encodes these rules, for drafting rather than judging) · `git-commit` (version-control text, which
+these rules deliberately do not govern).

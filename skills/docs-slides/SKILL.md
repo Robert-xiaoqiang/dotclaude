@@ -479,5 +479,6 @@ and how much of it to show) · `writing-style` (the punctuation and prose rules 
 speaker notes obey) · `writing-style-zh` (the same for a Chinese deck, including the declarative-title
 and no-invented-takeaway rules the slide titles obey) · `docs-weekly` (the other spoken-argument deliverable,
 which carries an argument rather than a log) · `naming-descriptive` (naming the talk directory and its
-assets) · `code-no-fallbacks` (why an unknown cite key and an out-of-range crop fail loudly rather
-than defaulting).
+assets) · `writing-chatgpt` (the writer tool's `slide` task drafts title, bullets and script in this
+register; the deck's gates still run here) · `code-no-fallbacks` (why an unknown cite key and an
+out-of-range crop fail loudly rather than defaulting).
