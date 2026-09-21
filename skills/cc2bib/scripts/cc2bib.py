@@ -48,9 +48,31 @@ def field(body: str, name: str) -> str:
 
 
 # ------------------------------------------------------------------ resolve
-def candidates(title: str):
-    """S2 first, then arXiv and Crossref, so an S2 outage degrades rather than stops."""
+ARXIV_RE = re.compile(r"arxiv[:\s/]*(\d{4}\.\d{4,5})", re.I)
+
+
+def declared_arxiv(body: str):
+    """An arXiv id anywhere in the entry, not only in an eprint field. Most
+    entries written by hand put it in journal = {arXiv preprint arXiv:...}."""
+    m = ARXIV_RE.search(body or "")
+    return m.group(1) if m else None
+
+
+def candidates(title: str, body: str = ""):
+    """Identifier first, then title.
+
+    An entry that names an arXiv id is claiming one specific record, so that
+    record is fetched and compared. Resolving by id is authoritative and it
+    catches the case a title search cannot: a real id and a real author under a
+    title that was never the paper's.
+    """
     out = []
+    aid = declared_arxiv(body)
+    if aid:
+        rec = C.arxiv_by_id(aid)
+        if rec:
+            rec["by_id"] = True
+            out.append(rec)
     hit = C.s2_match(title)
     if hit:
         out.append(hit)
@@ -59,6 +81,19 @@ def candidates(title: str):
                for c in out):
         out += C.crossref_match(title)
     return out
+
+
+def author_requery(title: str, author: str):
+    """Relevance search with the authors attached.
+
+    The exact-title endpoint locks onto one record, and for a generic title
+    such as "Quantum machine learning" that record may be a different paper
+    entirely. Before calling an entry wrong, ask again with the authors.
+    """
+    names = " ".join(sorted(C.bib_surnames(author))[:4])
+    if not names:
+        return []
+    return C.s2_search(f"{title} {names}", limit=5) or []
 
 
 def judge(title, author, year, cands):
@@ -84,6 +119,9 @@ def judge(title, author, year, cands):
         dy = 0
     if dy > YEAR_TOL:
         notes.append(f"year {year} vs {best['year']}")
+    if best.get("by_id") and sim < TITLE_OK and author_ok:
+        return ("TITLE-WRONG", sim, best,
+                f"entry's own arXiv id resolves to a different title; " + "; ".join(notes))
     if sim < TITLE_MAYBE:
         v = "NOT-FOUND"
     elif sim < TITLE_OK:
@@ -132,7 +170,14 @@ def cmd_audit(a):
     rows, fixed = [], []
     for i, e in enumerate(entries, 1):
         t, au, yr = field(e["body"], "title"), field(e["body"], "author"), field(e["body"], "year")
-        v, sim, best, notes = judge(t, au, yr, candidates(t))
+        cands = candidates(t, e["body"])
+        v, sim, best, notes = judge(t, au, yr, cands)
+        if v in ("WRONG-RECORD", "NOT-FOUND"):
+            extra = author_requery(t, au)
+            if extra:
+                v2, sim2, best2, notes2 = judge(t, au, yr, cands + extra)
+                if v2 == "VERIFIED" or sim2 > sim:
+                    v, sim, best, notes = v2, sim2, best2, notes2
         new = to_bibtex(e["key"], best, e["type"]) if best and v in ("VERIFIED", "REVIEW") else e["raw"]
         rows.append({"key": e["key"], "cited": e["key"] in cited if cited else None,
                      "verdict": v, "sim": round(sim, 3), "notes": notes,

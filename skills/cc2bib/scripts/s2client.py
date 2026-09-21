@@ -141,6 +141,30 @@ def arxiv_match(title: str):
     return out
 
 
+def arxiv_by_id(arxiv_id: str):
+    """Resolve an arXiv id directly. Authoritative, and the strongest check
+    available: an entry that carries an id is claiming a specific record, so
+    the claim can be compared against that record rather than guessed at from
+    the title."""
+    if not arxiv_id:
+        return None
+    d = fetch(f"https://export.arxiv.org/api/query?id_list={arxiv_id}&max_results=1",
+              tag="arxivid")
+    raw = (d or {}).get("__raw__", "")
+    m = re.search(r"<entry>(.*?)</entry>", raw, re.S)
+    if not m:
+        return None
+    e = m.group(1)
+    t = re.search(r"<title>(.*?)</title>", e, re.S)
+    if not t or "Error" in t.group(1):
+        return None
+    y = re.search(r"<published>(\d{4})", e)
+    return {"title": re.sub(r"\s+", " ", t.group(1)).strip(),
+            "year": int(y.group(1)) if y else None, "venue": "arXiv",
+            "externalIds": {"ArXiv": arxiv_id},
+            "authors": [{"name": n} for n in re.findall(r"<name>([^<]+)</name>", e)]}
+
+
 def crossref_match(title: str):
     if not title.strip():
         return []
