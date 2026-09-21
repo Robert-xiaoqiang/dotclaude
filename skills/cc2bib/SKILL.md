@@ -73,6 +73,8 @@ paper an entry may claim. Confirmation needs the author list too.
 | verdict | meaning |
 |---|---|
 | `VERIFIED` | title similarity at least 0.93 and a first-author surname in common and year within 2 |
+| `NOT-CITABLE` | a blog post, model card, repository or bare URL, checked before any lookup |
+| `TITLE-WRONG` | the entry's own arXiv id resolves to a paper with a different title |
 | `REVIEW` | title between 0.78 and 0.93, or year off by more than 2 |
 | `WRONG-RECORD` | title matches but no author overlaps, so the entry points at a different paper |
 | `NOT-FOUND` | nothing above 0.78 from any source, the strongest hallucination signal |
@@ -82,6 +84,22 @@ legitimately differ, for example posted 2016 and published 2017.
 
 A corporate author such as "Meta AI" has no surname to cross-check, so it is
 accepted on title alone and the report says so.
+
+## Web sources are not citations
+A blog post, a model card, a repository or a bare URL is not a citable source.
+It has no authors of record, no venue, no version a reader can pin, and nothing
+to verify against, and its content can change or disappear after the citing
+paper is published. Entries like these are reported as `NOT-CITABLE` before any
+lookup runs, because there is nothing to look up.
+
+Almost always the thing being cited does have a paper, and that paper is what
+belongs in the bibliography. A table row reading `Llama-3.2-3B` cited a Meta
+blog post; the Llama 3 herd paper says the same thing and can be checked. When
+no paper exists, the right move is usually to name the artefact in the text and
+drop the citation, not to cite the URL.
+
+An entry carrying an arXiv id or a DOI is never `NOT-CITABLE`, whatever its
+venue string says, because it has a real identifier behind it.
 
 **Preprints are preferred** when both a preprint and a published version exist.
 An arXiv id is stable, free to resolve and always reachable, which is what a

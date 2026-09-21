@@ -50,6 +50,32 @@ def field(body: str, name: str) -> str:
 # ------------------------------------------------------------------ resolve
 ARXIV_RE = re.compile(r"arxiv[:\s/]*(\d{4}\.\d{4,5})", re.I)
 
+# A blog post, a model card, a repository or a bare URL is not a citable
+# source. It has no authors of record, no venue, no version a reader can pin
+# and nothing to verify against, and it can be edited or removed after
+# publication. Almost always the thing being cited has a paper, and that paper
+# is what belongs in the bibliography.
+WEB_VENUE = re.compile(
+    r"\bblog\b|model card|release notes|documentation|\bdocs\b|github|gitlab|"
+    r"hugging\s*face|repository|\brepo\b|website|web page|online|"
+    r"technical report,\s*open|\burl\b", re.I)
+
+
+def web_source(body: str):
+    """Reason this entry is a web source rather than a paper, or None."""
+    if ARXIV_RE.search(body or "") or re.search(r"\bdoi\s*=", body or "", re.I):
+        return None                      # it has a real identifier, it is a paper
+    venue = ""
+    m = re.search(r"(?:journal|booktitle|howpublished|publisher)\s*=\s*[\"{](.+?)[\"}]",
+                  body or "", re.S)
+    if m:
+        venue = re.sub(r"\s+", " ", m.group(1)).strip()
+    if venue and WEB_VENUE.search(venue):
+        return f"venue is {venue!r}"
+    if re.search(r"\burl\s*=", body or "", re.I) and not venue:
+        return "url only, no venue"
+    return None
+
 
 def declared_arxiv(body: str):
     """An arXiv id anywhere in the entry, not only in an eprint field. Most
@@ -170,6 +196,15 @@ def cmd_audit(a):
     rows, fixed = [], []
     for i, e in enumerate(entries, 1):
         t, au, yr = field(e["body"], "title"), field(e["body"], "author"), field(e["body"], "year")
+        web = web_source(e["body"])
+        if web:
+            rows.append({"key": e["key"], "cited": e["key"] in cited if cited else None,
+                         "verdict": "NOT-CITABLE", "sim": 0.0, "notes": web,
+                         "claim": {"title": t, "author": au, "year": yr},
+                         "match": None, "old_entry": e["raw"], "new_entry": e["raw"]})
+            fixed.append(e["raw"])
+            print(f"[{i:>3}/{len(entries)}] {e['key']:<28}{'NOT-CITABLE':<14}{web[:40]}", flush=True)
+            continue
         cands = candidates(t, e["body"])
         v, sim, best, notes = judge(t, au, yr, cands)
         if v in ("WRONG-RECORD", "NOT-FOUND"):
@@ -210,7 +245,7 @@ def write_md_report(rows, path, src, out):
          f"Corrected file: `{out.name}`. Entries marked NOT-FOUND or WRONG-RECORD are "
          "carried through unchanged, because inventing a replacement is the failure "
          "this audit exists to catch.", ""]
-    for bad in ("NOT-FOUND", "WRONG-RECORD", "REVIEW"):
+    for bad in ("NOT-CITABLE", "TITLE-WRONG", "NOT-FOUND", "WRONG-RECORD", "REVIEW"):
         sel = [r for r in rows if r["verdict"] == bad]
         if not sel:
             continue
