@@ -15,6 +15,7 @@ not own which runs to compare (`output-analysis`) or how a report references a f
 - [The one rule](#the-one-rule)
 - [Diagrams (TikZ · Mermaid · HTML/SVG)](#diagrams-tikz--mermaid--htmlsvg)
 - [Data figures (matplotlib)](#data-figures-matplotlib)
+- [Looking like a strong technical report](#looking-like-a-strong-technical-report)
 - [Reproducibility](#reproducibility)
 - [Anti-patterns](#anti-patterns)
 - [Companions](#companions)
@@ -185,6 +186,71 @@ scales genuinely differ, and then say so in the caption.
 
 ---
 
+## Looking like a strong technical report
+
+The rule above governs what a figure *contains*. This governs what it *looks like*, and the gap
+between a competent figure and one that reads as it came out of a strong lab is almost entirely here.
+Every item is something the good reports do and the default settings of every plotting library do
+not.
+
+**The figure uses the document's font, at the document's size.** This is the single loudest tell. A
+panel set in DejaVu Sans, dropped into a paper set in Times or Palatino, reads as pasted in no matter
+how good the data is. Name the document's face in the generator, or export `pgf` and let LaTeX set
+the text. Then size the figure to the width it will occupy, and never let `\includegraphics` scale
+it: a figure drawn at 6 in and included at `0.7\textwidth` has 7 pt labels claiming to be 10 pt, and
+two such figures at different scales have visibly different type.
+
+**One hue, plus grey, plus one accent.** The default colour cycle gives every series equal weight and
+none of them meaning. Strong reports desaturate: baselines and reference curves are grey, the
+paper's own arm is the one saturated colour on the page, and a second hue appears only when a second
+distinction genuinely exists. A reader should be able to find the contribution without reading the
+legend. Keep that assignment fixed across every figure in the document, so a run keeps its identity.
+
+**Remove the frame, keep two spines.** A full box around the axes is a library default, not a
+choice. Left and bottom spines in a mid grey, a hairline horizontal grid behind the data on the value
+axis only, and nothing else. Ticks point outward, are short, and there are three to five of them at
+round values.
+
+**Label the lines, not a legend box.** A legend makes the reader match a colour to a name and carry
+it back to the curve. A name set at the end of its own line, in that line's colour, removes the trip
+entirely, and it is what the reports do whenever the lines separate at the right edge. Keep a legend
+only when the curves cross or bunch.
+
+**Let the data set the limits.** An axis running 0 to 40 for data that lives in 10 to 34 spends a
+third of the panel on nothing, and the differences the figure exists to show shrink accordingly.
+Pad the data range slightly and stop. The exception is a bar chart, whose baseline must be zero or
+the bars lie about their ratios.
+
+**Annotate the claim.** The peak, the crossing point, the endpoint gap: mark the one place the text
+points at, with a dot and its value or a short arrow. A figure where every point is equally
+unmarked makes the reader find the result; a figure with one marked point hands it over.
+
+**Panels are lettered, aligned, and share their scales.** `(a)`, `(b)` in bold at the top left,
+outside the axes. Panels in a row share a y-axis and say so by drawing the tick labels once. Panels
+that do not share a scale must not be the same size and shape, or the reader will compare them
+anyway.
+
+**Spend the space on the data.** Tight bounding box, no title, no `suptitle`, no padding the document
+will add again. Inside the axes, the opposite: keep marks off the spines and labels off the marks.
+
+### Hallmarks of a figure nobody styled
+
+| tell | fix |
+|---|---|
+| The default blue-orange-green cycle on four series | one hue in tints, grey baselines, one accent for the contribution |
+| A legend box floating over the data | direct labels at the line ends |
+| A full box around the axes, ticks on all four sides | two spines, outward ticks |
+| A dense grid in both directions | hairline horizontal grid, behind the data |
+| Font visibly different from the body text | the document's face, or `pgf` output |
+| Two figures on facing pages at different type sizes | draw each at the width it is included at, never scale |
+| `0.0, 0.1, ... 1.0` on an axis whose data spans 0.42 to 0.70 | limits from the data, plus a little padding |
+| A title inside the image | the caption |
+| Value labels absent from a bar chart | print the value above each bar and drop the y-axis |
+| A rainbow heatmap | sequential for magnitudes, diverging only when zero means something |
+
+
+---
+
 ## Reproducibility
 
 A figure is regenerated whenever a run updates, so the generator is an artifact, not a chat one-off.
@@ -216,6 +282,11 @@ A figure is regenerated whenever a run updates, so the generator is an artifact,
   exist.
 - **Reviewing the source instead of the render.**
 - **A figure whose generator exists only in the conversation.**
+- **The library's default palette**, which gives four series equal weight and the reader no way
+  to find the contribution.
+- **A figure scaled by `\includegraphics`**, so its type size no longer matches its neighbour's.
+- **An axis padded to a round number** far outside the data, shrinking the difference the figure
+  exists to show.
 
 ---
 
@@ -224,5 +295,6 @@ A figure is regenerated whenever a run updates, so the generator is an artifact,
 report references a figure and what a placeholder spec contains) · `docs-slides` (how a figure reaches
 a slide: cropping a published one to the panel that carries the argument, rather than redrawing it) · `dataviz` (palette and mark detail for
 richer or interactive charts, whose default is a standalone dashboard, so strip its title and caption) ·
+`docs-table` (the same question for a grid of numbers, and the shared generator) ·
 `layout-workspace` (where generators live) · `writing-style-zh` (the prose rules a Chinese figure's
 labels obey, and where the one-name-one-object rule lives) · `conventions` (family index).
