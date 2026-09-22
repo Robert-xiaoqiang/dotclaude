@@ -42,27 +42,49 @@ the same pair `writing-chatgpt` uses. Source it before any call:
 set -a; . $CPFS_HOME/.secret; set +a
 ```
 
-Three request shapes reach three families, and the key decides which of them exist:
+Three protocols reach three families, and **the model id says which one it speaks**. The `mr.` prefix
+belongs to the OpenAI-protocol ids only, and using it on a Google or Volcengine id is what produces a
+routing error that looks like a missing model.
 
-| family | path | models |
+| family | path | model ids |
 |---|---|---|
 | OpenAI images | `{base}/images/generations` | `mr.gpt-image-2`, `gpt-image-1.5` |
-| Gemini | `{root}/protocol/vertex/v1beta/models/{model}:generateContent`, `responseModalities: ["IMAGE"]` | `mr.gemini-3-pro-image-preview`, `mr.gemini-3.1-flash-image-preview` |
-| Seedream | `{base}/images/generations` | `mr.doubao-seedream-5-0-260128`, `mr.doubao-seedream-4-5-251128` |
+| Google | `{root}/protocol/vertex/v1beta/models/{model}:{action}` | `vertex_ai.gemini-3-pro-image-preview`, `ai_studio.gemini-3-pro-image-preview`, and the `3.1-flash-image-preview` and `2.5-flash-image` pairs |
+| Volcengine | `{root}/protocol/volcengine/api/v3/images/generations` | `doubao-seedream-5-0-260128`, `doubao-seedream-4-5-251128` |
 
-Probed on 2026-09-21 from the public domain `routify-pub.alibaba-inc.com`, **only the OpenAI family
-answered**. The Gemini ids return `AllModelsFailed` and the Seedream ids return `NoAvailableModels`,
-which is the router saying this key has no such model rather than the request being wrong. The
-internal domains `routify.alibaba-inc.com` and `routify-online.alibaba-inc.com` are not reachable
-from this host, so the fix is a provisioning request, not a code change. Re-run the probe before
-assuming today matches that snapshot:
+Google authenticates with `x-goog-api-key: Bearer <key>`, and the action is `generateContent` with
+`responseModalities: ["IMAGE"]`. The two Google channels differ in how they take an input file:
+`vertex_ai.*` accepts both `contents[].parts[].fileData.fileUri`, which the router converts to a GCS
+link, and `contents[].parts[].inlineData.data`, which it converts to base64. `ai_studio.*` accepts
+only the second. Text-to-image needs neither, so either channel works for this skill.
+
+Volcengine authenticates with `Authorization: Bearer <key>`. Seedream is the image family and is
+synchronous. **Seedance is video, not image**, and it is asynchronous: a POST to
+`{root}/protocol/volcengine/api/v3/contents/generations/tasks` creates a task whose body carries
+`content[]` parts, `ratio`, `duration` and `generate_audio`, and the result is polled rather than
+returned. This skill does not drive it. The Doubao seed text models split by id, where an id ending
+in `-completion` speaks `/chat/completions` and everything else speaks `/responses`.
+
+Three failures mean three different things, and only one of them is worth retrying:
+
+- `NoAvailableModels` is the router saying this key has no such model. A provisioning request fixes
+  it, a different path does not.
+- `AllModelsFailed` means the route was found and the upstream refused. Usually a wrong id shape for
+  that channel, sometimes a real outage, and `429 ... model is overloaded` under it is worth a retry.
+- `401 API密钥状态异常：AK余额耗尽禁用` means the key itself is disabled because its balance is
+  exhausted. Every endpoint returns it, text and image alike, so a probe that shows this everywhere is
+  reporting one billing fact rather than a model inventory. **This is the state as of 2026-09-21.**
+  Before that the OpenAI family answered, the Google and Volcengine ids were never reached under
+  their correct prefixes, and the internal domains `routify.alibaba-inc.com` and
+  `routify-online.alibaba-inc.com` are not reachable from this host in any case. Re-probe once the
+  key is funded:
 
 ```sh
 python3 $CPFS_HOME/.claude/skills/drawing-gemini/scripts/genimage.py --probe
 ```
 
-The key is rate limited at 5 requests per minute for synchronous models, so the probe sleeps between
-calls and a batch of generations should too.
+The key is rate limited at 5 requests per minute for synchronous models and 1 for asynchronous ones,
+so the probe sleeps between calls and a batch of generations should too.
 
 ## The scripts
 `scripts/genimage.py` is the whole interface. It picks the family from the model id, sends one

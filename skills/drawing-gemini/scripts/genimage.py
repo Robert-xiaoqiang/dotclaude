@@ -8,10 +8,11 @@
 #       python3 genimage.py --probe
 import argparse, base64, json, os, sys, time, urllib.error, urllib.request
 
-OPENAI = ("mr.gpt-image-2", "gpt-image-1.5", "mr.doubao-seedream-5-0-260128",
-          "mr.doubao-seedream-4-5-251128", "doubao-seedream-4-5-251128")
-GEMINI = ("mr.gemini-3-pro-image-preview", "mr.gemini-3.1-flash-image-preview",
-          "mr.vertex_ai.gemini-3-pro-image-preview", "gemini-3-pro-image-preview")
+OPENAI = ("mr.gpt-image-2", "gpt-image-1.5")
+GEMINI = ("vertex_ai.gemini-3-pro-image-preview", "ai_studio.gemini-3-pro-image-preview",
+          "vertex_ai.gemini-3.1-flash-image-preview", "ai_studio.gemini-3.1-flash-image-preview",
+          "vertex_ai.gemini-2.5-flash-image")
+VOLC = ("doubao-seedream-5-0-260128", "doubao-seedream-4-5-251128")
 
 
 def endpoints():
@@ -20,8 +21,11 @@ def endpoints():
 
 
 def family_of(model):
-    if model in GEMINI or "image-preview" in model:
+    """The protocol a model id speaks, read off its own prefix."""
+    if model.startswith(("vertex_ai.", "ai_studio.")) or "gemini" in model:
         return "gemini"
+    if model.startswith(("doubao", "doubao.")):
+        return "volcengine"
     return "openai"
 
 
@@ -46,6 +50,11 @@ def request_for(model, prompt, size, aspect, family):
                  "generationConfig": {"responseModalities": ["IMAGE"],
                                       "imageConfig": {"aspectRatio": aspect, "imageSize": "2K"}}},
                 {"x-goog-api-key": f"Bearer {key}"})
+    if family == "volcengine":
+        return (f"{root}/protocol/volcengine/api/v3/images/generations",
+                {"model": model, "prompt": prompt, "size": size,
+                 "response_format": "b64_json", "watermark": False},
+                {"Authorization": f"Bearer {key}"})
     return (f"{base}/images/generations",
             {"model": model, "prompt": prompt, "size": size, "n": 1},
             {"Authorization": f"Bearer {key}"})
@@ -75,10 +84,13 @@ def extract_png(family, raw):
 
 def probe(timeout):
     p = "a plain white square with one black circle in the centre, flat vector, no text"
-    for model in OPENAI + GEMINI:
+    for model in OPENAI + GEMINI + VOLC:
         fam = family_of(model)
         url, body, hdr = request_for(model, p, "1024x1024", "1:1", fam)
         st, dt, raw = post(url, body, hdr, timeout)
+        if st == 401 and "\u4f59\u989d\u8017\u5c3d" in raw:
+            print("the key is disabled, its balance is exhausted; every endpoint returns this")
+            return
         png, why = extract_png(fam, raw) if st == 200 else (None, raw[:110].replace("\n", " "))
         print(f"[{st}] {dt:>6}s {fam:<7} {model:<42} {'OK, ' + str(len(png)) + ' bytes' if png else why}")
         time.sleep(3)                                        # the key is rate limited, RPM 5
@@ -86,7 +98,7 @@ def probe(timeout):
 
 ap = argparse.ArgumentParser(description=__doc__)
 ap.add_argument("--model", default="mr.gpt-image-2")
-ap.add_argument("--family", choices=("auto", "openai", "gemini"), default="auto")
+ap.add_argument("--family", choices=("auto", "openai", "gemini", "volcengine"), default="auto")
 ap.add_argument("--prompt"), ap.add_argument("--prompt-file")
 ap.add_argument("--out", default="image.png")
 ap.add_argument("--size", default="1536x1024", help="OpenAI family, pixels")
