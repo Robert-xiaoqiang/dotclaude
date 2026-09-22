@@ -48,6 +48,33 @@ figure trying to be readable on its own, which is a requirement nobody imposed.
 | **A legend entry that is a sentence** | legends are keys, not glossaries | shorten to the arm name |
 | **Units or definitions spelled out** (`accuracy (fraction of correct answers)`) | terse axis labels are the convention | caption, once |
 
+### Style, which is where a figure looks amateur before it is read
+
+| ✗ | why | instead |
+|---|---|---|
+| **Drop shadows, glows, bevels, gradients** | a slide effect, and it muddies every edge at print size | flat fills, nothing behind the shape |
+| **Fill plus stroke plus shadow on the same box** | three ways of saying "this is a box" | pick one: a tinted fill with no stroke, or a stroke with no fill |
+| **Mixed capitalization** across labels, axis names and panel titles | the reader reads the inconsistency before the content | one convention for every string in the figure, and the same one in its siblings |
+| **The whole equation, transcribed into the image** | the document already displays it, and the two will drift | the symbol alone, `$\mathcal{L}_{\mathrm{OPD}}$`, placed on the thing it scores |
+
+**A comparison is marked, not narrated.** When the figure exists to say *this is compared against
+that*, put a marker on each of the two things, a box around them or a bracket beside them, join them
+with one line, and label that line with the name of the comparison. A red dashed box around each
+compared quantity and a red arrow between them carrying `$\mathcal{L}_{\mathrm{KD}}$` is the whole
+idiom. Writing the loss out in full inside the panel is the failure it replaces.
+
+### What never appears inside the image, continued
+
+The trailing-node rule below is the commonest case of a wider one. **An explanatory annotation is a
+caption wherever it sits**, not only under a panel. Labels such as `dense credit`, `evidence, before
+decoding`, `one decision`, `one state, three operations` and `near-duplicate` all name the reader's
+takeaway rather than the object drawn, and all of them belong in the caption. The test is the same:
+if deleting it removes no object, no symbol and no quantity, it was prose.
+
+**An illustration sells a concept and a formulation.** It is not text placed in boxes. If the panel
+would survive being replaced by a bulleted list of its own labels, it is a list with borders, and the
+drawing has not been done yet.
+
 ### What the figure must carry
 
 Names of objects, their arrangement, the direction of flow, axes, scales, tick labels, and a legend when
@@ -267,6 +294,14 @@ A figure is regenerated whenever a run updates, so the generator is an artifact,
 
 - **A figure that reads fine with the document covered.** It has absorbed the document's job.
 - **A claim, a conclusion, or a "key insight" printed on the image.**
+- **An explanatory annotation anywhere in the panel**, not only under it. `dense credit`,
+  `evidence, before decoding`, `one decision` are captions that wandered into the drawing.
+- **Drop shadows and gradients**, which are slide effects that print as mud.
+- **Two capitalization conventions in one figure**, usually an uppercase panel title over
+  lowercase axis labels, or the reverse.
+- **An equation transcribed into a panel** where its symbol would have pointed at the same
+  thing and could not drift from the text.
+- **A list with borders.** Boxes of text in a row, no structure, no quantity, no flow.
 - **A footnote node under a panel**, which is a caption written twice in two places that will drift.
 - **A caption baked into the image**, then a second caption in the document.
 - **One figure per arm** where a legend would do.
