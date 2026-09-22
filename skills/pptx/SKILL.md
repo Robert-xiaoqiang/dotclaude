@@ -25,6 +25,7 @@ Paths are relative to this skill's directory. Everything else is plain Python, `
 | `scripts/clean.py unpacked/` | Delete slides, media, and rels no longer referenced. Run **after** `<p:sldIdLst>` is final |
 | `scripts/office/validate.py deck.pptx [--original src.pptx]` | Schema, relationship, content-type, chart and slide checks; each failure names its fix. Pass `--original` for any template-derived deck — it baselines the schema checks against the template, so the template's own XSD errors don't read as yours |
 | `scripts/office/soffice.py --headless --convert-to pdf deck.pptx` | LibreOffice wrapper — bare `soffice` hangs in this sandbox |
+| `scripts/office/overlap_audit.py deck.pptx` | Off-slide shapes, text over text, and near-miss alignment, read from the geometry rather than the render |
 
 ## Creating with pptxgenjs — gotchas
 
@@ -200,6 +201,18 @@ report template-inherited problems either way, so read those on their own merits
 pptxgenjs emits chart XML PowerPoint refuses to open, and every other tool
 accepts: python-pptx opens those decks, LibreOffice renders them, the XSD
 passes them. Every failure names its fix. Fix it in the generator and rebuild.
+
+### Overlap and alignment audit
+
+```bash
+python scripts/office/overlap_audit.py deck.pptx
+```
+
+Reads the shape geometry directly and reports three things a rendered image makes you hunt for:
+shapes that fall off the slide, text that sits on top of other text or on a box it does not belong
+to, and edges that are within a hair of aligning without actually aligning. Run it before the visual
+pass, because it finds the defects that are one millimetre wide and it names the shapes, which the
+eye does not. It cannot see text that overflows its own box, so the visual pass below still happens.
 
 ### Visual QA
 
