@@ -65,23 +65,29 @@ synchronous. **Seedance is video, not image**, and it is asynchronous: a POST to
 returned. This skill does not drive it. The Doubao seed text models split by id, where an id ending
 in `-completion` speaks `/chat/completions` and everything else speaks `/responses`.
 
-Three failures mean three different things, and only one of them is worth retrying:
+Four replies mean four different things, and only two of them are worth retrying:
 
-- `NoAvailableModels` is the router saying this key has no such model. A provisioning request fixes
-  it, a different path does not.
-- `AllModelsFailed` means the route was found and the upstream refused. Usually a wrong id shape for
-  that channel, sometimes a real outage, and `429 ... model is overloaded` under it is worth a retry.
-- `401 API密钥状态异常：AK余额耗尽禁用` means the key itself is disabled because its balance is
-  exhausted. Every endpoint returns it, text and image alike, so a probe that shows this everywhere is
-  reporting one billing fact rather than a model inventory. **This is the state as of 2026-09-21.**
-  Before that the OpenAI family answered, the Google and Volcengine ids were never reached under
-  their correct prefixes, and the internal domains `routify.alibaba-inc.com` and
-  `routify-online.alibaba-inc.com` are not reachable from this host in any case. Re-probe once the
-  key is funded:
+- `401 未配置此模型，请检查模型名` is the router saying this key has no such model. Every Google id is
+  in this state as of 2026-09-21, on both the `vertex_ai.` and `ai_studio.` channels, so the path is
+  right and the provisioning is missing. A request to the platform fixes it, a different path does not.
+- `NoAvailableModels` is the same fact reported by the OpenAI-protocol endpoint, usually because a
+  Google or Volcengine id was sent there with an `mr.` prefix instead of to its own protocol.
+- `AllModelsFailed` means the route was found and the upstream refused, so read the message inside
+  it. Seedream returns it for a bad `size`, and `429 ... model is overloaded` under it is transient
+  and worth retrying after a minute.
+- `401 API密钥状态异常：AK余额耗尽禁用` looks permanent and is not. It appeared across every endpoint
+  on 2026-09-21, text and image alike, and the same key answered normally about twenty minutes later
+  with no intervention. Treat it as a transient throttle, wait, and probe again before telling anyone
+  the key is dead.
 
-```sh
-python3 $CPFS_HOME/.claude/skills/drawing-gemini/scripts/genimage.py --probe
-```
+Probed on 2026-09-21 from the public domain `routify-pub.alibaba-inc.com`: the OpenAI family answers
+(`mr.gpt-image-2` reliably, `gpt-image-1.5` with occasional 429s), Seedream answers on the Volcengine
+path once `size` is large enough, and no Google image model is configured for this key. The internal
+domains `routify.alibaba-inc.com` and `routify-online.alibaba-inc.com` are not reachable from this
+host, so they are not a workaround.
+
+**Seedream sizes.** `doubao-seedream-4-5-251128` and `doubao-seedream-5-0-260128` reject any image
+under 3686400 pixels, so `1024x1024` fails and `2560x1440` is the smallest 16:9 size that passes.
 
 The key is rate limited at 5 requests per minute for synchronous models and 1 for asynchronous ones,
 so the probe sleeps between calls and a batch of generations should too.

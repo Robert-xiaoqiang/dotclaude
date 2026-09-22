@@ -51,6 +51,9 @@ def request_for(model, prompt, size, aspect, family):
                                       "imageConfig": {"aspectRatio": aspect, "imageSize": "2K"}}},
                 {"x-goog-api-key": f"Bearer {key}"})
     if family == "volcengine":
+        w, h = (int(v) for v in size.lower().split("x"))
+        if w * h < 3686400:                                  # seedream refuses anything smaller
+            size = "2560x1440"
         return (f"{root}/protocol/volcengine/api/v3/images/generations",
                 {"model": model, "prompt": prompt, "size": size,
                  "response_format": "b64_json", "watermark": False},
