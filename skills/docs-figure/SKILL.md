@@ -399,6 +399,9 @@ comparable scales, so a small gain looks small. Panels that measure different qu
 
 ### What a results figure plots, and what it does not
 
+**Scores are `xx.y` on the axis and in the labels, never `0.xxx` with a "$\times 100$" note.** The
+number a reader compares is the one in the table, in the same form.
+
 **Plot the metric the paper is judged on, and say so on the axis.** A results curve shows the
 deployment score, the out-of-distribution average when that is what the claims rest on, with
 the y-axis labelled as that score. In-domain numbers and every other training-side quantity

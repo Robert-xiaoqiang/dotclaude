@@ -60,10 +60,13 @@ of the paper's own cell over the underlined runner-up, and only when the author 
 **Three effective digits, and no more.** A rubric score of `0.5784` claims a precision no evaluation
 of a few hundred prompts has. `57.8` says the same thing and is a third the width.
 
-**Put the scale in the number, not in front of it.** A column of `0.5784`, `0.6073`, `0.6075` spends
-its first two characters on `0.` in every cell, and the reader's eye has to travel past them to reach
-the digits that differ. Multiply by 100 and say so once in the caption. This is what every strong
-technical report does, and it is why their tables read at a glance.
+**Put the scale in the number, not in front of it, and never annotate it.** A column of `0.5784`,
+`0.6073`, `0.6075` spends its first two characters on `0.` in every cell, and the reader's eye has
+to travel past them to reach the digits that differ. Report `57.8`, `60.7`, `60.8`. A score written
+as `xx.y` is the standard form in this literature and needs no explanation, so there is no
+"$\times 100$" in the caption, the axis label, or the prose: the annotation makes a reader wonder
+what the raw quantity was, and nobody asks. The same holds for a percentage: `48.9` in a column
+headed "Agree (%)", never `0.489` with a note.
 
 **One decimal count per column, always.** `57.8` beside `60.7` beside `60.75` breaks the alignment
 that makes a column scannable. Pad with a trailing zero rather than dropping it.
@@ -147,7 +150,7 @@ agent. \textbf{Bold}: best per column. \underline{Underline}: second best.}
 ```
 
 Column abbreviations are defined in the caption once, in the form they appear, `WB, IFB,
-MMCQA: WritingBench, IFBench, MedMCQA`. The scale is stated once, `$\times 100$`. What the
+MMCQA: WritingBench, IFBench, MedMCQA`. Scores are `xx.y` and the caption never says `$\times 100$`. What the
 caption never carries: the experiment's design, the reason a row is there, or the finding,
 which is the text's first bold sentence and not the table's. The caption goes **above** a table
 and **below** a figure, which is the `booktabs` convention and every venue's template follows
