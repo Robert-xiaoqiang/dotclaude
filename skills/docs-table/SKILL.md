@@ -70,7 +70,10 @@ that makes a column scannable. Pad with a trailing zero rather than dropping it.
 
 **Digits line up.** Right-align every numeric column (`r`, or `S` from `siunitx` when the column mixes
 widths), and set `\sisetup` or the document's font so figures are tabular. A centred numeric column
-is the third most common reason a table is slow to read.
+is the third most common reason a table is slow to read. The one exception: when every value in a column
+has the same format (`xx.x` throughout), centring keeps the digits aligned just as well, and it keeps a
+column of short numbers balanced under a header wider than they are (`MedMCQA` over `50.7`), where
+right alignment leaves a hole on the left.
 
 **Differences carry a sign and a unit.** `{$+$}3.8` and `{$-$}2.0`, and percentage points are `pp`, never
 `\%`. A change from 57.8 to 64.6 is `{$+$}6.8\,pp`; calling it `{$+$}6.8\%` is a different and wrong
