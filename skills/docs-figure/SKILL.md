@@ -150,6 +150,12 @@ lossy version. Emit vector (`pdf`) for LaTeX and a raster preview only for revie
 - **Size arrowheads for the room, not for the source file.** A head that looks right at 100% is
   invisible once the figure is scaled to a slide width. Set the head explicitly and check it in the
   render at final size.
+- **Use a swept head, not a solid triangle.** The default filled triangle reads as heavy at print
+  size, and where two of them meet on a short connector the shaft disappears between them. The swept
+  head is concave at the back, so it stays legible while taking less ink: `stealth` in OOXML
+  (`<a:tailEnd type="stealth" w="med" len="med"/>`), `-{Stealth}` in TikZ, and `arrowstyle='-|>'`
+  with a `head_width` set in matplotlib. Reserve the solid `triangle` for the rare case where one
+  arrow must outweigh its neighbours, and never mix the two kinds in one figure.
 - **Spend space on the connectors, not on empty box interiors.** Oversized boxes with cramped arrows
   between them is the commonest way a diagram becomes unreadable: shrink the boxes to their contents
   and give the gaps to the edges.
@@ -311,6 +317,8 @@ A figure is regenerated whenever a run updates, so the generator is an artifact,
 - **A diagram of diagonals.** Nothing overlaps, and it still reads as scribble.
 - **The headless arrow.** The gap is shorter than the arrowhead, so the edge renders as a dot on a
   border and the reader does not see a connection at all.
+- **The blunt arrow.** Solid triangles everywhere, so a short connector is all head and no shaft and
+  a dense panel turns into a field of black wedges.
 - **Big boxes, starved arrows.** Half the panel is empty box interior while the connectors have no
   room to be seen.
 - **A connector crossing a box it has nothing to do with**, which reads as a relation that does not
