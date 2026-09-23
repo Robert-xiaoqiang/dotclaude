@@ -170,11 +170,17 @@ lossy version. Emit vector (`pdf`) for LaTeX and a raster preview only for revie
 - **One line style per kind of relation, and only one meaning per style.** A connector that says
   "this module is applied here" must not look like a connector that says "the data flows here next".
   Give it its own colour and dash pattern and name the distinction in the panel label.
-- **A positioning chart has discrete, named levels on both axes.** `Flat · Vector · Wiki ·
-  Layers` against `Fixed · Search one module · Search workflow`, with systems placed in cells.
-  A continuous axis labelled `structure →` invites the reader to ask what 6.4 means, and quadrant
-  captions on the drawing (`fixed, flat`) are the caption written four times. Tint the cell the
-  paper occupies; say why in the caption.
+- **A positioning chart has discrete, named levels on both axes, and each axis is one kind of
+  thing.** `Context only · Flat store · Linked graph · Hierarchy` is one kind (how items relate);
+  `Flat · Vector · Wiki · Layers` is not, since vector is an index, wiki an organization and the
+  other two topologies, so the columns overlap and the scale is not monotone. The adaptation axis
+  is the scope of what may change: `Fixed · Component · System`, the literature's own levels;
+  "search one module" collapses selecting a module with rewriting it. **Audit the taxonomy
+  through the writer before drawing**, with the systems' own papers as context: the first draft
+  of the MemDGM chart put a system that evolves four modules jointly on the component row.
+  A search whose result may land in several columns is drawn as a **span** across them, not a
+  point. No vertical offsets within a discrete row; they imply a continuous scale that was never
+  defined. Tint the cell the paper occupies; say why in the caption, with the axis definitions.
 - **No panel title on the drawing.** `(a) Design space` above a panel is the caption's job. The
   panel letter alone, if two panels share a figure.
 - **A workflow reads left to right, and every relation is one thin open-headed line.** Boxes are
