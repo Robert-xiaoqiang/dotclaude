@@ -129,7 +129,7 @@ For workflow, architecture, and formulation figures.
 | **Mermaid** | the figure lives in markdown that renders it inline | routing is automatic and coarse, so expect a graph rather than a block diagram |
 | **HTML/SVG** | the artifact is a web page | inline everything, no external assets |
 | **matplotlib** | anything with data behind it | see below |
-| **PowerPoint (python-pptx + soffice)** | a block diagram in the author's System-1.5 idiom: solid pastel blocks with heavy borders, stage titles, block arrows, a red dashed region on what changes, a glyph legend | keep the generator in the figure workshop; export to PDF; Icons8 ios7 PNGs via the `id=…&format=png` URL, one pack per figure |
+| **PowerPoint (python-pptx + soffice)** | a numbered workflow in the Jev-Mem idiom (arXiv:2609.23986 fig. 1): pastel panels with a thin tinted outline and a soft outer shadow, a black filled circle with a white number at each panel's top-left beside a bold title and a grey subtitle, large black line icons per item, math on the arrows, a dotted feedback return. An evolution loop takes MemEvolve's shape (arXiv:2512.18746 fig. 3): an archive of candidates carrying fitness, a proposer, a patch, an evaluation, a gate, and the return to the archive | generator in the figure workshop; export to PDF; Icons8 ios7 PNGs via the `id=…&format=png` URL, one pack per figure; the red dashed target goes on the code being rewritten, never on a data block |
 
 Keep a TikZ figure and its Mermaid twin in sync when both exist, and expect the Mermaid one to be the
 lossy version. Emit vector (`pdf`) for LaTeX and a raster preview only for review.
@@ -177,6 +177,13 @@ lossy version. Emit vector (`pdf`) for LaTeX and a raster preview only for revie
   paper occupies; say why in the caption.
 - **No panel title on the drawing.** `(a) Design space` above a panel is the caption's job. The
   panel letter alone, if two panels share a figure.
+- **A workflow reads left to right in numbered steps.** The source of the input (the benchmark or
+  environment) is the first panel, the actor the second, the system the third; a second row carries
+  the loop that changes the system. Numbers on black circles, titles beside them, verbs and symbols
+  on arrows, nothing else in prose.
+- **Route every return under or around, never through the gutter a vertical must cross.** Two
+  loops on two rows meet at exactly the vertical that connects them; the accept-return and the
+  feedback go beneath the lower row on separate lines.
 - **A zoom callout is built, not implied.** Shade the source region with a translucent overlay,
   run two hairlines from its bottom corners to the top corners of the magnified box, and fill the
   trapezoid between them with a lighter translucent shade. Draw the shade and the two lines
