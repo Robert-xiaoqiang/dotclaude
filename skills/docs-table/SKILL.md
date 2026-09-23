@@ -147,6 +147,24 @@ Scores are rubric means $\times 100$. \textbf{Bold} marks the best result in a c
 second best, in points.}
 ```
 
+**The caption states the setting, never the result.** What was measured, on which models and
+suites, at what scale, and what each mark means. The finding ("our method leads every column by
+4.8 points") belongs in the results paragraph that cites the table, as its bold lead sentence, and
+in the shaded row's own margin. A caption that announces the winner repeats the paragraph, drifts
+from it when a number changes, and reads as the author ranking the table for the reader instead of
+letting the marks do it. Figure captions are the opposite case and may lead with the finding,
+because a figure has no marks that rank it.
+
+```latex
+% wrong: the caption reports the result
+\caption{\ourmethod{} is the best entry in every column, averaging 53.5 against 48.7 ...}
+% right: the caption reports the setting and the convention
+\caption{Main results on Ouro-1.4B and 2.6B. Exact match on the general suites and answer F1
+on the long-context suites, latency in seconds per answer. \textbf{Bold} marks the best entry
+in a column and \underline{underline} the second best, and the shaded row gives the margin of
+our row over the strongest baseline.}
+```
+
 The caption goes **above** a table and **below** a figure. That is the `booktabs` convention and
 every venue's template follows it.
 
@@ -160,7 +178,8 @@ every venue's template follows it.
 4. **Bold the best, underline the second best**, in every column, computed per column.
 5. **The winning cell carries its margin over the underlined cell**, signed, in points, inline when
    the row has room and as a small second line when it does not.
-6. **The caption declares the scale and both marks**, and sits above the table.
+6. **The caption declares the setting, the scale and both marks**, never the result, and sits
+   above the table.
 7. **`booktabs` only.** `\toprule`, `\midrule`, `\cmidrule(lr){}`, `\bottomrule`. No vertical rules,
    no `\hline`, no full-width rule between every row.
 8. **One font size and one `\tabcolsep` across every table in the document.** A table set smaller
@@ -264,6 +283,8 @@ typed. The same script feeds the figures.
   margin of 8 look the same.
 - **Marks placed by hand** on a table a script emits, then not moved when the numbers change.
 - **A caption that describes the experiment and never says what bold means.**
+- **A caption that reports the result.** The winner and its margin, restated above the grid that
+  already marks them, and left behind when the numbers move.
 - **Vertical rules**, `\hline` between every row, or a box around the table.
 - **`\tiny` to make a table fit.** Rotate it, split it, or drop the columns that fail the one rule.
 - **A different font size in every table.**
