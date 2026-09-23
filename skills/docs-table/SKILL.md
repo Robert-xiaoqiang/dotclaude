@@ -118,6 +118,11 @@ Define them as macros in the preamble so a restyle is one edit:
 When the paper's own method is not the best in some column, mark that column honestly: the bold goes
 on whoever won. A table where the bold never leaves one row reads as a table nobody checked.
 
+**Tint the cell, never the row.** When the wins are also shaded, the shade goes on each cell
+that wins, `\cellcolor{oursbg}` before its contents, and not on the method's whole row. A shaded
+row says "this row is special" and marks nothing in particular; a shaded cell says "this cell won",
+and the eye then finds every win in a column at once.
+
 **Where the margin goes when the row is tight.** `64.6 (+3.8)` inline costs about twice a cell's width,
 which an eleven-column table cannot pay. Set the margin as a small second line under the value instead,
 in the accent colour at `\tiny` or `\scriptsize`, so the column keeps the width of its numbers:
