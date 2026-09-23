@@ -170,17 +170,20 @@ lossy version. Emit vector (`pdf`) for LaTeX and a raster preview only for revie
 - **One line style per kind of relation, and only one meaning per style.** A connector that says
   "this module is applied here" must not look like a connector that says "the data flows here next".
   Give it its own colour and dash pattern and name the distinction in the panel label.
-- **A positioning chart has discrete, named levels on both axes, and each axis is one kind of
-  thing.** `Context only · Flat store · Linked graph · Hierarchy` is one kind (how items relate);
-  `Flat · Vector · Wiki · Layers` is not, since vector is an index, wiki an organization and the
-  other two topologies, so the columns overlap and the scale is not monotone. The adaptation axis
-  is the scope of what may change: `Fixed · Component · System`, the literature's own levels;
-  "search one module" collapses selecting a module with rewriting it. **Audit the taxonomy
-  through the writer before drawing**, with the systems' own papers as context: the first draft
-  of the MemDGM chart put a system that evolves four modules jointly on the component row.
-  A search whose result may land in several columns is drawn as a **span** across them, not a
-  point. No vertical offsets within a discrete row; they imply a continuous scale that was never
-  defined. Tint the cell the paper occupies; say why in the caption, with the axis definitions.
+- **A positioning chart has discrete, named levels on both axes, each axis one kind of thing, and
+  every placement checked against the system's own paper before it is drawn.** Use the
+  literature's levels: organization `Flat · Indexed · Graph · Hierarchical` (survey
+  arXiv:2512.13564 §3.1), design search `Hand-designed · Fixed space · Open-ended` (ADAS
+  arXiv:2408.08435). `Flat · Vector · Wiki · Layers` mixed an index, an organization and two
+  topologies; `Search one module` collapsed selecting with rewriting. **Audit twice**: the writer
+  for the axis design, then `claude -p` with `WebSearch` for each placement, prompt on stdin,
+  `--output-format json`, and the instruction that the final message must hold the whole report,
+  because text mode returns only the last message and a mid-loop report is lost. The MemDGM
+  chart's "empty cell" claim survived the first draft and the writer, and fell to the web check:
+  two published systems already sat in it. A search whose result may land in several columns is a
+  **span**, drawn to the column its best published result reaches. No vertical offsets inside a
+  discrete row. Tint the cell the paper occupies and put the surviving claim, with citations for
+  every neighbour, in the caption.
 - **No panel title on the drawing.** `(a) Design space` above a panel is the caption's job. The
   panel letter alone, if two panels share a figure.
 - **A workflow reads left to right in numbered panels, one concept per panel.** Panel = a stage the
