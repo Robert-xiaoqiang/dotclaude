@@ -170,6 +170,18 @@ lossy version. Emit vector (`pdf`) for LaTeX and a raster preview only for revie
 - **One line style per kind of relation, and only one meaning per style.** A connector that says
   "this module is applied here" must not look like a connector that says "the data flows here next".
   Give it its own colour and dash pattern and name the distinction in the panel label.
+- **A positioning chart has discrete, named levels on both axes.** `Flat · Vector · Wiki ·
+  Layers` against `Fixed · Search one module · Search workflow`, with systems placed in cells.
+  A continuous axis labelled `structure →` invites the reader to ask what 6.4 means, and quadrant
+  captions on the drawing (`fixed, flat`) are the caption written four times. Tint the cell the
+  paper occupies; say why in the caption.
+- **No panel title on the drawing.** `(a) Design space` above a panel is the caption's job. The
+  panel letter alone, if two panels share a figure.
+- **A zoom callout is built, not implied.** Shade the source region with a translucent overlay,
+  run two hairlines from its bottom corners to the top corners of the magnified box, and fill the
+  trapezoid between them with a lighter translucent shade. Draw the shade and the two lines
+  *before* the row they cross, so the blocks stay on top of the shade; in a generator that is
+  insertion order.
 - **Draw the construction, not a paraphrase of it.** If the mechanism is a split, two additive
   couplings and a concat, then draw split, ⊕, ⊕, concat. A box labelled with the mechanism's name
   teaches nothing the caption did not already say. The test: could a reader reimplement the step from
