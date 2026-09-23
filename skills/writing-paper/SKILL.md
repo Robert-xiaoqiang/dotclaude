@@ -387,19 +387,27 @@ the authors' own choices, or reads *what we found*.
 
 ## Captions
 
-A caption opens with a bold lead phrase that names the figure's object, then one sentence per
-panel, then nothing. The lead phrase is a noun phrase with a full stop, not a claim and not a
-question. Panel sentences say what is drawn and against what; the finding lives in the body text,
-which the figure is placed beside.
+A workflow or architecture caption narrates the workflow. It opens with *Illustration of the
+X workflow.*, then states the model in one sentence, then walks the loop in the order the drawing
+runs, naming what each stage does with the paper's own symbols, and closes on where the loop
+returns. The reader follows the numbered circles on the drawing with the caption in hand.
 
 ```
-right:  \caption{\textbf{Structure, autonomy, and the cost of each.} (a)~Nine systems on the
-        two axes the design has to span. (b)~Task success against latency.}
-wrong:  \caption{Our method dominates every baseline on both axes, as the figure shows.}
+right:  \caption{Illustration of the \ourmethod{} workflow. We model memory as a four-tier
+        hierarchy $M_t$ over an immutable floor, every tier exposing the same five verbs.
+        Given a query $q_t$, the agent reads evidence $E_t=R(q_t,M_t)$ and answers $a_t$.
+        Based on the feedback $\mathbf{F}$, a rewriter evolves the in-layer verbs and the
+        cross-layer verbs of one tier; \cert{} admits the candidate only on a paired
+        improvement, and finally the accepted program returns to the archive.}
+wrong:  \caption{\textbf{X as two closed loops.} Top, the task loop: ... Bottom right, the
+        rewrite loop: ...}          a panel-by-panel inventory, not a workflow
+wrong:  \caption{Our method dominates every baseline on both axes.}     a claim
 ```
 
-Table captions take the same lead phrase, then the one condition a reader must know to read the
-numbers (the fixed reader and judge, the $n$, the paired test), then nothing.
+A results-figure caption names the figure's object in a bold lead phrase, then gives one sentence
+per panel saying what is drawn and against what; the finding stays in the body. A table caption
+takes the same lead phrase, then the one condition a reader must know to read the numbers (the
+fixed reader and judge, the $n$, the paired test), then nothing.
 
 ## Numbers
 Report a difference with an explicit sign and a unit, and bind the unit with a thin space:
