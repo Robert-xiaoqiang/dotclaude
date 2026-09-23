@@ -41,6 +41,8 @@ entries at inference time" has spent it setting up the gap the paper fills.
 - [The arc: each section expands the last](#the-arc-each-section-expands-the-last)
 - [The method section](#the-method-section)
 - [The experiments section](#the-experiments-section)
+- [Headings name concepts, never processes or questions](#headings-name-concepts-never-processes-or-questions)
+- [Families are enumerated, not described by a split](#families-are-enumerated-not-described-by-a-split)
 - [Numbers](#numbers)
 - [Rules](#rules)
 - [Anti-patterns](#anti-patterns)
@@ -311,6 +313,53 @@ itself an argument, because it says which family the paper competes with.
 it plainly, state what each reports instead, and state what the paper adds. That is a finding about
 the field. Burying it inside a paragraph about tables turns a legitimate contribution into an excuse.
 
+## Headings name concepts, never processes or questions
+
+A heading is the one line a skimming reviewer reads, so it has to carry something they can take
+away. Two forms, and the section decides which.
+
+**In the method, a heading is a concept noun the paper then owns.** `Depth shortcut.`
+`Confidence-gated ladder descent.` `Support-linked memory hierarchy.` The reader can carry the
+noun into the next section and into the results table. A heading that describes the process
+instead — `The store and the leaf-support relation.`, `The descent policy.`, `The two channels as
+arms.` — names a step rather than a thing, and there is nothing to carry.
+
+**In the results, a heading is a complete claim with its number.** `Routing gains $+8.18$ points
+over the verbatim-only floor on LoCoMo-10.` Not `LoCoMo-10.`, which is a label, and not `The
+census.`, which is a topic. A reader who reads only the bold run-in heads of the results section
+should come away with the paper's findings in order.
+
+**A heading that opens with What, How, or Why is always wrong.** `What would refute each law.` is a
+question put to the reader, and the reader came to be told. It is also a process description
+wearing a question mark: the thing itself is the falsification condition, so the heading is
+`Falsification conditions.` The same applies to `What this says about the field.`, which should be
+the thing it says.
+
+**Run-in heads, not `\paragraph`.** Use `\noindent\textbf{Concept.}` followed by the text on the
+same line. `\paragraph` adds vertical space that breaks the density of a conference page, and its
+output drifts between classes.
+
+## Families are enumerated, not described by a split
+
+When a set divides, name the families and count them. The reader needs the partition, not the
+procedure that produced it.
+
+```
+wrong:  Splitting those questions by where the gold session lands isolates the effect.
+wrong:  We use a two-family rule.
+right:  Runs fall into two families: 1) Family A, cross-system comparisons, including the
+        seven-system arena at fixed reader and judge, and 2) Family B, paired within-system
+        comparisons, including the content and routing arms at fixed writer, reader and judge.
+```
+
+The form is: *these fall into N families, 1) NAME, including X and Y, 2) NAME, including Z.* It
+applies to benchmarks, baselines, layers, ablation arms and error categories alike. A sentence that
+describes the splitting operation — "by where the memory lives", "by which tier is varied" — leaves
+the reader to reconstruct the families, and they will reconstruct them differently from you.
+
+Setup headings take the same treatment. `Benchmarks, readers and judges.` names the three things
+the paragraph fixes. `Benchmarks and grading.` names one thing and a gerund.
+
 ## Numbers
 Report a difference with an explicit sign and a unit, and bind the unit with a thin space:
 `($+$23.8\,pp)`. Percentage points and percent are different quantities, so a change from 42.0\% to
@@ -374,6 +423,16 @@ gain sits on a small base, because "50\% relative improvement" on a base of 4\% 
   number in the table incomparable with the work it is placed beside.
 - **Percent where percentage points belong.** It inflates every reported gain and a reviewer will
   notice.
+- **The question heading.** `What would refute each law.` `How does the router decide?` The reader
+  came to be told, not asked. Name the thing: `Falsification conditions.`
+- **The process heading.** `The two-family rule.` `The descent policy.` `The store and the
+  leaf-support relation.` Each names a step or a mechanism-in-motion where a concept noun belongs.
+- **The label heading in a results section.** `LoCoMo-10.` `The census.` `Cost against accuracy.`
+  A results run-in head that is not a claim with a number wastes the one line a skimmer reads.
+- **The split described instead of the families named.** "by where the memory lives", "splitting
+  those questions by where the gold session lands". Enumerate: 1) NAME, including X, 2) NAME,
+  including Y.
+- **`\paragraph` for a run-in head.** Use `\noindent\textbf{...}`.
 - **A contribution in the abstract with no experiment.** The fastest way to lose a reviewer.
 
 ## Companions

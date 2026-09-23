@@ -886,6 +886,13 @@ because a terminal section restating delivered conclusions is a second copy of t
 - **Numbered headings**, which exist only so a cross-reference can point at them. Any list *inside* a
   section still starts at 1, never 0.
 - **A section file whose top heading is H1**, so the assembled report has one title per section.
+- **A heading that asks the reader a question.** "What does this tell us?", "How should we read
+  this?" The reader opened the report to be told. Name the thing instead.
+- **A heading that describes a process where a concept belongs.** "The two-family rule", "Splitting
+  by where the memory lives". A section heading is a noun the reader carries to the next section;
+  see `writing-paper` for the two forms and when each applies.
+- **A set divided without its families named.** Write *these fall into two families: 1) NAME,
+  including X, 2) NAME, including Y*, never "we split them by where the gold session lands".
 - **A figure placeholder shipped in the delivered document**, or a figure shown without its name and path.
 - **A formulation whose equation has no derivation under it**, while the results prose runs three
   paragraphs per table.
