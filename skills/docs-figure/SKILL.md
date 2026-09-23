@@ -129,7 +129,7 @@ For workflow, architecture, and formulation figures.
 | **Mermaid** | the figure lives in markdown that renders it inline | routing is automatic and coarse, so expect a graph rather than a block diagram |
 | **HTML/SVG** | the artifact is a web page | inline everything, no external assets |
 | **matplotlib** | anything with data behind it | see below |
-| **PowerPoint (python-pptx + soffice)** | a workflow diagram in the author's LatentHarness fig-2 grammar: two large outlined pastel panels with a bold title top-left; small rounded boxes with flat pastel fills and a thin dark outline; **one line weight everywhere, thin, with open arrowheads, never filled**; sharp orthogonal turns, no curves; italic serif math on arrows ($q$, $a$, $t=1\ldots T$); dashed for a time or iteration loop; **red only for the signal that changes the system**; a red dashed box around what is learned or rewritten | generator in the figure workshop; export to PDF; canvas at most ~1.5x the print width so labels stay above 6 pt |
+| **PowerPoint (python-pptx + soffice)** | a workflow diagram in the numbered-panel style of Jev-Mem (arXiv:2609.23986 fig. 1): large pastel panels with a thin tinted outline and a soft outer shadow, a black numbered circle with a bold title and a grey subtitle per panel, one large Icons8 line glyph per panel and small ones per item, chips inside for the concrete objects, **thin open-headed arrows with italic math between panels**, returns routed beneath the row. An evolution loop takes MemEvolve's diagnose-and-design shape: archive with a Pareto front, diagnose traces to the failed module, propose a patch behind the fixed interface, validate, evaluate, gate | generator in the figure workshop; export to PDF; Icons8 ios7 PNGs via the `id=…&format=png` URL; the red dashed box on the body being rewritten, never on data |
 
 Keep a TikZ figure and its Mermaid twin in sync when both exist, and expect the Mermaid one to be the
 lossy version. Emit vector (`pdf`) for LaTeX and a raster preview only for review.
@@ -183,10 +183,11 @@ lossy version. Emit vector (`pdf`) for LaTeX and a raster preview only for revie
   defined. Tint the cell the paper occupies; say why in the caption, with the axis definitions.
 - **No panel title on the drawing.** `(a) Design space` above a panel is the caption's job. The
   panel letter alone, if two panels share a figure.
-- **A workflow reads left to right, and every relation is one thin open-headed line.** Boxes are
-  nouns, arrows carry a verb in small mono or a symbol in italic serif, and the two rows are the two
-  loops: the task loop over the system, the learning loop over the system's code. Filled block
-  arrows, gradients, drop shadows on boxes, and numbered step circles are the marketing register.
+- **A workflow reads left to right in numbered panels, one concept per panel.** Panel = a stage the
+  caption can name (MemArena, Agent, hierarchy; Archive, Diagnose, Propose, Evaluate); inside it, a
+  large glyph and chips for the concrete objects (benchmarks, tiers, the program with its slots).
+  Between panels, one thin open-headed line with a symbol. Small flat boxes in a bare grammar were
+  tried for this author and rejected as weaker: the panels carry the visual weight.
 - **Route every return under or around, never through the gutter a vertical must cross.** Two
   loops on two rows meet at exactly the vertical that connects them; the accept-return and the
   feedback go beneath the lower row on separate lines.
