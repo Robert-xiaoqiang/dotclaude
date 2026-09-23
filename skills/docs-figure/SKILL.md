@@ -286,14 +286,16 @@ the bars lie about their ratios.
 points at, with a dot and its value or a short arrow. A figure where every point is equally
 unmarked makes the reader find the result; a figure with one marked point hands it over.
 
-**Panels are not lettered, and a panel name goes below the panel, centred.** No `(a)`, `(b)` at
-the top left unless the author asks for it. The default is the figure's own caption, below and
-centred, describing panels by position: left and right, top row and bottom row. When a panel
-needs a name of its own, such as the four failure classes in a row of four, it is a centred
-sub-caption under that panel, in the body face, the way a LaTeX `\subcaption` sits, and most
-figures need none. Panels in a row share a y-axis and say so by drawing the tick labels once.
-Panels that do not share a scale must not be the same size and shape, or the reader will compare
-them anyway.
+**Panel letters live in the sub-caption, below the panel and centred, never at the top left.**
+Most figures need no sub-captions at all: the caption names panels by position, "Left:",
+"Right:", "Top:", "Bottom:". When panels do carry sub-captions, each is a centred line under its
+panel in the body face, the way a LaTeX `\subcaption` sits, and then it starts with its letter,
+"(a) Methods", "(b) Modules of the harness", so the caption and the text can say "Fig. 3a". The
+anti-pattern is the letter as a title at the top left of the axes, "(a) Blind", with the
+sub-caption trailing under it or missing: a title reads as part of the plot, the letter has no
+caption to belong to, and the figure looks like a notebook export. Panels in a row share a
+y-axis and say so by drawing the tick labels once. Panels that do not share a scale must not be
+the same size and shape, or the reader will compare them anyway.
 
 **A curve over training looks measured.** It is drawn through the evaluation points, one marker
 per evaluation, with the run-to-run noise those points actually carry. A spline through five
