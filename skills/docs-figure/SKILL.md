@@ -191,6 +191,19 @@ lossy version. Emit vector (`pdf`) for LaTeX and a raster preview only for revie
   large glyph and chips for the concrete objects (benchmarks, tiers, the program with its slots).
   Between panels, one thin open-headed line with a symbol. Small flat boxes in a bare grammar were
   tried for this author and rejected as weaker: the panels carry the visual weight.
+- **An evolution loop is drawn in DGM's own idiom** (arXiv:2505.22954 fig. 1): an archive as a
+  tree of grey nodes with the selected parent in red and the new child in yellow; four verbs on
+  the loop, select, self-modify, evaluate, add; and beside it what the self-modification touches,
+  drawn as a UML class view, the interface with its verbs, the prior implementation, and the new
+  version extending it and overriding one verb (hollow-triangle generalization heads, dashed for
+  implements). One trial is a terminal transcript with the console glyph: the command, the
+  diagnosis, the rewrite, the validation, the evaluation line, the paired test, the archive add.
+  A loop drawn as a left-to-right pipeline of stages was rejected twice as "no idea": the tree,
+  the class view and the transcript are what make trial-and-error behind a fixed interface
+  visible.
+- **A title emblem has no enclosing ring and a transparent ground.** Generators put the mark in a
+  circle and on an off-white square; both show against the page. Crop to the mark and knock the
+  near-white out to alpha before embedding.
 - **Route every return under or around, never through the gutter a vertical must cross.** Two
   loops on two rows meet at exactly the vertical that connects them; the accept-return and the
   feedback go beneath the lower row on separate lines.
