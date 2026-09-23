@@ -286,10 +286,26 @@ the bars lie about their ratios.
 points at, with a dot and its value or a short arrow. A figure where every point is equally
 unmarked makes the reader find the result; a figure with one marked point hands it over.
 
-**Panels are lettered, aligned, and share their scales.** `(a)`, `(b)` in bold at the top left,
-outside the axes. Panels in a row share a y-axis and say so by drawing the tick labels once. Panels
-that do not share a scale must not be the same size and shape, or the reader will compare them
-anyway.
+**Panels are not lettered, and a panel name goes below the panel, centred.** No `(a)`, `(b)` at
+the top left unless the author asks for it. The default is the figure's own caption, below and
+centred, describing panels by position: left and right, top row and bottom row. When a panel
+needs a name of its own, such as the four failure classes in a row of four, it is a centred
+sub-caption under that panel, in the body face, the way a LaTeX `\subcaption` sits, and most
+figures need none. Panels in a row share a y-axis and say so by drawing the tick labels once.
+Panels that do not share a scale must not be the same size and shape, or the reader will compare
+them anyway.
+
+**A curve over training looks measured.** It is drawn through the evaluation points, one marker
+per evaluation, with the run-to-run noise those points actually carry. A spline through five
+checkpoint values, smooth to the eye, reads as invented even when the values are real, and
+smoothing that hides the noise hides the very thing that makes a gap credible. Keep the
+evaluation cadence visible on the axis: a tick per hundred steps with a minor per fifty, never
+three ticks on a five-hundred-step run.
+
+**No text on the data.** The best checkpoint, the peak, the crossing are what the text and the
+caption say. A label floating beside a curve competes with the curve, and a second one beside the
+next curve turns the panel into a diagram. Name series in a legend, and mark a point with a
+marker, not with words.
 
 **Spend the space on the data.** Tight bounding box, no title, no `suptitle`, no padding the document
 will add again. Inside the axes, the opposite: keep marks off the spines and labels off the marks.
