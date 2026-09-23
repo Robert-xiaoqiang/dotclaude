@@ -457,6 +457,40 @@ lane titles are names ("Guidance fields", "Adaptive criteria"), and the reading 
 and the text's. What the reader gets in one look, and never gets from the table, is the causal
 sequence: a field retires when the criteria it targeted change colour, a weight drops when a
 lifeline saturates, the reward falls when a bar is raised while quality keeps rising.
+
+### The caption
+
+A caption names what is shown and how to read the marks, and stops. Its shape, taken from the
+papers whose figures read fastest:
+
+1. **A noun phrase with the metric and the setting.** "Abstention rate (line, left axis) and SR
+   improvement over the base agent (bars, right axis) across task-difficulty bins on WebArena."
+   Not a sentence, not a story.
+2. **The marks as label: value pairs.** "Dashed: GRPO's best checkpoint." "Bold: best per column.
+   Underline: second best." Each one a fragment ending in a full stop.
+3. **At most one sentence of reading, for a results figure only.** "Mem-π abstains on easy tasks,
+   generates on hard tasks, and improves most where memory is needed." That sentence is the
+   figure's claim, in bold in the text; the caption may echo it and nothing more.
+
+Ten to thirty words for a results figure, up to fifty for a method overview, where each panel's
+name is followed by what it holds and not by what it shows. What a caption never does: narrate
+panel by panel, say why the design produces the result, define the quantities the text already
+defined, or say "top row shows" when "Top:" will do. A reader who wants the reading is in the
+text; a caption that carries it is read twice and drifts from the text the second time it is
+edited. Panel positions are named by "Left:", "Right:", "Top:", "Bottom:", never by letters.
+
+The caption is prose and goes through the writer like every other paragraph.
+
+**Before, 88 words:** "Training dynamics at Qwen3.5-4B on one step axis. Top row: share of
+response pairs in each signal class over training, a training-set statistic. Bottom row, left
+to right: share of tasks the sampling interface holds at each weight level; mean number of
+guidance fields per task against the scheduled ceiling, with the harness without a critic for
+contrast; accepted rubric operations per hundred steps by type; and the share of accepted
+rubric edits that reverse an edit on the same criterion within the previous two visits to it."
+
+**After, 32 words:** "Training dynamics at Qwen3.5-4B. Top: share of response pairs in each
+signal class. Bottom: sampling weight levels, guidance strength against the scheduled ceiling,
+accepted rubric operations per hundred steps, and the rubric-edit reversal rate.\"
 ---
 
 ## Reproducibility

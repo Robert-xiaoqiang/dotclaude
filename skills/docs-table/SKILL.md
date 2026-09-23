@@ -137,38 +137,21 @@ in the accent colour at `\tiny` or `\scriptsize`, so the column keeps the width 
 
 ## The caption declares the convention
 
-Every marking and scaling decision is invisible in the grid, so the caption states it, in this order:
-what the table reports, the scale, what the marks mean, and what the parenthetical is.
+A table caption is a noun phrase with the metric and the setting, then the marks as label:
+value pairs, then nothing. Ten to thirty words.
 
 ```latex
-\caption{%
-Main results against the reproduced published methods, each arm at its best checkpoint.
-Scores are rubric means $\times 100$. \textbf{Bold} marks the best result in a column and
-\underline{underline} the second best; the parenthetical on our row is the margin over that
-second best, in points.}
+\caption{Task success rate (SR \%) across four agent benchmarks with gpt-5.4-mini as the base
+agent. \textbf{Bold}: best per column. \underline{Underline}: second best.}
+\caption{Ablation results (SR \%) on WebArena and ALFWorld. Subscripts: drop from the full model.}
 ```
 
-**The caption states the setting, never the result.** What was measured, on which models and
-suites, at what scale, and what each mark means. The finding ("our method leads every column by
-4.8 points") belongs in the results paragraph that cites the table, as its bold lead sentence, and
-in the shaded row's own margin. A caption that announces the winner repeats the paragraph, drifts
-from it when a number changes, and reads as the author ranking the table for the reader instead of
-letting the marks do it. Figure captions are the opposite case and may lead with the finding,
-because a figure has no marks that rank it.
-
-```latex
-% wrong: the caption reports the result
-\caption{\ourmethod{} is the best entry in every column, averaging 53.5 against 48.7 ...}
-% right: the caption reports the setting and the convention
-\caption{Main results on Ouro-1.4B and 2.6B. Exact match on the general suites and answer F1
-on the long-context suites, latency in seconds per answer. \textbf{Bold} marks the best entry
-in a column and \underline{underline} the second best, and the shaded row gives the margin of
-our row over the strongest baseline.}
-```
-
-The caption goes **above** a table and **below** a figure. That is the `booktabs` convention and
-every venue's template follows it.
-
+Column abbreviations are defined in the caption once, in the form they appear, `WB, IFB,
+MMCQA: WritingBench, IFBench, MedMCQA`. The scale is stated once, `$\times 100$`. What the
+caption never carries: the experiment's design, the reason a row is there, or the finding,
+which is the text's first bold sentence and not the table's. The caption goes **above** a table
+and **below** a figure, which is the `booktabs` convention and every venue's template follows
+it. The caption is prose and goes through the writer like every other paragraph.
 ---
 
 ## Rules
