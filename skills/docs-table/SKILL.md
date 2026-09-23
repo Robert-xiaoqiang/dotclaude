@@ -21,6 +21,7 @@ find by scanning every cell because nothing on the page marks it.
 - [The caption declares the convention](#the-caption-declares-the-convention)
 - [Rules](#rules)
 - [Structure](#structure)
+- [Organizing a results table like a technical report](#organizing-a-results-table-like-a-technical-report)
 - [One source for tables and figures](#one-source-for-tables-and-figures)
 - [Anti-patterns](#anti-patterns)
 - [Companions](#companions)
@@ -46,6 +47,11 @@ the cell that carries it, and delete the column.
 
 The test, applied before the table is set: cover each column in turn. If the remaining table supports
 the same claim, that column was not carrying it.
+
+**Absolute values, not differences.** A cell holds the quantity measured, and the baseline appears as
+its own row. `13.5 (+1.5)` beside every share, or a table whose cells are all `pp vs base`, hides the
+baseline's level and makes every reader subtract. The one difference a table may carry is the margin
+of the paper's own cell over the underlined runner-up, and only when the author has asked for it.
 
 ---
 
@@ -94,9 +100,10 @@ Two constraints make it work:
 - **The margin is measured against the underlined cell, in the same column.** Not against the
   baseline, and not against a different column's runner-up. If the runner-up differs by column, the
   underline moves with it and each margin is still locally correct.
-- **Bold and underline are the only two marks.** Colour, shading, arrows and daggers added on top
-  stop the reader from knowing what a mark means. One exception: `\meas{}`-style superscripts that
-  flag provenance rather than rank, declared in the caption.
+- **Bold and underline are the only rank marks.** Arrows, daggers and coloured numbers added on top
+  stop the reader from knowing what a mark means. Shading is not a rank mark: a light tint of the
+  paper's accent on its own row (`\rowcolor{ours}` with a colour at 8 to 12 percent) marks identity,
+  and is the one place colour belongs in a results table. Shade the row, never individual cells.
 
 Define them as macros in the preamble so a restyle is one edit:
 
@@ -107,6 +114,15 @@ Define them as macros in the preamble so a restyle is one edit:
 
 When the paper's own method is not the best in some column, mark that column honestly: the bold goes
 on whoever won. A table where the bold never leaves one row reads as a table nobody checked.
+
+**Where the margin goes when the row is tight.** `64.6 (+3.8)` inline costs about twice a cell's width,
+which an eleven-column table cannot pay. Set the margin as a small second line under the value instead,
+in the accent colour at `\tiny` or `\scriptsize`, so the column keeps the width of its numbers:
+
+```latex
+\newcommand{\gain}[2]{\makecell{\textbf{#1}\\[-2.5pt]{\tiny\color{oursfg}$+$#2}}}
+\ourmethod{} & \gain{59.3}{3.0} & \gain{64.6}{2.9} & ... \\
+```
 
 ---
 
@@ -134,7 +150,8 @@ every venue's template follows it.
 2. **Three effective digits.** Scale to 0-100 rather than printing a leading `0.` in every cell.
 3. **One decimal count per column**, trailing zeros kept, numeric columns right-aligned.
 4. **Bold the best, underline the second best**, in every column, computed per column.
-5. **The winning cell carries its margin over the underlined cell**, signed, in points.
+5. **The winning cell carries its margin over the underlined cell**, signed, in points, inline when
+   the row has room and as a small second line when it does not.
 6. **The caption declares the scale and both marks**, and sits above the table.
 7. **`booktabs` only.** `\toprule`, `\midrule`, `\cmidrule(lr){}`, `\bottomrule`. No vertical rules,
    no `\hline`, no full-width rule between every row.
@@ -143,6 +160,9 @@ every venue's template follows it.
 9. **Differences are `pp`, not `\%`**, and relative gains are given beside absolutes when the base is
    small.
 10. **Tables and figures read the same source**, so a number cannot differ between them.
+11. **Cells hold absolute values.** The baseline is a row, not a subtrahend.
+12. **The paper's own row is shaded**, lightly, in its accent. No other colour in the table.
+13. **Scales are row groups of one table**, families are runs of rows, and trajectories are figures.
 
 ## Structure
 
@@ -166,6 +186,36 @@ caption, each with its own header row, beat one block nobody can read.
 **Leave the placeholder visible when a number is not in yet.** `--` in every cell of a row, with the
 caption saying what is pending, is honest and survives review. A blank cell reads as a bug, and a
 number invented to fill the hole is the one mistake in this skill that ends a career.
+
+## Organizing a results table like a technical report
+
+The flagship reports set their main table the same way, and the pattern is worth copying whole.
+
+**Columns are benchmarks, grouped by what they test.** A spanning header over each group, joined by a
+`\cmidrule(lr)`, and an `Avg.` column closing every group. Short benchmark names in the header, with
+any abbreviation expanded once in the caption.
+
+**Rows are methods, grouped twice.** The outer grouping is the base model or scale, set as an italic
+header row spanning the table (`\multicolumn{12}{l}{\textit{Qwen3.5-4B}}`), so several scales share
+one set of columns instead of becoming several tables. Inside a scale, methods run in families in the
+order the paper introduced them: the plain baseline first, then each family of competing methods,
+then the paper's own method last and shaded. A thin `\cmidrule` or a `\midrule` between families
+states the grouping without a label.
+
+**Merge tables that share their columns.** Two tables with the same benchmarks at two model scales are
+one table with two row groups. Three tables that differ only in which arms they list are one table.
+Splitting them makes the reader carry numbers between floats.
+
+**Endpoints only.** A table compares end states. A per-epoch trajectory is a figure (`docs-figure`),
+and once that figure exists the per-epoch table is deleted.
+
+**Ablations share the main table's conventions** and add one column naming what each variant keeps,
+set as a compact tag (`p,g,c`, `g`, `c`) rather than a sentence. Lower-is-better columns say so in the
+header with a small `$\downarrow$`, higher-is-better with `$\uparrow$`, and the bold and underline
+follow the arrow.
+
+**Every table in the document uses one font size, one `\tabcolsep`, one shading colour.**
+`\footnotesize` for results, the same for a qualitative case table, which is not an exception.
 
 ## One source for tables and figures
 
@@ -195,6 +245,12 @@ typed. The same script feeds the figures.
 - **A different font size in every table.**
 - **`\%` on a difference between two percentages.**
 - **A fabricated number in place of a pending one.**
+- **A table of differences against a baseline**, or `(+x)` against the baseline in every cell, when
+  the baseline row could simply be printed.
+- **A per-epoch table** beside the curve that already shows the trajectory.
+- **Two tables with the same columns**, one per model scale.
+- **Coloured individual cells** instead of one shaded row for the paper's method.
+- **An inline margin that pushes the table past the text width**, where a stacked margin would fit.
 
 ## Companions
 `docs-figure` (the same question for pictures, and the shared generator directory) · `writing-paper`

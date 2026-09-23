@@ -16,6 +16,7 @@ not own which runs to compare (`output-analysis`) or how a report references a f
 - [Diagrams (TikZ · Mermaid · HTML/SVG)](#diagrams-tikz--mermaid--htmlsvg)
 - [Data figures (matplotlib)](#data-figures-matplotlib)
 - [Looking like a strong technical report](#looking-like-a-strong-technical-report)
+- [House style for result plots](#house-style-for-result-plots)
 - [Reproducibility](#reproducibility)
 - [Anti-patterns](#anti-patterns)
 - [Companions](#companions)
@@ -201,7 +202,8 @@ For experiment sections. Chart type follows the question, not the habit.
 
 Style, matching the embed rule above:
 
-- Terse axis labels (`step`, `loss`, `acc`). Units in the caption, once.
+- Terse axis labels in sentence case (`Training step`, `Loss`, `Accuracy (%)`), never lowercase.
+  Units in the label's parentheses or in the caption, once.
 - **One colour per run, fixed across every figure in the document**, so a run keeps its identity.
   Colourblind-safe palette (Okabe-Ito).
 - Legend inside the axes, no frame, only when more than one series. Direct labelling beats a legend when
@@ -233,11 +235,14 @@ the text. Then size the figure to the width it will occupy, and never let `\incl
 it: a figure drawn at 6 in and included at `0.7\textwidth` has 7 pt labels claiming to be 10 pt, and
 two such figures at different scales have visibly different type.
 
-**One hue, plus grey, plus one accent.** The default colour cycle gives every series equal weight and
-none of them meaning. Strong reports desaturate: baselines and reference curves are grey, the
-paper's own arm is the one saturated colour on the page, and a second hue appears only when a second
-distinction genuinely exists. A reader should be able to find the contribution without reading the
-legend. Keep that assignment fixed across every figure in the document, so a run keeps its identity.
+**Hue encodes family, weight encodes importance.** The default colour cycle gives every series equal
+weight and none of them meaning. Strong reports assign colour by what an arm *is*: the untrained or
+plain baseline in neutral grey, each family of competing methods in its own hue with one tint per
+member, and the paper's own method in the single accent no other series uses, drawn heaviest. With
+two to four series that collapses to grey, one muted hue and the accent. A reader should be able to
+find the contribution without reading the legend, and to see which baselines belong together without
+reading it either. Keep the assignment fixed across every figure in the document, and match it to any
+colour the paper already gives those families in its diagrams, so a run keeps its identity.
 
 **Remove the frame, keep two spines.** A full box around the axes is a library default, not a
 choice. Left and bottom spines in a mid grey, a hairline horizontal grid behind the data on the value
@@ -270,7 +275,7 @@ will add again. Inside the axes, the opposite: keep marks off the spines and lab
 
 | tell | fix |
 |---|---|
-| The default blue-orange-green cycle on four series | one hue in tints, grey baselines, one accent for the contribution |
+| The default blue-orange-green cycle on four series | grey plain baseline, one hue per method family, one accent for the contribution |
 | A legend box floating over the data | direct labels at the line ends |
 | A full box around the axes, ticks on all four sides | two spines, outward ticks |
 | A dense grid in both directions | hairline horizontal grid, behind the data |
@@ -281,6 +286,64 @@ will add again. Inside the axes, the opposite: keep marks off the spines and lab
 | Value labels absent from a bar chart | print the value above each bar and drop the y-axis |
 | A rainbow heatmap | sequential for magnitudes, diverging only when zero means something |
 
+
+---
+
+## House style for result plots
+
+The section above says what a strong figure looks like. This is the concrete specification that
+produces one, so a generator can be written against it rather than tuned by eye. It is what the
+flagship technical reports converge on, and every value below was chosen for print at the width the
+figure is set.
+
+**Size first, then type.** Draw the figure at the width it will occupy: `5.5 in` for an ICLR or
+NeurIPS `\textwidth`, `3.25 in` for one column of a two-column venue. Then set type for that size:
+tick labels 7 to 7.5 pt, axis labels and panel titles 8 to 8.5 pt, legend 7.5 pt, value labels on bars
+6.5 to 7 pt. A figure drawn at 13 in and shrunk into 5.5 in carries 11 pt labels that print at 4.5 pt,
+which is the single most common reason a paper's plots look amateur next to its text.
+
+**Face.** The document's face in the generator: `Nimbus Roman` or `Times New Roman` for a Times
+template, with `stix` math, `pdf.fonttype 42` so the text stays text.
+
+**Capitalization.** Sentence case for every string: `Training epoch`, `Score`, `Share of pairs (%)`,
+panel titles as proper names (`Medical`, `WritingBench`, `Blind`). One convention for the whole
+document.
+
+**Lines.** Baselines 1.1 to 1.3 pt, the paper's own method 1.9 to 2.2 pt and drawn last so it sits on
+top. The plain baseline is dashed grey. Other baselines are solid. Line style is a second channel for
+family only when colour alone would fail in greyscale, never decoration.
+
+**Markers.** When the x-axis has ten points or fewer, every point gets a marker: hollow (white face,
+coloured edge) for baselines, filled for the paper's method, 3 to 4 pt. One marker shape per family,
+so shape repeats the family that hue already encodes. With dense steps, no markers, and a filled dot
+on the endpoint only.
+
+**Bars.** Soft fill (the series colour at about 85 percent opacity, or a light tint of it for
+baselines), a darker edge of 0.5 to 0.6 pt, width 0.7 of the slot, and the value printed at the bar's
+end in the value's own precision. The paper's bar is the accent at full saturation. Any reference
+value, such as the plain baseline, is a thin dashed vertical or horizontal line with its value, not a
+bar the reader must compare against by eye. Horizontal bars when the category names are long.
+
+**Legend.** One legend per figure, not one per panel: a single frameless row above the panels
+(`fig.legend(..., ncol=n, loc="upper center")`), in the order the arms appear in the results table,
+paper's method last. Direct end-of-line labels replace it when there are three series or fewer and
+the lines separate.
+
+**Frame and grid.** Left and bottom spines at 0.6 pt in a mid grey, outward ticks 2.5 pt long, three
+to five of them at round values, a 0.5 pt light horizontal grid behind the data, nothing else.
+
+**Plot values, not differences.** A panel plots the quantity itself, the score or the share, with
+the baseline drawn as its own series or reference line. A panel of `Δ vs base` hides the baseline's
+own level, turns every baseline movement into apparent movement of every arm, and makes the reader
+reconstruct what the table already reports. Plot a difference only when the reader asked for one, and
+then label the axis with the difference's name.
+
+**Trajectories are figures, endpoints are tables.** A per-epoch or per-step trajectory belongs in a
+line plot. A table with one column per epoch prints the same curve less legibly, and should be
+deleted once the curve exists. The table keeps the endpoint comparison.
+
+**Panels.** Panels in a row share the y-axis (`sharey="row"`) when they measure the same quantity on
+comparable scales, so a small gain looks small. Panels that measure different quantities do not.
 
 ---
 
@@ -330,6 +393,12 @@ A figure is regenerated whenever a run updates, so the generator is an artifact,
 - **A figure scaled by `\includegraphics`**, so its type size no longer matches its neighbour's.
 - **An axis padded to a round number** far outside the data, shrinking the difference the figure
   exists to show.
+- **A `Δ vs base` panel** nobody asked for, where the baseline's own level has vanished and every
+  line moves when the baseline does.
+- **A figure drawn at 13 in and set at 5.5 in**, whose labels print at 4 pt.
+- **Lowercase axis labels** beside capitalized panel titles.
+- **One legend per panel**, repeated six times across a grid.
+- **A per-epoch table** printed beside the curve that already shows it.
 
 ---
 
