@@ -129,7 +129,7 @@ For workflow, architecture, and formulation figures.
 | **Mermaid** | the figure lives in markdown that renders it inline | routing is automatic and coarse, so expect a graph rather than a block diagram |
 | **HTML/SVG** | the artifact is a web page | inline everything, no external assets |
 | **matplotlib** | anything with data behind it | see below |
-| **PowerPoint (python-pptx + soffice)** | a numbered workflow in the Jev-Mem idiom (arXiv:2609.23986 fig. 1): pastel panels with a thin tinted outline and a soft outer shadow, a black filled circle with a white number at each panel's top-left beside a bold title and a grey subtitle, large black line icons per item, math on the arrows, a dotted feedback return. An evolution loop takes MemEvolve's shape (arXiv:2512.18746 fig. 3): an archive of candidates carrying fitness, a proposer, a patch, an evaluation, a gate, and the return to the archive | generator in the figure workshop; export to PDF; Icons8 ios7 PNGs via the `id=…&format=png` URL, one pack per figure; the red dashed target goes on the code being rewritten, never on a data block |
+| **PowerPoint (python-pptx + soffice)** | a workflow diagram in the author's LatentHarness fig-2 grammar: two large outlined pastel panels with a bold title top-left; small rounded boxes with flat pastel fills and a thin dark outline; **one line weight everywhere, thin, with open arrowheads, never filled**; sharp orthogonal turns, no curves; italic serif math on arrows ($q$, $a$, $t=1\ldots T$); dashed for a time or iteration loop; **red only for the signal that changes the system**; a red dashed box around what is learned or rewritten | generator in the figure workshop; export to PDF; canvas at most ~1.5x the print width so labels stay above 6 pt |
 
 Keep a TikZ figure and its Mermaid twin in sync when both exist, and expect the Mermaid one to be the
 lossy version. Emit vector (`pdf`) for LaTeX and a raster preview only for review.
@@ -177,10 +177,10 @@ lossy version. Emit vector (`pdf`) for LaTeX and a raster preview only for revie
   paper occupies; say why in the caption.
 - **No panel title on the drawing.** `(a) Design space` above a panel is the caption's job. The
   panel letter alone, if two panels share a figure.
-- **A workflow reads left to right in numbered steps.** The source of the input (the benchmark or
-  environment) is the first panel, the actor the second, the system the third; a second row carries
-  the loop that changes the system. Numbers on black circles, titles beside them, verbs and symbols
-  on arrows, nothing else in prose.
+- **A workflow reads left to right, and every relation is one thin open-headed line.** Boxes are
+  nouns, arrows carry a verb in small mono or a symbol in italic serif, and the two rows are the two
+  loops: the task loop over the system, the learning loop over the system's code. Filled block
+  arrows, gradients, drop shadows on boxes, and numbered step circles are the marketing register.
 - **Route every return under or around, never through the gutter a vertical must cross.** Two
   loops on two rows meet at exactly the vertical that connects them; the accept-return and the
   feedback go beneath the lower row on separate lines.
@@ -511,6 +511,10 @@ A figure is regenerated whenever a run updates, so the generator is an artifact,
 
 - **A figure that reads fine with the document covered.** It has absorbed the document's job.
 - **A claim, a conclusion, or a "key insight" printed on the image.**
+- **The decorative equation.** `E_t = R(q_t, M_t)` and `M_{t+1} = U(M_t, q_t, a_t)` floating under a
+  block: symbols the paper never defines, standing in for a mechanism the drawing should show. Draw the
+  mechanism (route with its outcomes, supp to the floor, the two reads) and keep only the paper's own
+  symbols on the arrows.
 - **An explanatory annotation anywhere in the panel**, not only under it. `dense credit`,
   `evidence, before decoding`, `one decision` are captions that wandered into the drawing.
 - **Drop shadows and gradients**, which are slide effects that print as mud.
