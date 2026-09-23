@@ -129,7 +129,8 @@ distinction first, then compress in a second call against a budget, which is wha
 
 ## Taking the result back
 The reply is the whole passage, so replace the original span, never splice sentences from the two.
-Read the diff before committing to it: numbers, citation keys, labels and macros must be unchanged,
+Read the diff before committing to it: numbers, citation keys, labels, macros **and every `\input`
+or `\include` line** must be unchanged,
 and a `[CITE]` or `[NUMBER]` placeholder in the reply is the writer refusing to invent a fact, which
 the agent then resolves from the repo. A critique or narrative reply is a list of problems, not a
 patch; apply the fixes it names with `rewrite` or `ask` in the same session.
@@ -202,6 +203,11 @@ diff.
   reads them for the argument and finds none, and the passage comes back generic.
 - **The sentence splice.** Keeping the old first sentence and the new rest. The writer's transition
   now points at a sentence it never saw.
+- **The dropped `\input`.** Asked to remove "where a file lives", the writer deleted
+  `\input{runindex}` and `\input{pairedtests}` from the top of an appendix: thirteen pages of tables
+  and four labels gone, and a label-set diff of the returned text showed nothing, because the
+  labels lived in the included files. Diff the `\input` lines explicitly, and never phrase a
+  removal request in words that also describe an include.
 - **Deleting the placeholder.** `[CITE]` removed to make the paragraph clean. The claim is now
   unsupported and the reviewer finds it.
 - **Premature compression.** The reply is shorter, every line is a conclusion, and the middle step

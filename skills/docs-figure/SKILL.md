@@ -129,6 +129,7 @@ For workflow, architecture, and formulation figures.
 | **Mermaid** | the figure lives in markdown that renders it inline | routing is automatic and coarse, so expect a graph rather than a block diagram |
 | **HTML/SVG** | the artifact is a web page | inline everything, no external assets |
 | **matplotlib** | anything with data behind it | see below |
+| **PowerPoint (python-pptx + soffice)** | a block diagram in the author's System-1.5 idiom: solid pastel blocks with heavy borders, stage titles, block arrows, a red dashed region on what changes, a glyph legend | keep the generator in the figure workshop; export to PDF; Icons8 ios7 PNGs via the `id=…&format=png` URL, one pack per figure |
 
 Keep a TikZ figure and its Mermaid twin in sync when both exist, and expect the Mermaid one to be the
 lossy version. Emit vector (`pdf`) for LaTeX and a raster preview only for review.
@@ -137,6 +138,9 @@ lossy version. Emit vector (`pdf`) for LaTeX and a raster preview only for revie
 
 - Fixed coordinates break silently when a label grows. Anchor to node borders
   (`[xshift=4mm]M.north west`) and use `fit` for containers, so a rename cannot produce an overlap.
+- **Check the render at print scale, not on the canvas.** A 36 cm canvas set to `\textwidth` prints
+  at 0.39x and its 8 pt labels at 3 pt. A blanket font scale on fixed geometry fails, since the text
+  grows and the boxes do not. Change the canvas shape instead: two rows print at 0.58x.
 - **Check the render, never the source.** Box collisions, arrows entering the wrong edge, and labels
   landing on lines are invisible in `.tex` and obvious in the image.
 - Route so nothing crosses. A crossing is a layout failure, not a fact about the system.
