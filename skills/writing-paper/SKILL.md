@@ -263,6 +263,26 @@ and spend the space on what the paper changes.
 **Define every symbol immediately after its equation**, in a "where" clause. An equation whose symbols
 are defined three paragraphs later, or not at all, is decoration.
 
+### Register: a design, not an audit
+
+A method section presents the system as designed, in the vocabulary of its figure: the interface
+verbs by name, the seed programs, the loop, the gate. It carries no sentence about what is
+unexercised, pre-registered or not run; the results sections carry the evidence and the
+limitations section the caveats. A reviewer lens that checks the prose against the code
+("evidence fit") belongs to the results audit and must never drive the method text: given that
+lens, a writer turns a two-page design into a six-page confession (six operators, "operator bodies
+are fixed", every head ending "no measured arm fires this"). The lenses that improve a method
+section are three: motivation (does each element follow from the stated problem), missing design
+details (could a strong reader reimplement it; which detail belongs in the section, which in an
+appendix), and clarity and novelty (one sentence that settles the distinction from each foil).
+
+The loop that works: a hand-written skeleton in the paper's macros with the heads fixed; one writer
+`rewrite` for voice; writer `critique` and a `claude -p` review in parallel, both restricted to
+the three lenses, no hedges, no numbers; the merge into one numbered edit list done by hand, with
+the LaTeX of any changed display pasted into the list; one writer turn to apply it; one final turn
+with an explicit change list. Prompts, rules and LLM reflections go in the paper's `promptbox`
+idiom, with `\role{system}` markers and `\phead{Section}` heads, never in verbatim blocks.
+
 ## The experiments section
 The test is mechanical. **Look at the grammatical subject of each paragraph's first sentence. If it is
 an artifact of the paper, a table, a figure, or a section, the sentence is wasted. If it is a claim
