@@ -361,6 +361,38 @@ deleted once the curve exists. The table keeps the endpoint comparison.
 **Panels.** Panels in a row share the y-axis (`sharey="row"`) when they measure the same quantity on
 comparable scales, so a small gain looks small. Panels that measure different quantities do not.
 
+
+### What a results figure plots, and what it does not
+
+**Plot the metric the paper is judged on, and say so on the axis.** A results curve shows the
+deployment score, the out-of-distribution average when that is what the claims rest on, with
+the y-axis labelled as that score. In-domain numbers and every other training-side quantity
+stay in the table. The one exception is a figure whose claim is about the training signal
+itself, such as the share of response pairs in each failure class over training. That is a
+training-set statistic, it is labelled as one, and it is the only kind of figure that shows one.
+
+**A figure whose every number is already in a table is deleted.** Nine panels of per-benchmark
+curves beside a table with the same nine columns is the commonest instance, followed by a
+bar chart of the ablation table's cells. The figure earns its place by showing something the
+table cannot: a trajectory, a distribution, a crossing.
+
+**Track the mechanism, not only the outcome.** When the method claims to move several things,
+such as three interfaces and a memory, give each its own panel showing that interface's own
+quantity over training, in that interface's colour from the method figure, never an outcome
+metric and never a difference. A reader then sees the method act, which no results table can
+show, and the panels justify the story rather than decorate it.
+
+**End labels live inside the axes.** Extend the x-limit past the last tick to leave room, rather
+than letting a label overhang the axes. An overhanging label grows the saved bounding box, and
+`\includegraphics[width=\textwidth]` then shrinks the whole figure, type included, to fit it.
+
+**A legend never covers a value label.** Put the legend over the empty part of the panel. When
+the tallest bar is the first one, that means a single column at the upper right and a raised
+y-limit, not two columns across the top.
+
+**The palest tint in a family must still read as a line.** A colour chosen as "lighter as
+components are removed" fails when the last member vanishes against the grid. Check the palest
+member against the grid colour before committing the family, and darken it rather than the grid.
 ---
 
 ## Reproducibility

@@ -220,6 +220,22 @@ follow the arrow.
 **Every table in the document uses one font size, one `\tabcolsep`, one shading colour.**
 `\footnotesize` for results, the same for a qualitative case table, which is not an exception.
 
+**Name an ablation by what it removes, in words, indented under the row it ablates.**
+
+```latex
+\ourmethod{}          & 10.5 & 13.4 & \best{27.2} \\
+\quad w/o critic      & 11.1 & 15.2 & 31.6 \\
+\quad w/o critic \& memory & 11.7 & 16.1 & 33.1 \\
+```
+
+Never `$-$C $-$M`. A math minus in a name typesets as an operator, the letters mean nothing
+to a reader who has not memorised the key, and the same string set by LaTeX and by
+matplotlib's mathtext comes out in two different faces, so the table and its figure disagree
+on what the arm is called. The parent row comes first and its ablations sit below it in the
+order the modules are removed, so the group reads top-down and the name is never repeated.
+A subscript is fine for a restriction that has a symbol, `\ourmethod{}$_g$` for the harness
+held to one interface, because it is the paper's own notation and not an abbreviation.
+
 ## One source for tables and figures
 
 A results table is regenerated whenever a run updates, so the LaTeX rows are emitted by a script, not
