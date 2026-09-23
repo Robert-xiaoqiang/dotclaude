@@ -43,6 +43,8 @@ entries at inference time" has spent it setting up the gap the paper fills.
 - [The experiments section](#the-experiments-section)
 - [Headings name concepts, never processes or questions](#headings-name-concepts-never-processes-or-questions)
 - [Families are enumerated, not described by a split](#families-are-enumerated-not-described-by-a-split)
+- [Related work: direction heads, second to last](#related-work-direction-heads-second-to-last)
+- [Captions](#captions)
 - [Numbers](#numbers)
 - [Rules](#rules)
 - [Anti-patterns](#anti-patterns)
@@ -359,6 +361,45 @@ the reader to reconstruct the families, and they will reconstruct them different
 
 Setup headings take the same treatment. `Benchmarks, readers and judges.` names the three things
 the paragraph fixes. `Benchmarks and grading.` names one thing and a gerund.
+
+## Related work: direction heads, second to last
+
+Related work sits second to last, after the results and before the limitations, where Mem-Pi and
+System-1.5 put it. By then the reader has the method and the numbers, so the section places the
+work; it does not motivate it. Motivation that has drifted here belongs in the introduction.
+
+Three or four paragraphs, and each is one research direction. The run-in head names the direction
+as a noun phrase, never as a claim or a sentence:
+
+```
+right:  \noindent\textbf{Retrieval-centric agent memory.}
+right:  \noindent\textbf{Efficient reasoning models.}
+wrong:  \noindent\textbf{Long context is the baseline to beat.}     a claim
+wrong:  \noindent\textbf{Evolving the system rather than the store.} a process
+```
+
+Inside a paragraph the shape is fixed. The first sentence summarises what the direction does in
+one line. The body enumerates the lines within it, *one line of work does X, a second line does Y*,
+with citations attached to the named systems rather than trailing the sentence. The last sentence
+places this paper against the direction in one clause: Mem-Pi closes on *the constraint we
+remove*, System-1.5 on *builds upon X but further Y*. No sentence addresses the reader, narrates
+the authors' own choices, or reads *what we found*.
+
+## Captions
+
+A caption opens with a bold lead phrase that names the figure's object, then one sentence per
+panel, then nothing. The lead phrase is a noun phrase with a full stop, not a claim and not a
+question. Panel sentences say what is drawn and against what; the finding lives in the body text,
+which the figure is placed beside.
+
+```
+right:  \caption{\textbf{Structure, autonomy, and the cost of each.} (a)~Nine systems on the
+        two axes the design has to span. (b)~Task success against latency.}
+wrong:  \caption{Our method dominates every baseline on both axes, as the figure shows.}
+```
+
+Table captions take the same lead phrase, then the one condition a reader must know to read the
+numbers (the fixed reader and judge, the $n$, the paired test), then nothing.
 
 ## Numbers
 Report a difference with an explicit sign and a unit, and bind the unit with a thin space:
