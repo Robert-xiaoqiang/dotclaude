@@ -72,8 +72,8 @@ that makes a column scannable. Pad with a trailing zero rather than dropping it.
 widths), and set `\sisetup` or the document's font so figures are tabular. A centred numeric column
 is the third most common reason a table is slow to read.
 
-**Differences carry a sign and a unit.** `$+$3.8` and `$-$2.0`, and percentage points are `pp`, never
-`\%`. A change from 57.8 to 64.6 is `$+$6.8\,pp`; calling it `$+$6.8\%` is a different and wrong
+**Differences carry a sign and a unit.** `{$+$}3.8` and `{$-$}2.0`, and percentage points are `pp`, never
+`\%`. A change from 57.8 to 64.6 is `{$+$}6.8\,pp`; calling it `{$+$}6.8\%` is a different and wrong
 quantity. State the unit in the caption once and drop it from the cells.
 
 **Never print a constant column.** If every cell in a column is `0.0000` because it is the baseline's
@@ -235,7 +235,7 @@ typed. The same script feeds the figures.
   drift from the first.
 - **`0.5784`.** Four decimals on a number measured to two, with the two most prominent characters
   identical in every row.
-- **The constant column.** `$+$0.0000` down the baseline's whole row.
+- **The constant column.** `{$+$}0.0000` down the baseline's whole row.
 - **Bold with no underline.** The reader sees who won and not who they beat, so a margin of 0.1 and a
   margin of 8 look the same.
 - **Marks placed by hand** on a table a script emits, then not moved when the numbers change.
