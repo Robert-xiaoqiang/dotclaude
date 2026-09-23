@@ -393,6 +393,47 @@ y-limit, not two columns across the top.
 **The palest tint in a family must still read as a line.** A colour chosen as "lighter as
 components are removed" fails when the last member vanishes against the grid. Check the palest
 member against the grid colour before committing the family, and darken it rather than the grid.
+
+**The training axis is the training step, never the epoch index.** An epoch is a bookkeeping
+unit whose length depends on the batch, so a curve over epochs 1 to 5 is five points that cannot
+show where a method peaks or how fast it gets there. Plot against steps, sample the curve densely
+enough that its derivative is visible, mark each curve's best checkpoint, and let the reader see
+the convergence claim: the method that repairs its signal reaches its best at half the budget of
+one that does not. Every figure in the document shares this axis, so a share of pairs, a guidance
+strength and a score all read against the same abscissa.
+
+**A two-dimensional ablation is not one Cartesian table.** When arms vary along two axes, such as
+which interface may move and which modules are present, a table holding every combination reads
+as a grid nobody can rank. Give one axis the table, ordered so each restricted arm sits beside the
+published method it mirrors, and give the other axis a figure: a slope per setting from the
+weakest arm to the full one, with the published counterpart as a reference tick. The numbers then
+appear once each, the table holding one dimension and the figure the other.
+
+### Showing one case evolve
+
+A case study is where a method's story is either seen or lost, and a table of visits with a prose
+column loses it. The form that reads at once is a **timeline on the training-step axis**, one lane
+per thing the method changes, stacked so a reader's eye moves down one moment in time:
+
+- a lane per scalar the method controls, drawn as a step function with its value at each change
+  (a sampling weight, a strength, a threshold);
+- a lane per set of discrete fields, drawn as bars over the interval each field is mounted
+  (guidance fields, active tools);
+- a lane of **lifelines**, one per item the method edits (a criterion, a rule, a prompt), each a
+  bar spanning the steps it is alive, coloured by the method's own verdict on it at that moment,
+  with its parameter printed on the bar and each operation that created, repriced, merged, split
+  or deleted it as a distinct mark at the step it happened;
+- a bottom lane with the quantity being optimised against the quantity that is actually wanted
+  (the group reward against a rubric-free judgement), so the reader sees them separate and
+  rejoin.
+
+Vertical hairlines at the moments the method acted tie the lanes together. Item names go on the
+left as tick labels, short enough to read at 6 pt, and the legend for verdict colours and
+operation marks sits above the whole figure, never inside a lane. No lane carries a sentence: the
+lane titles are names ("Guidance fields", "Adaptive criteria"), and the reading is the caption's
+and the text's. What the reader gets in one look, and never gets from the table, is the causal
+sequence: a field retires when the criteria it targeted change colour, a weight drops when a
+lifeline saturates, the reward falls when a bar is raised while quality keeps rising.
 ---
 
 ## Reproducibility
