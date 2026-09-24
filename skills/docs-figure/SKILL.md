@@ -470,6 +470,10 @@ A case study is where a method's story is either seen or lost, and a table of vi
 column loses it. The form that reads at once is a **timeline on the training-step axis**, one lane
 per thing the method changes, stacked so a reader's eye moves down one moment in time:
 
+- **A results figure sits in the main body beside the paragraph that reads it.** Each RQ
+  paragraph names the figure it reads and gives one or two numbers from it; the long analysis moves
+  to the appendix and references the same figure. A figure that no main-text paragraph reads is
+  either deleted or moved to the appendix with the paragraph that does.
 - a lane per scalar the method controls, drawn as a step function with its value at each change
   (a sampling weight, a strength, a threshold);
 - a lane per set of discrete fields, drawn as bars over the interval each field is mounted

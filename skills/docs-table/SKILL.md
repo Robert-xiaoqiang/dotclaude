@@ -127,14 +127,20 @@ method at a glance and reads as one band. Per-cell tint looks like the same thin
 marked break the band into patches with white gutters between them. Bold and underline still
 carry which cell won; the tint says only whose row this is.
 
-**Where the margin goes when the row is tight.** `64.6 (+3.8)` inline costs about twice a cell's width,
-which an eleven-column table cannot pay. Set the margin as a small second line under the value instead,
-in the accent colour at `\tiny` or `\scriptsize`, so the column keeps the width of its numbers:
+**The margin is inline, never a second line.** `64.6 (+3.8)`: the value in bold, the margin
+in parentheses right after it, in the accent colour and one size smaller. A margin set as a small
+second line under the value breaks the row's baseline, and a reader scanning the column sees two
+numbers where there is one result.
 
 ```latex
-\newcommand{\gain}[2]{\makecell{\textbf{#1}\\[-2.5pt]{\tiny\color{oursfg}$+$#2}}}
-\ourmethod{} & \gain{59.3}{3.0} & \gain{64.6}{2.9} & ... \\
+\newcommand{\bestin}[2]{\textbf{#1}\,{\scriptsize\color{oursfg}(#2)}}
+\ourmethod{} & \best{84.2} & \best{53.1} & \bestin{53.5}{$+$4.8} & \bestin{55\%}{$-$29\,pp} \\
 ```
+
+**When the row cannot carry it in every column**, as in a nine-column results table, give the
+margin only in the summary columns the reader ranks by, the average and the cost columns, and
+leave the per-benchmark cells as plain bold. The per-benchmark margins then belong in the results
+paragraph, next to the claim each one supports. Never shrink the table to make every margin fit.
 
 ---
 
@@ -158,13 +164,19 @@ it. The caption is prose and goes through the writer like every other paragraph.
 ---
 
 ## Rules
+- **An ablation table reports the deployment metric only, in the main table's columns.** The
+  component rows (single-interface arms, w/o module rows indented under their parent) carry the
+  same transfer columns as the main table's out-of-distribution block, tagged by domain (Med.,
+  Sci., Writ., Role, IF, Avg.), never training-side readouts such as end-of-training signal-class
+  shares, which belong in a figure or the appendix. One benchmark per domain, so the in-domain and
+  transfer blocks share one set of tags.
 1. **A column carries a comparison or it is deleted.** Epoch, seed, parameter count and any column
    derivable from two others belong in the caption.
 2. **Three effective digits.** Scale to 0-100 rather than printing a leading `0.` in every cell.
 3. **One decimal count per column**, trailing zeros kept, numeric columns right-aligned.
 4. **Bold the best, underline the second best**, in every column, computed per column.
-5. **The winning cell carries its margin over the underlined cell**, signed, in points, inline when
-   the row has room and as a small second line when it does not.
+5. **The winning cell carries its margin over the underlined cell**, signed, in points, inline as
+   `64.6 (+3.8)`, never as a second line, and only in the summary columns when the row is tight.
 6. **The caption declares the setting, the scale and both marks**, never the result, and sits
    above the table.
 7. **`booktabs` only.** `\toprule`, `\midrule`, `\cmidrule(lr){}`, `\bottomrule`. No vertical rules,
@@ -282,7 +294,8 @@ typed. The same script feeds the figures.
 - **A per-epoch table** beside the curve that already shows the trajectory.
 - **Two tables with the same columns**, one per model scale.
 - **Coloured individual cells** instead of one shaded row for the paper's method.
-- **An inline margin that pushes the table past the text width**, where a stacked margin would fit.
+- **A margin set as a second line under the value**, which breaks the baseline the column is read along.
+- **A table shrunk to fit a margin in every column**, where the summary columns alone should carry it.
 
 ## Companions
 `docs-figure` (the same question for pictures, and the shared generator directory) · `writing-paper`
