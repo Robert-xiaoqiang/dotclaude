@@ -357,6 +357,21 @@ wearing a question mark: the thing itself is the falsification condition, so the
 `Falsification conditions.` The same applies to `What this says about the field.`, which should be
 the thing it says.
 
+**Counted-article headings are process headings in disguise.** `The two-channel model.`, `The two
+channels.`, `The three laws.`, `The self-rewriting store.`, `The ceiling clause.` name how many
+things there are or point at "the" thing instead of naming a concept a reader can carry. Write the
+concept in Title Case, the way Mem-Pi, System-1.5 and HarnessRL do (`Adaptation Distillation`,
+`Dynamic Shortcut Architecture`, `Harness Evolver`): `Channel Model of Derived Memory`, `Content
+Channel and Routing Channel`, `Laws of Derived Memory`, `Certified Self-Rewriting`, `Conversion
+Ceiling: Once Routing Saturates, the Reader Binds`.
+
+**Strong claims get one visual register, and only strong claims do.** A law, a results takeaway and
+the design rule the model implies go in claim boxes (a thin coloured left rule on a light tint,
+numbered `Law N` / `Finding N`, one colour per kind), each holding the claim in one sentence and its
+headline evidence in at most two more. A headline claim inside running prose may take one accent
+span (`\keyclaim{}`), at most once per paragraph and a handful of times per paper. Nothing else is
+coloured or boxed, so the eye learns that colour means "this is a claim the paper stands on".
+
 **Run-in heads, not `\paragraph`.** Use `\noindent\textbf{Concept.}` followed by the text on the
 same line. `\paragraph` adds vertical space that breaks the density of a conference page, and its
 output drifts between classes.
