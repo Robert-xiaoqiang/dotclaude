@@ -511,6 +511,17 @@ papers whose figures read fastest:
    generates on hard tasks, and improves most where memory is needed." That sentence is the
    figure's claim, in bold in the text; the caption may echo it and nothing more.
 
+**A method comparison is one sentence, not a panel list.** When a diagram stacks systems to
+compare them (a prior loop, the same loop under a different objective, then ours), the caption is
+the comparison itself, written as one sentence in reading order: each system named with its
+citation and one clause on what distinguishes it. "Comparison of a looped reasoner
+(Ouro~\citep{...}), the same loop trained with an outcome reward that credits every latent state
+(RLTT~\citep{...}), and \ourmethod{}, which interleaves reasoning and memory in latent space and
+learns each latent action from its action gain." No position labels (`Top:`, `Left:`, `Middle:`)
+and no panel letters there, because the systems' names are already drawn on the figure and the
+sentence gives their order. Position labels and panel letters are for result plots whose panels
+carry no name of their own, never a requirement.
+
 Ten to thirty words for a results figure, up to fifty for a method overview, where each panel's
 name is followed by what it holds and not by what it shows. What a caption never does: narrate
 panel by panel, say why the design produces the result, define the quantities the text already
