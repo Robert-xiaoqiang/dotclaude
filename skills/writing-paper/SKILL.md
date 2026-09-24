@@ -305,6 +305,30 @@ The strong form also places the number **immediately after the claim it supports
 sentences later behind a digression. A result that appears mid-paragraph, after an explanation of why
 prior work is hard to compare against, will be missed by every reader who skims.
 
+**Every results paragraph has one shape: finding, two or three numbers, one reason.** The bold
+head *is* the finding, a short claim of the form "X beats Y on Z" or "X drives Y", so a reader who
+reads only the heads has the results in order. The body then gives two or three representative
+numbers, a comparison or a trend, each right after the claim it supports, and stops: the table or
+figure carries every other cell and is cited for it. The paragraph closes with one or two sentences
+of plausible explanation that tie the finding back to the paper's motivation and design, the
+mechanism the method was built around. A paragraph that walks through every suite, every scale and
+every variant says the same thing six times, buries the one comparison that mattered, and never
+says why.
+
+```latex
+% WEAK: a topic label, then every cell of the table restated, and no reason.
+\noindent\textbf{Recall provenance.}\ On 2Wiki, MuSiQue and HotpotQA, 72.6\%, 65.9\% and 74.8\%
+of evidence recalls hit a gold passage, and derived shares are 28.9\%, 34.7\% and 27.3\%. On
+GSM8K, MATH500 and GPQA the derived shares are 39.2\%, 35.6\% and 33.2\% ...
+
+% STRONG: the finding as the head, two numbers, one reason tied to the design.
+\noindent\textbf{Recall retrieves the right evidence, and re-uses reasoning when evidence is
+not missing.}\ Evidence recalls hit a gold passage 66 to 75\% of the time against 2 to 3\% chance
+(Table~\ref{tab:provenance}), and on general suites a third of recalls read a derived state. The
+memory stores computation as well as input, so the policy recalls a conclusion instead of deriving
+it again.
+```
+
 **Structure the section as questions, not as tables.** Ablations and analyses are numbered research
 questions carried in run-in bold, answered before the numbers arrive:
 
@@ -319,6 +343,9 @@ well-initialized memory distribution, online RL struggles to converge.
 
 Number the questions across the whole section, so RQ1 and RQ2 in the ablation continue into RQ4 in the
 analysis. A reader can then locate the claim a table supports without reading the table.
+When the paper leads every paragraph with its finding instead, the question is folded into the
+head's claim ("Credit, not the price, carries the accuracy.") and no RQ label is added. Pick one
+convention per paper and hold it across the whole section.
 
 **The setup is a reproducibility contract.** Benchmarks and baselines go under run-in bold headers.
 Each benchmark carries its citation on its name, its size, and, where a split is inherited rather than
@@ -481,6 +508,10 @@ gain sits on a small base, because "50\% relative improvement" on a base of 4\% 
 18. **Every mechanism in the abstract appears in the method and is measured in the experiments.**
 
 ## Anti-patterns
+- **The enumerating results paragraph.** Every suite, scale and variant restated in prose, the
+  same comparison six times, and no sentence saying why the method behaves that way.
+- **A topic label as the head of a results paragraph** (`Ablations.`, `Recall provenance.`), where
+  the head should be the finding itself.
 - **The trailing citation.** `... is a left-to-right generative model~\citep{x}.` The citation now
   supports the paper's own description rather than the published concept.
 - **The bibliography paragraph.** One paper per sentence, each a summary, no claim connecting them and
