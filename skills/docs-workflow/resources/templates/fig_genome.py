@@ -9,7 +9,7 @@ prs.slide_width = Emu(int(W2 * CM)); prs.slide_height = Emu(int(H2 * CM))
 F = 7.5
 LAM0, LAMW = 1.55, 0.44
 VX = [2.05, 3.06, 4.07, 5.25, 6.3]; VW = 1.02
-ROWS = [('skill', 'Skill'), ('graph', 'Graph'), ('summary', 'Summary'), ('verbatim', 'Verbatim')]
+ROWS = [('skill', 'Skill'), ('graph', 'Graph'), ('summary', 'Summary'), ('verbatim', 'Raw')]
 RY = [0.86, 1.34, 1.82, 2.30]; RH = 0.42
 # headers
 rect(LAM0, 0.06, LAMW, 0.34, C('EEF0F3'), None, 0, 0.2); text(LAM0, 0.06, LAMW, 0.34, M('λ', 9), PP_ALIGN.CENTER)
@@ -24,7 +24,7 @@ for (ic, nm), y in zip(ROWS, RY):
     icon(ic, 0.02, y + 0.06, 0.3); text(0.34, y, 1.1, RH, R(nm, 7.2, True), pad=0.0)
     for x in VX: rect(x, y + 0.03, VW, RH - 0.06, C('F6F4FB'), C('C9C2DE'), 0.6, 0.18)
     # membership bit: a switch, or a lock on the floor
-    if nm == 'Verbatim':
+    if nm == 'Raw':
         icon('lock', LAM0 + 0.08, y + 0.06, 0.28)
     else:
         on = nm != 'Skill'
@@ -40,6 +40,6 @@ rect(0.1, ky + 0.06, 0.3, 0.22, HILITE, HILINE, 1.0, 0.18, MSO_LINE_DASH_STYLE.D
 text(0.45, ky, 3.2, 0.34, R('child 1: override one verb', F))
 rect(3.85, ky + 0.06, 0.3, 0.22, WHITE, HILINE, 1.0, 0.18, MSO_LINE_DASH_STYLE.DASH)
 text(4.2, ky, 3.1, 0.34, R('child 2: flip one bit', F))
-icon('lock', 0.12, ky + 0.42, 0.26); text(0.45, ky + 0.4, 3.0, 0.34, R('floor bit locked', F))
+icon('lock', 0.12, ky + 0.42, 0.26); text(0.45, ky + 0.4, 3.0, 0.34, R('raw bit locked', F))
 for o in sorted(OVER, reverse=True): print('OVERFLOW %.2f cm  %-40s at (%s, %s)' % o)
 os.makedirs('out', exist_ok=True); prs.save('out/fig_genome.pptx'); print('written')

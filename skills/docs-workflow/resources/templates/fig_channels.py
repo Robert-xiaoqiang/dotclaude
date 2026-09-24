@@ -26,10 +26,10 @@ def panel2(x0, title, sym, col, route):
         fill = GOLD if k == 3 else (HILITE if (route and insupp) else WHITE)
         rect(x, ly, 0.26, 0.26, fill, (HILINE if (route and insupp) else GREY), 0.75, 0.1)
     text(lx[3] - 0.05, ly - 0.02, 0.36, 0.3, R('★', 7, False, INK, False, FREE), PP_ALIGN.CENTER, pad=0)
-    text(x0 + 0.1, ly + 0.28, 2.6, 0.4, [R('verbatim leaves  ', 7.5, False, GREY), S('\U0001D4B1', 9, GREY)])
+    text(x0 + 0.1, ly + 0.28, 2.6, 0.4, [R('raw leaves  ', 7.5, False, GREY), S('\U0001D4B1', 9, GREY)])
     fan = C('B4472F') if route else C('C3C8D0')
     for k in (2, 3, 4): seg(x0 + 1.25 + 0.06 * (k - 3), 1.52, lx[k] + 0.13, ly, fan, 0.8, MSO_LINE_DASH_STYLE.DASH)
-    text(x0 + 1.62, 1.92, 1.3, 0.4, [R('supp', 7.5, False, fan), R('(', 7.5, False, fan), M('x', 9, fan), R(')', 7.5, False, fan)])
+    text(x0 + 1.62, 1.92, 1.3, 0.4, [R('src', 7.5, False, fan), R('(', 7.5, False, fan), M('x', 9, fan), R(')', 7.5, False, fan)])
     # context C and the reader
     cx, cy, cw, ch = x0 + 3.35, 1.62, 2.0, 0.56
     text(cx, cy - 0.42, cw, 0.4, M('C', 10), PP_ALIGN.CENTER)

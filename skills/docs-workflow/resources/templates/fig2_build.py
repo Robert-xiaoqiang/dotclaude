@@ -127,8 +127,8 @@ def chip(x, y, w, h, runs, fill=WHITE, line=INK, lw=0.9, align=PP_ALIGN.CENTER, 
 
 # ------------------------------------------------------------------ code highlighting
 KW = {'class', 'def', 'return', 'if', 'and', 'else'}
-FN = {'admit', 'index', 'score', 'propose', 'route', 'supp', 'len'}
-TY = {'Tier', 'Interface', 'SummaryTier_v3', 'SummaryTier_v4', 'bool', 'Index', 'Proposal', 'Action'}
+FN = {'admit', 'index', 'score', 'propose', 'route', 'src', 'len'}
+TY = {'Layer', 'Interface', 'SummaryLayer_g0', 'SummaryLayer_child', 'bool', 'Index', 'Proposal', 'Action'}
 CT = {'Stop', 'Narrow', 'Descend'}
 def code_runs(line, size=FC):
     runs = []; body, cm = (line.split('#', 1) + [None])[:2] if '#' in line else (line, None)
@@ -177,15 +177,15 @@ def elabel(x, y, w, txt, col, align=PP_ALIGN.CENTER): return text(x, y, w, 0.45,
 # ------------------------------------------------------------------ Self-modify geometry first (it sets the height)
 ex, ew = 11.2, 8.45
 yt0 = P0 + 0.8                                          # tier.py top
-TIER = ['Action = Stop | Narrow | Descend', 'class Tier(Interface):', '    # in-layer',
-        '    def admit(p) -> bool', '    def index(items) -> Index', '    def score(q, focus) -> [(x, c)]',
-        '    # cross-layer', '    def propose(items, seg) -> [Proposal]', '    def route(q, x, c) -> Action',
-        '    # contract: V append-only; supp exact;', '    #   within budget B; deterministic']
+TIER = ['Action = Stop | Narrow | Descend', 'class Layer(Interface):', '    # in-layer',
+        '    def admit(p) -> bool', '    def index(items) -> Index', '    def score(q, scope) -> [(x, c)]',
+        '    # cross-layer', '    def propose(items, chunk) -> [Proposal]', '    def route(q, x, c) -> Action',
+        '    # invariants: V append-only; src exact;', '    #   within budget B; deterministic']
 ht = 0.5 + len(TIER) * LH + 0.14
 ysel = yt0 + ht + 0.25 + 0.33                           # diagnosis -> rewriter row
-DIFF = [(' ', 'class SummaryTier_child(SummaryTier_seed):'), (' ', '    def route(q, x, c):'),
+DIFF = [(' ', 'class SummaryLayer_child(SummaryLayer_g0):'), (' ', '    def route(q, x, c):'),
         ('-', '        return Stop if c > .3 else Descend'), ('+', '        if c > .55: return Stop'),
-        ('+', '        if c > .3 and len(supp(x)) <= 8:'), ('+', '            return Narrow'), ('+', '        return Descend')]
+        ('+', '        if c > .3 and len(src(x)) <= 8:'), ('+', '            return Narrow'), ('+', '        return Descend')]
 ydf = ysel + 0.33 + 0.55
 hd = 0.5 + len(DIFF) * LH + 0.14
 PB = ydf + hd + 0.15                                    # row-2 panel bottoms
@@ -196,8 +196,10 @@ prs.slide_height = Emu(int(H * CM))
 yd = P0 + 8.35                                          # accept / reject row, also the new child g'
 
 # ------------------------------------------------------------------ labels (one place, so a terminology change is one edit)
-LBL = dict(verbatim='Verbatim', kv='kv-assoc', adapter='adapter', nlport='NL port', latport='Latent port',
-           compose='compose', latent='latent layers')
+LBL = dict(verbatim='Raw', kv='KV memory', adapter='adapter', nlport='Text injection', latport='Latent injection',
+           compose='assemble', latent='latent memory', ledger='rejection log', contract='validity check', diagnosis='diagnosis',
+           rewriter='meta agent', archive='Archive', selfmod='Self-modify', evaluate='Evaluate', run='run MemArena',
+           paired='paired test', judge='Judge', reader='Reader', agent='Task Agent', loop='Darwin G\u00f6del Loop')
 # ------------------------------------------------------------------ the zoom band (behind everything)
 BAND = C('F2EFFA')
 poly([(XC0, B1), (XC1, B1), (XC1, F0), (XA0, F0)], BAND)
@@ -220,7 +222,7 @@ for ic, nm, y in BARS:
     icon(ic, LX0 + 0.12, y + 0.12, 0.5); text(LX0 + 0.7, y, 1.9, BH, R(nm, FS, True))
 icon('lock', LX0 + 0.72 + width_cm([R(LBL['verbatim'], FS, True)]) + 0.06, yv + 0.2, 0.34)      # the append-only floor
 IX = 16.2
-for x in (IX + 0.3, IX + 0.75): rect(x, cy['Skill'] - 0.18, 0.36, 0.36, C('FAEAD5'), C('C08A2E'), 0.9, 0.2)
+for x in (IX - 0.15, IX + 0.3): rect(x, cy['Skill'] - 0.18, 0.36, 0.36, C('FAEAD5'), C('C08A2E'), 0.9, 0.2)
 gn = [(IX + 0.12, cy['Graph'] - 0.13), (IX + 0.62, cy['Graph'] + 0.15), (IX + 1.1, cy['Graph'] - 0.13)]
 for i, j in [(0, 1), (1, 2), (0, 2)]: seg(*gn[i], *gn[j], C('4A7CB5'), 1.0)
 for x, y in gn: oval(x, y, 0.12, C('D6E6F5'), C('4A7CB5'), 1.0)
@@ -229,11 +231,12 @@ for k, x in enumerate([IX, IX + 0.43, IX + 0.86]):
 leaves = [IX + 0.24 * k for k in range(5)]
 for k, x in enumerate(leaves): rect(x, cy[LBL['verbatim']] - 0.105, 0.21, 0.21, HILITE if k < 3 else WHITE, HILINE if k < 3 else GREY, 0.8, 0.1)
 for k in range(3): seg(IX + 0.07 + 0.1 * k, ys + BH, leaves[k] + 0.105, cy[LBL['verbatim']] - 0.105, GREY, 0.9, MSO_LINE_DASH_STYLE.DASH)
-text(13.4, ys + BH + 0.05, 2.55, 0.45, [R('supp', FS), R('(', FS), M('x'), S('⋆', 9), R(')', FS)], PP_ALIGN.RIGHT)
+text(13.4, ys + BH + 0.05, 2.55, 0.45, [R('src', FS), R('(', FS), M('x'), S('⋆', 9), R(')', FS)], PP_ALIGN.RIGHT)
 PX, DX = LX1 - 0.35, LX1 - 0.12                     # promote / demote in the gaps, labelled once
 for (_, _, ya), (_, _, yb) in zip(BARS[:-1], BARS[1:]):
-    seg(PX, yb, PX, ya + BH, PROM, ALW, head=True); seg(DX, ya + BH, DX, yb, DEM, ALW, head=True)
-text(LX0, 2.7, PX - LX0 - 0.1, 0.5, [R('promote', FS, True, PROM), R(' / ', FS, False, GREY), R('demote', FS, True, DEM)], PP_ALIGN.RIGHT)
+    seg(PX + 0.1, yb, PX + 0.1, ya + BH, PROM, ALW, head=True)
+text(LX0, 2.7, PX + 0.1 - LX0 - 0.1, 0.5, R('promote', FS, True, PROM), PP_ALIGN.RIGHT)
+rect(IX + 0.75, cy['Skill'] - 0.18, 0.36, 0.36, WHITE, DEM, 1.0, 0.2, MSO_LINE_DASH_STYLE.DASH)     # an evicted item
 # two queries, two depths: q1 stops at graph, q2 narrows on the summary hit and stops at the floor
 Q1X, Q2X, QS = 17.9, 18.65, 0.38
 seg(10.95, yq, Q2X, yq, K_CT, ALW)                                        # the lane inside MemDGM
@@ -247,36 +250,37 @@ ky = 6.62; kx = LX0
 seg(kx + 0.12, ky + 0.02, kx + 0.12, ky + 0.34, K_CT, 1.0, head=True); text(kx + 0.26, ky, 1.5, 0.38, R('Descend', FC, True, K_CT, False, MONO))
 icon('focus_set', kx + 1.75, ky + 0.02, 0.32); text(kx + 2.1, ky, 1.4, 0.38, R('Narrow', FC, True, K_CT, False, MONO))
 icon('stop', kx + 3.45, ky + 0.02, 0.32); text(kx + 3.8, ky, 1.1, 0.38, R('Stop', FC, True, K_CT, False, MONO))
+rect(kx + 4.85, ky + 0.05, 0.28, 0.28, WHITE, DEM, 1.0, 0.2, MSO_LINE_DASH_STYLE.DASH); text(kx + 5.18, ky, 1.5, 0.38, R('evicted', FS, True, DEM))
 # the two ports: latent layers (kv-assoc, adapter) and compose (the text context through its two channels)
-rect(10.95, 1.87, 1.85, 1.05, WHITE, LAT, 1.0, 0.12)
+rect(10.95, 1.87, 2.0, 1.05, WHITE, LAT, 1.0, 0.12)
 for k, nm in enumerate([LBL['kv'], LBL['adapter']]):
-    y = 1.93 + k * 0.48; rect(11.03, y, 1.69, 0.42, C('F1EEF8'), LAT, 0.75, 0.2)
-    text(11.03, y, 1.69, 0.42, R(nm, 9.5, True, LAT), PP_ALIGN.CENTER)
-seg(11.87, yq, 11.87, 1.87, K_CT, ALW, head=True)                             # q also reaches the latent layers
-rect(10.95, 3.2, 1.85, 3.25, WHITE, NLB, 1.0, 0.08)
+    y = 1.93 + k * 0.48; rect(11.03, y, 1.84, 0.42, C('F1EEF8'), LAT, 0.75, 0.2)
+    text(11.03, y, 1.84, 0.42, R(nm, 9, True, LAT), PP_ALIGN.CENTER)
+seg(11.95, yq, 11.95, 1.87, K_CT, ALW, head=True)                             # q also reaches the latent layers
+rect(10.95, 3.2, 2.0, 3.25, WHITE, NLB, 1.0, 0.08)
 def chan(y, subtxt):
-    rect(11.1, y - 0.26, 1.55, 0.52, C('EAF3FA'), NLB, 0.75, 0.18)
+    rect(11.1, y - 0.26, 1.7, 0.52, C('EAF3FA'), NLB, 0.75, 0.18)
     text(11.28, y - 0.26, 0.36, 0.52, R('C', 12, False, NLB, False, SANS), pad=0.0); text(11.6, y - 0.14, 1.0, 0.45, R(subtxt, 9, False, NLB), pad=0.0)
 chan(cy['Graph'], 'txt'); chan(cy[LBL['verbatim']], 'route')
-icon('nl_interface', 11.66, yC - 0.62, 0.36); text(10.95, yC - 0.22, 1.85, 0.45, R(LBL['compose'], FS, True, NLB), PP_ALIGN.CENTER)
-seg(LX0, cy['Graph'], 12.65, cy['Graph'], NLB, ALW, head=True)
-seg(LX0, cy[LBL['verbatim']], 12.65, cy[LBL['verbatim']], NLB, ALW, head=True)
+icon('nl_interface', 11.77, yC - 0.62, 0.36); text(10.95, yC - 0.22, 2.0, 0.45, R(LBL['compose'], FS, True, NLB), PP_ALIGN.CENTER)
+seg(LX0, cy['Graph'], 12.8, cy['Graph'], NLB, ALW, head=True)
+seg(LX0, cy[LBL['verbatim']], 12.8, cy[LBL['verbatim']], NLB, ALW, head=True)
 
 # ------------------------------------------------------------------ MemArena
 panel(XA0, Y1, XA1 - XA0, B1 - Y1, P_ARENA, 'benchmark_arena', 'MemArena')
 ichip(0.8, yq - 0.32, 4.1, 0.64, 'query', [R('Query ', FS, True), M('q')])
-ichip(0.8, yA - 0.3, 3.85, 0.6, 'judge', R('Judge', FS, True))
+ichip(0.8, yA - 0.3, 3.85, 0.6, 'judge', R(LBL['judge'], FS, True))
 for k, (ic, nm) in enumerate([('accuracy', 'Accuracy'), ('tokens', 'Tokens'), ('latency', 'Latency')]):
     ichip(0.8, 2.85 + k * 0.66, 3.85, 0.56, ic, R(nm, FS, True), C('F7FAFD'), GREY, 0.75, 0.4)
 for k, (b, x, w) in enumerate([('LoCoMo', 0.8, 1.6), ('LongMemEval', 2.48, 2.42), ('InMind', 0.8, 1.6), ('PersonaMem', 2.48, 2.42)]):
     chip(x, 5.0 + (k // 2) * 0.62, w, 0.52, R(b, 9.5), WHITE, GREY, 0.75)
 
 # ------------------------------------------------------------------ Task Agent
-panel(XB0, Y1, XB1 - XB0, B1 - Y1, P_AGENT, 'task_agent', 'Task Agent')
+panel(XB0, Y1, XB1 - XB0, B1 - Y1, P_AGENT, 'task_agent', LBL['agent'])
 chip(7.55, yq - 0.24, 0.9, 0.48, [M('q')], C('EDF1F6'), GREY, 0.75)            # the agent issues the read
 seg(4.9, yq, 7.55, yq, K_CT, ALW, head=True); seg(8.45, yq, 10.95, yq, K_CT, ALW, head=True)
 text(5.1, yq - 0.5, 0.6, 0.45, M('q', 12, K_CT), PP_ALIGN.CENTER); text(10.1, yq - 0.5, 0.7, 0.45, M('q', 12, K_CT), PP_ALIGN.CENTER)
-rect(6.2, 1.85, 1.7, 2.15, WHITE, INK, LW, 0.08); text(6.2, 1.88, 1.7, 0.42, R('Reader', FS, True), PP_ALIGN.CENTER)
+rect(6.2, 1.85, 1.7, 2.15, WHITE, INK, LW, 0.08); text(6.2, 1.88, 1.7, 0.42, R(LBL['reader'], FS, True), PP_ALIGN.CENTER)
 bars = [2.35 + k * 0.53 for k in range(3)]
 for y in bars:
     rect(6.35, y, 1.4, 0.38, C('F1EEF8'), C('9A8BB8'), 0.75, 0.2); text(6.35, y, 1.4, 0.38, R('attn', 9.5, False, LAT), PP_ALIGN.CENTER)
@@ -291,7 +295,7 @@ rect(6.3, yC - 0.27, 0.5, 0.54, C('5B6472'), C('5B6472'), 0.75, 0.12); text(6.3,
 for k in range(5): rect(7.0 + k * 0.5, yC - 0.14, 0.28, 0.28, HILITE, HILINE, 0.8, 0.12)
 seg(7.05, yC - 0.38, 7.05, 4.0, INK, ALW, head=True)
 ichip2(6.0, 5.72, 3.9, 0.76, 'nl_interface', R(LBL['nlport'], FS, True, NLB), R('text → prompt', FS), WHITE, NLB, 0.9, 0.4)
-ichip2(6.0, 6.54, 3.9, 0.76, 'latent_purple', R(LBL['latport'], FS, True, LAT), R('KV → attention', FS), WHITE, LAT, 0.9, 0.4)
+ichip2(6.0, 6.54, 3.9, 0.76, 'latent_purple', R(LBL['latport'], FS, True, LAT), R('KV/LoRA → model', FS), WHITE, LAT, 0.9, 0.4)
 # answer and the two ports back into the agent
 seg(6.2, yA, 4.65, yA, INK, ALW, head=True); text(5.15, yA - 0.5, 0.6, 0.45, M('a'), PP_ALIGN.CENTER)
 seg(10.95, yC, 9.7, yC, NLB, ALW, head=True); text(10.1, yC - 0.52, 0.7, 0.45, M('C', 12, NLB), PP_ALIGN.CENTER)
@@ -299,20 +303,19 @@ seg(10.95, yKV, 9.7, yKV, LAT, ALW, head=True); text(10.0, yKV - 0.52, 0.9, 0.45
 
 # ================================================================== the Darwin Godel frame: Evaluate | Archive | Self-modify
 rect(XA0, F0, XC1 - XA0, FB - F0, BAND, C('8C7BB8'), 1.0, 0.02)
-icon('evolution', XA0 + 0.2, F0 + 0.1, 0.5); text(XA0 + 0.8, F0 + 0.08, 6.0, 0.55, [R('Darwin Gödel Loop', FT, True, C('5B4A8A'))])
+icon('evolution', XA0 + 0.2, F0 + 0.1, 0.5); text(XA0 + 0.8, F0 + 0.08, 6.0, 0.55, [R(LBL['loop'], FT, True, C('5B4A8A'))])
 EA0, EA1 = 0.75, XA1                                    # panels inset in the frame
 # ------------------------------------------------------------------ Evaluate
-panel(EA0, P0, EA1 - EA0, PB - P0, P_EVAL, 'evaluate', 'Evaluate')
+panel(EA0, P0, EA1 - EA0, PB - P0, P_EVAL, 'evaluate', LBL['evaluate'])
 yrun = P0 + 1.2; ex0, ex1 = 1.05, 4.9
-ichip(ex0, yrun - 0.33, ex1 - ex0, 0.66, 'run', R('run task loop', FS, True))
-icon('benchmark_arena', ex1 - 0.72, yrun - 0.15, 0.3); icon('task_agent', ex1 - 0.38, yrun - 0.15, 0.3)
+ichip(ex0, yrun - 0.33, ex1 - ex0, 0.66, 'run', R(LBL['run'], FS, True))
 ysc = P0 + 2.25; RH = 0.86
 rect(ex0, ysc, ex1 - ex0, 3 * RH + 0.16, WHITE, GREY, 0.8, 0.06)
 for k, (ic, nm, val) in enumerate([('accuracy', 'Accuracy', '.577 → .599'), ('tokens', 'Tokens', '4766 → 4683'), ('latency', 'Latency', '7.6 → 4.3 s')]):
     y = ysc + 0.08 + k * RH; icon(ic, ex0 + 0.15, y + 0.2, 0.44)
     text(ex0 + 0.72, y + 0.03, 2.9, 0.42, R(nm, FS, True)); text(ex0 + 0.72, y + 0.43, 2.9, 0.4, R(val, FC, False, INK, False, MONO))
 ypt = ysc + 3 * RH + 0.16 + 0.55
-ichip2(ex0, ypt, ex1 - ex0, 0.86, 'paired_test', R('paired test', FS, True), R('p = .043', FC, False, INK, False, MONO))
+ichip2(ex0, ypt, ex1 - ex0, 0.86, 'paired_test', R(LBL['paired'], FS, True), R('p = .043', FC, False, INK, False, MONO))
 xm = (ex0 + ex1) / 2
 seg(xm, yrun + 0.33, xm, ysc, LOOP, ALW, head=True); seg(xm, ysc + 3 * RH + 0.16, xm, ypt, LOOP, ALW, head=True)
 xr, xa, fy = ex0 + 0.9, ex1 - 0.9, ypt + 0.86 + 0.5
@@ -323,8 +326,8 @@ def decide(x, w, ic, word, fill):
 decide(ex0, 1.8, 'reject', 'Reject', C('FDECEA')); decide(ex1 - 1.9, 1.9, 'accept', 'Accept', C('E4F2E6'))
 
 # ------------------------------------------------------------------ Archive
-panel(XB0, P0, XB1 - XB0, PB - P0, P_ARCH, 'archive_tree', 'Archive')
-text(XB0 + 0.85 + width_cm([R('Archive', FT, True)]) + 0.12, P0 + 0.12, 0.6, 0.55, S('\U0001D49C', 15))
+panel(XB0, P0, XB1 - XB0, PB - P0, P_ARCH, 'archive_tree', LBL['archive'])
+text(XB0 + 0.85 + width_cm([R(LBL['archive'], FT, True)]) + 0.12, P0 + 0.12, 0.6, 0.55, S('\U0001D49C', 15))
 r = 0.32; ya0 = P0 + 1.55; bus = P0 + 2.3; yl1, yl2, yl3 = P0 + 3.1, P0 + 4.6, P0 + 6.1
 root = (7.7, ya0); gprime = (9.15, yd)
 seg(root[0], ya0 + r, root[0], bus, INK, LW); seg(6.5, bus, 7.7, bus, INK, LW); seg(7.7, bus, 9.15, bus, LOOP, LW, MSO_LINE_DASH_STYLE.DASH)
@@ -337,17 +340,17 @@ oval(*gprime, r, C('F2C23E')); text(gprime[0] - r, yd - r, 2 * r, 2 * r, M('g′
 elabel(5.95, ya0 - 0.22, 1.35, 'parent', LOOP, PP_ALIGN.RIGHT)
 elabel(7.7, yd - 0.52, 1.1, 'child', LOOP, PP_ALIGN.RIGHT)
 ylog = yd + 0.8
-ichip(6.2, ylog - 0.3, 2.3, 0.6, 'log', [R('ledger ', FS, True), S('\U0001D4A5', 13)], WHITE, GREY, 0.8, 0.38)
+ichip(6.2, ylog - 0.3, 3.45, 0.6, 'log', [R(LBL['ledger'] + ' ', FS, True), S('\U0001D4A5', 13)], WHITE, GREY, 0.8, 0.38)
 
 # ------------------------------------------------------------------ Self-modify
-panel(XC0, P0, XC1 - 0.15 - XC0, PB - P0, P_SELF, 'code_edit', 'Self-modify')
-editor(ex, yt0, ew, ht, 'tier.py', 'fixed')
+panel(XC0, P0, XC1 - 0.15 - XC0, PB - P0, P_SELF, 'code_edit', LBL['selfmod'])
+editor(ex, yt0, ew, ht, 'layer.py', 'fixed')
 for k, l in enumerate(TIER): cline(ex + 0.2, yt0 + 0.52 + k * LH, l)
-ichip(ex, ysel - 0.33, 3.45, 0.66, 'diagnosis', [R('diagnosis ', FS, True), S('\U0001D49F', 13), R('(', FS), M('g'), R(')', FS)])
-ichip(ex + 4.15, ysel - 0.33, 2.75, 0.66, 'rewriter', [R('rewriter ', FS, True), M('ρ')])
+ichip(ex, ysel - 0.33, 3.45, 0.66, 'diagnosis', [R(LBL['diagnosis'] + ' ', FS, True), S('\U0001D49F', 13), R('(', FS), M('g'), R(')', FS)])
+ichip(ex + 4.15, ysel - 0.33, 3.2, 0.66, 'rewriter', [R(LBL['rewriter'] + ' ', FS, True), M('ρ')])
 seg(ex + 3.45, ysel, ex + 4.15, ysel, LOOP, ALW, head=True)
 seg(ex + 5.5, ysel + 0.33, ex + 5.5, ydf, LOOP, ALW, head=True)
-editor(ex, ydf, ew, hd, tabs=[('skill', 'skill', False), ('graph', 'graph', False), ('summary', 'summary', True), ('verbatim', 'verbatim', False)])
+editor(ex, ydf, ew, hd, tabs=[('skill', 'skill', False), ('graph', 'graph', False), ('summary', 'summary', True), ('raw', 'verbatim', False)])
 yy = ydf + 0.52
 for sign, l in DIFF:                                     # bands first, then text
     if sign != ' ': rect(ex + 0.02, yy, ew - 0.04, LH, DF_RED if sign == '-' else DF_GRN, None, 0, 0.0, shape=MSO_SHAPE.RECTANGLE)
@@ -363,10 +366,10 @@ path([(root[0] + r, ya0), (xsel, ya0), (xsel, ysel), (ex, ysel)], col=LOOP, w=AL
 seg(ex1, yd, gprime[0] - r, yd, LOOP, ALW, head=True); elabel(6.0, yd - 0.5, 1.0, 'add', LOOP, PP_ALIGN.LEFT)
 path([(xr, yd + 0.3), (xr, ylog), (6.2, ylog)], col=GREY, w=ALW, dash=MSO_LINE_DASH_STYLE.DASH)
 ylj = ysel + 0.33 + 0.27                                 # ledger -> rewriter, under the diagnosis row
-path([(8.5, ylog), (10.45, ylog), (10.45, ylj), (ex + 4.55, ylj), (ex + 4.55, ysel + 0.33)], col=GREY, w=ALW, dash=MSO_LINE_DASH_STYLE.DASH)
-xc0, xc1 = 6.3, 8.65                                     # contract gate on the lane
+path([(9.65, ylog), (10.45, ylog), (10.45, ylj), (ex + 4.55, ylj), (ex + 4.55, ysel + 0.33)], col=GREY, w=ALW, dash=MSO_LINE_DASH_STYLE.DASH)
+xc0, xc1 = 6.3, 9.65                                     # contract gate on the lane
 path([(ex + 4.2, ydf + hd), (ex + 4.2, lane), (xc1, lane)], col=LOOP, w=ALW)
-ichip(xc0, lane - 0.31, xc1 - xc0, 0.62, 'contract', R('contract', FS, True), WHITE, LOOP, 1.0, 0.4)
+ichip(xc0, lane - 0.31, xc1 - xc0, 0.62, 'contract', R(LBL['contract'], FS, True), WHITE, LOOP, 1.0, 0.4)
 path([(xc0, lane), (0.3, lane), (0.3, yrun), (ex0, yrun)], col=LOOP, w=ALW)
 icon('python_code', 11.3, lane + 0.1, 0.4); text(11.75, lane + 0.05, 2.2, 0.5, [R('child ', FS, True, LOOP), M('g′', 12, LOOP)])
 
