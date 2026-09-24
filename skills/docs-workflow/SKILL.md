@@ -22,7 +22,7 @@ The reference drawings are in `resources/examples/`, the generators that produce
 - [Layout: a grid, not a collage](#layout-a-grid-not-a-collage)
 - [Type scale and print size](#type-scale-and-print-size)
 - [Icon plus concept word](#icon-plus-concept-word)
-- [Retrieving icons](#retrieving-icons)
+- [Retrieving icons](#retrieving-icons) (labels: see Icon plus concept word)
 - [Arrows and lines](#arrows-and-lines)
 - [Colour carries one meaning](#colour-carries-one-meaning)
 - [The code-editor window](#the-code-editor-window)
@@ -92,6 +92,16 @@ and "diagnosis", a pencil and "rewriter". The icon is 0.4 to 0.55 cm beside 10.5
 concept reuses the same icon everywhere it recurs (the metric icons in MemArena and again in
 Evaluate), which links the two places without a line. A symbol-only label (`F`, `score(a, gold)`)
 was rejected: name the concept.
+
+### Labels live in one table, and come from the literature
+Every concept word on the drawing is an entry of one `LBL` dict at the top of the generator, so a
+terminology change is one edit, and the same words appear in the paper's text and captions. Take
+the words from the representative papers the figure's own related work cites, not from the
+implementation: MemDGM's first labels (`verbatim floor`, `kv-assoc`, `NL port`, `ledger`,
+`contract`, `rewriter`, `genome`) were replaced after a literature sweep by `Raw`, `KV memory`,
+`Text injection`, `rejection log`, `validity check`, `meta agent`, `architecture` (Zep, MemGPT,
+RAPTOR, MemOS, DGM, HyperAgents, AutoMem). Code shown in an editor window follows the same names
+(`class Layer`, `score(q, scope)`, `src(x)`).
 
 ## Retrieving icons
 - One family: **Icons8 Fluency** (colourful flat, soft gradients). Search with the Icons8 MCP tool
