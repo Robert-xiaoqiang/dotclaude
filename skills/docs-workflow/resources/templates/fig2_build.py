@@ -2,14 +2,14 @@
 Top, the task loop:  MemArena -> Task Agent (NL port into the prompt, latent port into attention) <- MemDGM
 (the four-layer ladder over the append-only floor, supp(x*) fanned onto verbatim leaves, promote/demote
 between layers, route, compose C with its two channels, the KV store behind the latent port).
-Bottom, the Darwin Godel loop, each panel under its counterpart:  Evaluate (under MemArena, same metric
+Bottom, the program evolution loop, each panel under its counterpart:  Evaluate (under MemArena, same metric
 icons) <- Archive (tree, parent/child) -> Self-modify (under MemDGM, a zoom wedge from the Summary layer):
 the Tier interface as highlighted code, the rewriter, and the v3 -> v4 override as a code-review diff.
 Icons: Icons8 Fluency (icons2/).  Fonts: Arial, Courier New.  One type scale: titles 12.5 pt, body and
 edge labels 10 pt, code 9 pt.  Orthogonal arrows only.
 Build: python3 src/fig2_build.py && soffice --headless --convert-to pdf --outdir out out/fig2_arch.pptx
 """
-import os, pathlib, re
+import os, re
 from pptx import Presentation
 from pptx.util import Emu, Pt
 from pptx.dml.color import RGBColor
@@ -31,7 +31,7 @@ K_KW, K_FN, K_TY, K_CT, K_CM, K_TX = C('CF222E'), C('8250DF'), C('953800'), C('0
 ED_BG, ED_LN, ED_HD = C('F6F8FA'), C('D0D7DE'), C('EAEEF2')
 DF_RED, DF_GRN, DF_RS, DF_GS = C('FFEBE9'), C('DAFBE1'), C('CF222E'), C('1A7F37')
 SANS, MONO, SERIF, FREE = 'Arial', 'Courier New', 'Times New Roman', 'FreeSerif'
-ICONS = [str(pathlib.Path(__file__).resolve().parent.parent / 'icons'), 'icons2', 'icons']   # the skill's icon set first
+ICONS = ['icons2', 'icons']
 LW = 1.0; ALW = 1.25; FS = 10.5; FT = 12.5; FC = 9
 
 from PIL import ImageFont
@@ -164,7 +164,7 @@ Y1, B1 = 0.3, 7.4           # row 1
 XA0, XA1 = 0.6, 5.1         # column A: MemArena / Evaluate
 XB0, XB1 = 5.8, 10.1        # column B: Task Agent / Archive
 XC0, XC1 = 10.8, 20.0       # column C: MemDGM / Self-modify
-F0 = B1 + 1.15              # the Darwin Godel frame (the zoom of MemDGM)
+F0 = B1 + 1.15              # the program evolution frame (the zoom of MemCodex)
 P0 = F0 + 0.75              # row-2 panel tops
 def ichip2(x, y, w, h, ic, l1, l2, fill=WHITE, line=INK, lw=0.9, isz=0.46):
     rect(x, y, w, h, fill, line, lw, 0.16); icon(ic, x + 0.14, y + (h - isz) / 2, isz)
@@ -188,18 +188,19 @@ DIFF = [(' ', 'class SummaryLayer_child(SummaryLayer_g0):'), (' ', '    def rout
         ('+', '        if c > .3 and len(src(x)) <= 8:'), ('+', '            return Narrow'), ('+', '        return Descend')]
 ydf = ysel + 0.33 + 0.55
 hd = 0.5 + len(DIFF) * LH + 0.14
-PB = ydf + hd + 0.15                                    # row-2 panel bottoms
-FB = PB + 0.15
-lane = FB + 0.42
-H = lane + 0.62
+yvc = ydf + hd + 0.4                                    # validity check, the last step of self-modification
+PB = yvc + 0.62 + 0.2                                   # row-2 panel bottoms
+lane = PB + 0.45                                        # the child's return lane, inside the frame
+FB = lane + 0.62
+H = FB + 0.15
 prs.slide_height = Emu(int(H * CM))
-yd = P0 + 8.35                                          # accept / reject row, also the new child g'
+yd = P0 + 8.9                                          # accept / reject row, also the new child g'
 
 # ------------------------------------------------------------------ labels (one place, so a terminology change is one edit)
 LBL = dict(verbatim='Raw', kv='KV memory', adapter='adapter', nlport='Text injection', latport='Latent injection',
            compose='assemble', latent='latent memory', ledger='rejection log', contract='validity check', diagnosis='diagnosis',
            rewriter='meta agent', archive='Archive', selfmod='Self-modify', evaluate='Evaluate', run='run MemArena',
-           paired='paired test', judge='Judge', reader='Reader', agent='Task Agent', loop='Darwin G\u00f6del Loop')
+           paired='paired test', judge='Judge', reader='Reader', agent='Task Agent', loop='Program Evolution Loop')
 # ------------------------------------------------------------------ the zoom band (behind everything)
 BAND = C('F2EFFA')
 poly([(XC0, B1), (XC1, B1), (XC1, F0), (XA0, F0)], BAND)
@@ -210,7 +211,7 @@ yq = 1.41                                   # the query lane
 yA, yKV, yC = 2.15, 2.4, 5.1                # answer row, latent-port row, text-port row
 
 # ------------------------------------------------------------------ MemDGM
-panel(XC0, Y1, XC1 - XC0, B1 - Y1, P_MEM, 'layers_stack', 'MemDGM')
+panel(XC0, Y1, XC1 - XC0, B1 - Y1, P_MEM, 'layers_stack', 'MemCodex')
 LX0, LX1, BH = 13.3, 17.45, 0.75
 BARS = [('skill', 'Skill', 1.95), ('graph', 'Graph', 3.2), ('summary', 'Summary', 4.45), ('verbatim', LBL['verbatim'], 5.7)]
 cy = {nm: y + BH / 2 for _, nm, y in BARS}
@@ -244,7 +245,7 @@ seg(Q1X, yq, Q1X, cy['Graph'] - QS / 2, K_CT, ALW, head=True); icon('stop', Q1X 
 seg(Q2X, yq, Q2X, cy['Summary'] - QS / 2, K_CT, ALW); icon('focus_set', Q2X - QS / 2, cy['Summary'] - QS / 2, QS)
 seg(Q2X, cy['Summary'] + QS / 2, Q2X, cy[LBL['verbatim']] - QS / 2, K_CT, ALW, head=True); icon('stop', Q2X - QS / 2, cy[LBL['verbatim']] - QS / 2, QS)
 sub_lbl(Q1X + 0.06, yq + 0.03, 'q', '1', K_CT); sub_lbl(Q2X + 0.06, yq + 0.03, 'q', '2', K_CT)
-text(19.0, 3.9, 1.4, 0.44, R('route', FS, True, K_CT), PP_ALIGN.CENTER, rot=90)
+text(18.78, 2.28, 1.15, 0.44, R('route', FS, True, K_CT), PP_ALIGN.LEFT)
 # key for the three actions
 ky = 6.62; kx = LX0
 seg(kx + 0.12, ky + 0.02, kx + 0.12, ky + 0.34, K_CT, 1.0, head=True); text(kx + 0.26, ky, 1.5, 0.38, R('Descend', FC, True, K_CT, False, MONO))
@@ -270,11 +271,17 @@ seg(LX0, cy[LBL['verbatim']], 12.8, cy[LBL['verbatim']], NLB, ALW, head=True)
 panel(XA0, Y1, XA1 - XA0, B1 - Y1, P_ARENA, 'benchmark_arena', 'MemArena')
 ichip(0.8, yq - 0.32, 4.1, 0.64, 'query', [R('Query ', FS, True), M('q')])
 ichip(0.8, yA - 0.3, 3.85, 0.6, 'judge', R(LBL['judge'], FS, True))
-for k, (ic, nm) in enumerate([('accuracy', 'Accuracy'), ('tokens', 'Tokens'), ('latency', 'Latency')]):
-    ichip(0.8, 2.85 + k * 0.66, 3.85, 0.56, ic, R(nm, FS, True), C('F7FAFD'), GREY, 0.75, 0.4)
-for k, (b, x, w) in enumerate([('LoCoMo', 0.8, 1.6), ('LongMemEval', 2.48, 2.42), ('InMind', 0.8, 1.6), ('PersonaMem', 2.48, 2.42)]):
-    chip(x, 5.0 + (k // 2) * 0.62, w, 0.52, R(b, 9.5), WHITE, GREY, 0.75)
-
+# metric suite, 2 x 2
+for k, (ic, nm) in enumerate([('accuracy', 'Accuracy'), ('tokens', 'Tokens'), ('latency', 'Latency'), ('piece_evidence', 'Recall')]):
+    ichip(0.8 if k % 2 == 0 else 2.94, 2.62 + (k // 2) * 0.6, 2.06 if k % 2 == 0 else 1.71, 0.5, ic, R(nm, 9, True), C('F7FAFD'), GREY, 0.75, 0.3)
+# system interface
+ichip(0.8, 3.93, 3.85, 0.56, 'api', [R('write', 9.5, True, K_TX, False, MONO), R(' / ', 9.5, False, GREY, False, MONO), R('read', 9.5, True, K_TX, False, MONO)], WHITE, INK, 0.9, 0.38)
+# dataset interface: heterogeneous sources grouped under the episode schema they are mapped to
+rect(0.8, 4.63, 3.85, 2.55, C('F7FAFD'), GREY, 0.75, 0.06)
+icon('plugin', 0.93, 4.72, 0.38); text(1.38, 4.66, 3.2, 0.5, [R('episode ', FS, True), M('e=(R,', 11), S('\U0001D4AC', 12), R('e', 11, False, INK, True, SERIF, True), M(')', 11)])
+for k, b in enumerate(['LoCoMo', 'LongMemEval', 'MAB', 'PersonaMem', 'InMind', '…']):
+    x, w = (0.93, 1.36) if k % 2 == 0 else (2.37, 2.2)
+    chip(x, 5.22 + (k // 2) * 0.62, w, 0.5, R(b, 9, b == '…'), WHITE, GREY, 0.75)
 # ------------------------------------------------------------------ Task Agent
 panel(XB0, Y1, XB1 - XB0, B1 - Y1, P_AGENT, 'task_agent', LBL['agent'])
 chip(7.55, yq - 0.24, 0.9, 0.48, [M('q')], C('EDF1F6'), GREY, 0.75)            # the agent issues the read
@@ -301,7 +308,7 @@ seg(6.2, yA, 4.65, yA, INK, ALW, head=True); text(5.15, yA - 0.5, 0.6, 0.45, M('
 seg(10.95, yC, 9.7, yC, NLB, ALW, head=True); text(10.1, yC - 0.52, 0.7, 0.45, M('C', 12, NLB), PP_ALIGN.CENTER)
 seg(10.95, yKV, 9.7, yKV, LAT, ALW, head=True); text(10.0, yKV - 0.52, 0.9, 0.45, R('KV', FS, True, LAT), PP_ALIGN.CENTER)
 
-# ================================================================== the Darwin Godel frame: Evaluate | Archive | Self-modify
+# ================================================================== the program evolution frame: Evaluate | Archive | Self-modify
 rect(XA0, F0, XC1 - XA0, FB - F0, BAND, C('8C7BB8'), 1.0, 0.02)
 icon('evolution', XA0 + 0.2, F0 + 0.1, 0.5); text(XA0 + 0.8, F0 + 0.08, 6.0, 0.55, [R(LBL['loop'], FT, True, C('5B4A8A'))])
 EA0, EA1 = 0.75, XA1                                    # panels inset in the frame
@@ -311,11 +318,11 @@ yrun = P0 + 1.2; ex0, ex1 = 1.05, 4.9
 ichip(ex0, yrun - 0.33, ex1 - ex0, 0.66, 'run', R(LBL['run'], FS, True))
 ysc = P0 + 2.25; RH = 0.86
 rect(ex0, ysc, ex1 - ex0, 3 * RH + 0.16, WHITE, GREY, 0.8, 0.06)
-for k, (ic, nm, val) in enumerate([('accuracy', 'Accuracy', '.577 → .599'), ('tokens', 'Tokens', '4766 → 4683'), ('latency', 'Latency', '7.6 → 4.3 s')]):
+for k, (ic, nm, val) in enumerate([('accuracy', 'Accuracy', '63.6 → 66.9'), ('tokens', 'Tokens', '2.41k → 2.36k'), ('latency', 'Latency', '3.0 → 2.8 s')]):
     y = ysc + 0.08 + k * RH; icon(ic, ex0 + 0.15, y + 0.2, 0.44)
     text(ex0 + 0.72, y + 0.03, 2.9, 0.42, R(nm, FS, True)); text(ex0 + 0.72, y + 0.43, 2.9, 0.4, R(val, FC, False, INK, False, MONO))
 ypt = ysc + 3 * RH + 0.16 + 0.55
-ichip2(ex0, ypt, ex1 - ex0, 0.86, 'paired_test', R(LBL['paired'], FS, True), R('p = .043', FC, False, INK, False, MONO))
+ichip2(ex0, ypt, ex1 - ex0, 0.86, 'paired_test', R(LBL['paired'], FS, True), R('p = .006', FC, False, INK, False, MONO))
 xm = (ex0 + ex1) / 2
 seg(xm, yrun + 0.33, xm, ysc, LOOP, ALW, head=True); seg(xm, ysc + 3 * RH + 0.16, xm, ypt, LOOP, ALW, head=True)
 xr, xa, fy = ex0 + 0.9, ex1 - 0.9, ypt + 0.86 + 0.5
@@ -367,11 +374,12 @@ seg(ex1, yd, gprime[0] - r, yd, LOOP, ALW, head=True); elabel(6.0, yd - 0.5, 1.0
 path([(xr, yd + 0.3), (xr, ylog), (6.2, ylog)], col=GREY, w=ALW, dash=MSO_LINE_DASH_STYLE.DASH)
 ylj = ysel + 0.33 + 0.27                                 # ledger -> rewriter, under the diagnosis row
 path([(9.65, ylog), (10.45, ylog), (10.45, ylj), (ex + 4.55, ylj), (ex + 4.55, ysel + 0.33)], col=GREY, w=ALW, dash=MSO_LINE_DASH_STYLE.DASH)
-xc0, xc1 = 6.3, 9.65                                     # contract gate on the lane
-path([(ex + 4.2, ydf + hd), (ex + 4.2, lane), (xc1, lane)], col=LOOP, w=ALW)
-ichip(xc0, lane - 0.31, xc1 - xc0, 0.62, 'contract', R(LBL['contract'], FS, True), WHITE, LOOP, 1.0, 0.4)
-path([(xc0, lane), (0.3, lane), (0.3, yrun), (ex0, yrun)], col=LOOP, w=ALW)
-icon('python_code', 11.3, lane + 0.1, 0.4); text(11.75, lane + 0.05, 2.2, 0.5, [R('child ', FS, True, LOOP), M('g′', 12, LOOP)])
+vx = ex + 4.2                                            # validity check, then the child returns to Evaluate
+seg(vx, ydf + hd, vx, yvc, LOOP, ALW, head=True)
+ichip(vx - 1.65, yvc, 3.3, 0.62, 'contract', R(LBL['contract'], FS, True), WHITE, LOOP, 1.0, 0.4)
+ev = (EA0 + EA1) / 2
+path([(vx, yvc + 0.62), (vx, lane), (ev, lane), (ev, PB)], col=LOOP, w=ALW)
+icon('python_code', 11.3, lane + 0.08, 0.4); text(11.75, lane + 0.03, 2.2, 0.5, [R('child ', FS, True, LOOP), M('g′', 12, LOOP)])
 
 for o in sorted(OVER, reverse=True): print('OVERFLOW %.2f cm  %-40s at (%s, %s)' % o)
 print('canvas', W, 'x', round(H, 2))

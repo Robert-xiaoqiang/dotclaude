@@ -63,3 +63,10 @@ The Task Agent icon was chosen so it does not match the agent icons in the autho
 | log | log.png | Logbook | 4brDa8Wu96MT | fluency | https://img.icons8.com/?id=4brDa8Wu96MT&format=png&size=256 | logbook |
 | latent_purple | latent_purple.png | latent_interface recoloured to #7B5EA7 | - | fluency (recoloured) | derived | purple 3x3 grid |
 | stop | stop.png | Stop Sign | Zrc20nIaPRtZ | fluency | https://img.icons8.com/?id=Zrc20nIaPRtZ&format=png&size=256 | red octagon stop sign |
+| database | database.png | Database | KZHjwwenS7oK | fluency | https://img.icons8.com/?id=KZHjwwenS7oK&format=png&size=256 | blue cylinder stack (data sources) |
+| plugin | plugin.png | Plugin | LV1toaPaA7ia | fluency | https://img.icons8.com/?id=LV1toaPaA7ia&format=png&size=256 | violet brick (adapter, dataset interface) |
+| api | api.png | API | RlIXjuTUrwoX | fluency | https://img.icons8.com/?id=RlIXjuTUrwoX&format=png&size=256 | blue API tile (system interface) |
+| piece_evidence | piece_evidence.png | Piece Of Evidence | qTUv38Pw3E8m | fluency | https://img.icons8.com/?id=qTUv38Pw3E8m&format=png&size=256 | fingerprint in magnifier (evidence recall) |
+| chat | chat.png | Chat | GzN4ltD52jcA | fluency | https://img.icons8.com/?id=GzN4ltD52jcA&format=png&size=256 | two speech bubbles (a dialogue record) |
+| write_pen | write_pen.png | Edit Pencil | OWRPl8fxkRvG | fluency | https://img.icons8.com/?id=OWRPl8fxkRvG&format=png&size=256 | pencil (write call) |
+| document | document.png | Document | Ygov9LJC2LzE | fluency | https://img.icons8.com/?id=Ygov9LJC2LzE&format=png&size=256 | cyan page (read call) |

@@ -178,11 +178,22 @@ return to the agent on their own rows, one per port, below the lane.
 ## Concept mini-figures
 A paragraph that explains two ways of doing one thing becomes a two-panel figure at text width and
 3.5 cm tall (`fig_channels.py`): the same object in both panels, the path that differs coloured,
-the consequence in a chip (`μ(G) unchanged` / `μ(G) raised`), an accept or reject mark at the
-reader. A search space becomes a grid (`fig_genome.py`): rows are components with their icons,
+the consequence in a chip holding a value, never a verdict (`μ(G(q)) = 0` / `μ(G(q)) = 1`), an
+accept or reject mark at the reader. A search space becomes a grid (`fig_genome.py`): rows are components with their icons,
 columns the editable slots grouped by header bands, one cell shown overridden and one switch
 flipped, a two-line key. Place a grid as a `wrapfigure` at half width beside the paragraph it
 replaces.
+
+An evaluation suite that is itself a contribution gets a four-panel strip at true print size
+(`fig_arena.py`, `examples/arena_four_panel.png`, 13.97 x 3.95 cm): sources as a column of chips
+ending in an ellipsis chip `…`, the dataset interface drawing the unified schema as an object (a
+record of timestamped session rows and the query tuple in the paper's symbols), the system
+interface as the two calls in mono with the systems behind it as chips and the paper's own chip in
+the accent, and the metric suite as one icon row per metric with its concept word and its symbol.
+The same three components reappear in the workflow figure's benchmark panel as compact icon chips
+(metric suite 2 x 2, the call pair, the schema header over a grid of source chips ending in `…`), so
+the reader meets them twice in one vocabulary. Metric chips in both figures list the shared metrics
+in one order.
 
 ## Checks that must pass
 1. **Measure every label.** `width_cm()` measures runs with the Liberation fonts through PIL, and
