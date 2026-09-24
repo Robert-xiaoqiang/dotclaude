@@ -301,4 +301,4 @@ typed. The same script feeds the figures.
 `docs-figure` (the same question for pictures, and the shared generator directory) · `writing-paper`
 (the prose that leads with the finding and cites the table as evidence, and the `pp` convention) ·
 `output-analysis` (which runs belong in the comparison) · `writing-chatgpt` (the caption's prose) ·
-`conventions` (family index).
+`docs-results` (the experiments section: setup, finding-first paragraphs, ablation families) · `conventions` (family index).
