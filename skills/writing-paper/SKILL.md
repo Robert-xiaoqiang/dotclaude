@@ -168,6 +168,13 @@ Each paragraph covers one theme and ends by saying what the theme leaves open. T
 Steps 5 and 6 are what make the section an argument instead of a bibliography. A related-work paragraph
 that ends on its last citation has told the reader what exists and not why the paper was written.
 
+Steps 5 and 6 belong only at the end of the paragraph, in one or two sentences. A middle sentence
+that says what one cited method fails to do ("X ... but does not place retrieval within its action
+set") is the gap stated early and aimed at one paper, and it reads as an attack. Name at most two
+exemplars per line of work and let the grouped bracket carry the rest. The citation list must also
+be current: a fifth to a quarter of the section's citations from the last six months. The full
+section recipe, learned from Mem-Pi and System-1.5, with the recency count, is `docs-literature`.
+
 ## The leading sentence carries the finding
 The first sentence of a section, subsection, or paragraph is the most-read sentence in it. Spend it on
 a claim, never on a topic announcement.
@@ -551,7 +558,7 @@ gain sits on a small base, because "50\% relative improvement" on a base of 4\% 
 - **A contribution in the abstract with no experiment.** The fastest way to lose a reviewer.
 
 ## Companions
-`writing-style` (the punctuation, word, and sentence-structure rules this inherits, load it alongside) · `writing-style-zh` (the same layer for a Chinese-language paper) · `docs-figure`
+`docs-literature` (the related-work section: shape, closing, recency) · `writing-style` (the punctuation, word, and sentence-structure rules this inherits, load it alongside) · `writing-style-zh` (the same layer for a Chinese-language paper) · `docs-figure`
 (what a figure may contain and how to render it) · `naming-descriptive` (naming a method or an arm so
 the name states what it is) · `output-analysis` (producing the tables and curves the experiments
 section reports) · `writing-chatgpt` (hand the drafting to the writer tool, which applies this layer
