@@ -322,19 +322,8 @@ mechanism the method was built around. A paragraph that walks through every suit
 every variant says the same thing six times, buries the one comparison that mattered, and never
 says why.
 
-```latex
-% WEAK: a topic label, then every cell of the table restated, and no reason.
-\noindent\textbf{Recall provenance.}\ On 2Wiki, MuSiQue and HotpotQA, 72.6\%, 65.9\% and 74.8\%
-of evidence recalls hit a gold passage, and derived shares are 28.9\%, 34.7\% and 27.3\%. On
-GSM8K, MATH500 and GPQA the derived shares are 39.2\%, 35.6\% and 33.2\% ...
-
-% STRONG: the finding as the head, two numbers, one reason tied to the design.
-\noindent\textbf{Recall retrieves the right evidence, and re-uses reasoning when evidence is
-not missing.}\ Evidence recalls hit a gold passage 66 to 75\% of the time against 2 to 3\% chance
-(Table~\ref{tab:provenance}), and on general suites a third of recalls read a derived state. The
-memory stores computation as well as input, so the policy recalls a conclusion instead of deriving
-it again.
-```
+`docs-analysis` gives worked examples of this shape from System-1.5 and Mem-Pi, and owns the rest
+of the experiments section: setup, ablation framing, and where each piece of evidence goes.
 
 **Structure the section as questions, not as tables.** Ablations and analyses are numbered research
 questions carried in run-in bold, answered before the numbers arrive:
@@ -517,7 +506,7 @@ gain sits on a small base, because "50\% relative improvement" on a base of 4\% 
 ## Anti-patterns
 - **The enumerating results paragraph.** Every suite, scale and variant restated in prose, the
   same comparison six times, and no sentence saying why the method behaves that way.
-- **A topic label as the head of a results paragraph** (`Ablations.`, `Recall provenance.`), where
+- **A topic label as the head of a results paragraph** (`Ablations.`, `Case study.`), where
   the head should be the finding itself.
 - **The trailing citation.** `... is a left-to-right generative model~\citep{x}.` The citation now
   supports the paper's own description rather than the published concept.
@@ -562,4 +551,4 @@ gain sits on a small base, because "50\% relative improvement" on a base of 4\% 
 (what a figure may contain and how to render it) · `naming-descriptive` (naming a method or an arm so
 the name states what it is) · `output-analysis` (producing the tables and curves the experiments
 section reports) · `writing-chatgpt` (hand the drafting to the writer tool, which applies this layer
-and the style layer; the agent patches the result) · `docs-results` (the experiments section: setup, finding-first paragraphs, ablation families) · `conventions` (the map).
+and the style layer; the agent patches the result) · `docs-analysis` (the experiments and analysis section: setup, results paragraphs, ablations, evidence placement) · `conventions` (the map).

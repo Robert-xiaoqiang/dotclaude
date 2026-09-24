@@ -610,4 +610,4 @@ a slide: cropping a published one to the panel that carries the argument, rather
 richer or interactive charts, whose default is a standalone dashboard, so strip its title and caption) ·
 `docs-table` (the same question for a grid of numbers, and the shared generator) ·
 `layout-workspace` (where generators live) · `writing-style-zh` (the prose rules a Chinese figure's
-labels obey, and where the one-name-one-object rule lives) · `docs-results` (the experiments section: setup, finding-first paragraphs, ablation families) · `conventions` (family index).
+labels obey, and where the one-name-one-object rule lives) · `docs-analysis` (the experiments and analysis section: setup, results paragraphs, ablations, evidence placement) · `conventions` (family index).
