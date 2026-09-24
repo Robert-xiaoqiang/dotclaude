@@ -184,8 +184,8 @@ lossy version. Emit vector (`pdf`) for LaTeX and a raster preview only for revie
   **span**, drawn to the column its best published result reaches. No vertical offsets inside a
   discrete row. Tint the cell the paper occupies and put the surviving claim, with citations for
   every neighbour, in the caption.
-- **No panel title on the drawing.** `(a) Design space` above a panel is the caption's job. The
-  panel letter alone, if two panels share a figure.
+- **No panel title on the drawing.** `(a) Design space` above a panel is the caption's job, which
+  names the panels as "(a) noun phrase. (b) noun phrase." in reading order.
 - **A workflow reads left to right in numbered panels, one concept per panel.** Panel = a stage the
   caption can name (MemArena, Agent, hierarchy; Archive, Diagnose, Propose, Evaluate); inside it, a
   large glyph and chips for the concrete objects (benchmarks, tiers, the program with its slots).
@@ -313,16 +313,19 @@ the bars lie about their ratios.
 points at, with a dot and its value or a short arrow. A figure where every point is equally
 unmarked makes the reader find the result; a figure with one marked point hands it over.
 
-**Panel letters live in the sub-caption, below the panel and centred, never at the top left.**
-Most figures need no sub-captions at all: the caption names panels by position, "Left:",
-"Right:", "Top:", "Bottom:". When panels do carry sub-captions, each is a centred line under its
-panel in the body face, the way a LaTeX `\subcaption` sits, and then it starts with its letter,
-"(a) Methods", "(b) Modules of the harness", so the caption and the text can say "Fig. 3a". The
-anti-pattern is the letter as a title at the top left of the axes, "(a) Blind", with the
-sub-caption trailing under it or missing: a title reads as part of the plot, the letter has no
-caption to belong to, and the figure looks like a notebook export. Panels in a row share a
-y-axis and say so by drawing the tick labels once. Panels that do not share a scale must not be
-the same size and shape, or the reader will compare them anyway.
+**No sub-captions by default: the main caption names the panels.** A multi-panel figure
+carries no sub-captions under its panels. Its caption opens with one noun phrase for the whole
+figure, then names each panel in reading order as "(a) noun phrase. (b) noun phrase.", one
+concise noun concept per panel, so the caption reads "Training efficiency at Qwen3.5-4B. (a)
+Hours per hundred steps by stage. (b) Best OOD score against hours to reach it." and the text can
+say "Fig. 5b". Sub-captions are allowed only when the author asks for them, and then each is a
+centred line under its panel in the body face, the way a LaTeX `\subcaption` sits, starting with
+its letter, "(a) Methods", "(b) Modules of the harness". The anti-pattern is unchanged: the
+letter drawn as a title at the top left of the axes, "(a) Blind", with the sub-caption trailing
+under it or missing. A title reads as part of the plot, the letter has no caption to belong to,
+and the figure looks like a notebook export. Panels in a row share a y-axis and say so by
+drawing the tick labels once. Panels that do not share a scale must not be the same size and
+shape, or the reader will compare them anyway.
 
 **A curve over training looks measured.** It is drawn through the evaluation points, one marker
 per evaluation, with the run-to-run noise those points actually carry. A spline through five
@@ -513,7 +516,8 @@ name is followed by what it holds and not by what it shows. What a caption never
 panel by panel, say why the design produces the result, define the quantities the text already
 defined, or say "top row shows" when "Top:" will do. A reader who wants the reading is in the
 text; a caption that carries it is read twice and drifts from the text the second time it is
-edited. Panel positions are named by "Left:", "Right:", "Top:", "Bottom:", never by letters.
+edited. Panels are named in reading order as "(a) noun phrase. (b) noun phrase.", one noun
+concept each, and a single-panel figure needs no letter.
 
 The caption is prose and goes through the writer like every other paragraph.
 
