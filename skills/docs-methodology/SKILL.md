@@ -18,6 +18,7 @@ surround a hard equation. `writing-paper` owns the sentence, `docs-analysis` the
 ## Contents
 - [When to Use](#when-to-use)
 - [The one rule](#the-one-rule)
+- [Adapt the depth](#adapt-the-depth)
 - [The section overview](#the-section-overview)
 - [Order: base model first, then causal order](#order-base-model-first-then-causal-order)
 - [A new component: motivation, design, explanation](#a-new-component-motivation-design-explanation)
@@ -56,6 +57,22 @@ never stated bare. It comes with the problem that forces it and the reason this 
 
 The test, applied to each sentence that describes the method: *did the paper choose this?* If yes,
 the sentence before it gives the reason, or the sentence itself does ("we model X as Y because Z").
+
+## Adapt the depth
+The full argument (motivation, design, explanation) is for the paper's central and non-obvious
+choices, the ones a reviewer would question. A component that is standard in the field (a fast-weight
+memory, a delta-rule write, a GRPO advantage, a KL regularizer, a looped Transformer) gets one clause
+of *why* and one sentence of *what*, with its citation, and nothing more. The author rejected a
+latent-memory paragraph that argued fast weights, the delta rule and prompt compilation at length:
+"though docs-methodology is important, no need to follow it every time, concise when it is a very
+common background". The same judgment decides structure.
+- Merge a short background definition into the paragraph that uses it. "Looped latent reasoning" and
+  "the latent Think action" are one paragraph, since Think is just one more application of the block.
+- Merge short consecutive equations into one display separated by a comma,
+  `g=\sigma(\cdots),\qquad M'=M+g(v-Mk)k^\top`, instead of a two-line `align`.
+- Write the base model's composition inline when nothing later refers to it by number.
+- Keep the full treatment, with intuition, named factors and edge cases, for the equation that carries
+  the paper's contribution (for LatentHarness, the gate credit), not for every equation.
 
 ## The section overview
 The first paragraph of the section is a roadmap one level more detailed than the introduction and
@@ -212,11 +229,15 @@ The author's skeleton, which this skill generalizes:
 10. **One hierarchy of terms and claims from abstract to introduction to method.**
 11. **Math is accepted only after two independent reviewers accept it.**
 12. **No invented rationale.** An unsupported constant is a setting with its value in the appendix.
+13. **Adapt the depth.** Full argument for central choices, one clause of why for common background,
+    short background merged into the paragraph that uses it, short equations merged into one display.
 
 ## Anti-patterns
 - **The premise as opening.** "A looped reasoner must decide ..." as the first sentence.
 - **The fact-statement component.** "The memory is a fast-weight matrix." for a choice the paper made.
 - **The over-explained background.** Three sentences on the delta rule, none on why this paper uses it.
+- **The over-argued standard component.** A full motivation, design and explanation paragraph for a
+  fast-weight memory, as if it were the contribution. One clause of why is enough.
 - **The forward reference.** An action "writes by Eqs. 7 and 8" when Eqs. 7 and 8 are a subsection away.
 - **The parameterization-first module.** A softmax head defined before the reader knows what it decides.
 - **The bare equation.** A gradient displayed with no sentence of what it rewards.
