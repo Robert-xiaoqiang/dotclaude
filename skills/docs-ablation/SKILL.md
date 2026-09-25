@@ -83,7 +83,7 @@ layers". The full system is the first row, tinted, with the paper's macro.
 - **Few columns.** Show the family averages and one cost column (LatentHarness: Gen., Long, FLOPs).
   Per-benchmark columns go to the appendix. An ablation table compares variants, not benchmarks.
 - **The change from the full system** goes in small type after each value,
-  `55.4\,\drop{$-$0.4}` or `56.1\,\rise{$+$0.3}`, with red for a loss and green for a gain. This is the
+  `55.4\,\drop{$-0.4$}` or `56.1\,\rise{$+0.3$}`, with red for a loss and green for a gain. This is the
   one exception to `docs-table`'s "absolute values, not differences": an ablation's point is the
   change, and the absolute value stays beside it. Do not bold-and-underline an ablation table as well.
   The change marks carry the ranking.
@@ -130,7 +130,7 @@ differed from the full system by under a point with the same recall and tokens, 
 The fix regrouped the rows into families by the method's decisions: evidence channel, organization,
 read depth, latent memory, edit unit, acceptance and search. It added same-function alternatives,
 such as content plus routing against routing, a RAPTOR-style summary tree against the hierarchy, and
-whole-program rewrites against one-verb edits, and it moved per-benchmark numbers to the appendix.
+whole-program rewrites against single-method edits, and it moved per-benchmark numbers to the appendix.
 
 ## Rules
 1. **Families come from design decisions, one dimension each, two to four variants.**
