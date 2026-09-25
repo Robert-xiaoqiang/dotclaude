@@ -1,7 +1,7 @@
 ---
 name: docs-methodology
-description: "Write a paper's method section: an overview that goes from the design goal to the components and their training, the inherited base model formulated before anything is added, each new component told as motivation, design and explanation ('we model X as Y because Z'), modules defined by their inputs and outputs in causal order, intuition and a standard-design contrast around every hard equation, and one hierarchy of claims from abstract to introduction to method, learned from the LatentHarness method rewrites."
-when_to_use: "Use when drafting or revising a Method section, its opening overview, or a paragraph that introduces a new component or a hard equation, and when an author or reviewer says the method 'rushes to state facts', opens abruptly, uses an object before defining it, or has an equation nobody can follow."
+description: "Write a paper's method section: an overview that goes from the design goal to the components and their training, then the whole workflow at one glance (the method as a modeled object, the pipeline figure, end-to-end inputs and outputs with their symbols, each core module's role and the objective) before any module is designed, the inherited base model formulated before anything is added, each new component told as motivation, design and explanation ('we model X as Y because Z'), modules defined by their inputs and outputs in causal order, intuition and a standard-design contrast around every hard equation, and one hierarchy of claims from abstract to introduction to method, learned from the LatentHarness method rewrites."
+when_to_use: "Use when drafting or revising a Method section, its opening overview or workflow formulation, when a reader cannot tell the method's overall inputs and outputs, or a paragraph that introduces a new component or a hard equation, and when an author or reviewer says the method 'rushes to state facts', opens abruptly, uses an object before defining it, or has an equation nobody can follow."
 ---
 # Skill: docs-methodology
 
@@ -20,6 +20,7 @@ surround a hard equation. `writing-paper` owns the sentence, `docs-analysis` the
 - [The one rule](#the-one-rule)
 - [Adapt the depth](#adapt-the-depth)
 - [The section overview](#the-section-overview)
+- [The workflow formulation: inputs, outputs, symbols, then modules](#the-workflow-formulation-inputs-outputs-symbols-then-modules)
 - [Order: base model first, then causal order](#order-base-model-first-then-causal-order)
 - [A new component: motivation, design, explanation](#a-new-component-motivation-design-explanation)
 - [Modules by inputs and outputs](#modules-by-inputs-and-outputs)
@@ -91,6 +92,37 @@ one level less technical than the subsections. It runs in this order.
 Never open with the problem stated as the method's own premise ("A looped reasoner must decide at
 each latent state whether to compute again, recall, or emit"). It asks the reader to accept a framing
 the paper has not yet introduced, and it states our design as if it were a fact about the world.
+
+## The workflow formulation: inputs, outputs, symbols, then modules
+The overview says what the method adds. The reader also needs the whole workflow at one glance before
+any module is designed: what goes in, what comes out, which objects exist between them, and when each
+module runs. Without it every module paragraph is read without knowing where it sits, and the section
+reads as vague. The three papers the author holds up all do this in the section's opening paragraphs,
+before the first subsection.
+
+1. **Frame the method as a modeled object and point to the pipeline figure.** Mem-Pi: "We model adaptive
+   memory as a generative policy $\pi_\theta$ ... separate from the downstream agent." HarnessRL: "As
+   shown in Figure 2, \ourmethod{} augments an ordinary RL loop with an adaptive training-time harness
+   $\mathcal{H}_t=(p_t,g_t,c_t)$."
+2. **Give the end-to-end input and output with their symbols**, defined once and used everywhere after.
+   Mem-Pi defines the bank $\mathcal{E}$ of pairs $(x,m)$, the context $x=(q,o)$, and guidance $m$ injected
+   into the agent's context. System-1.5 defines the input sequence $X$ and the hidden states $H_l$ before
+   any shortcut. Define only the symbols the modules will need, one clause each.
+3. **Name each core module by its role in the workflow**: when it runs, what it reads, what it writes or
+   returns, and what it changes. HarnessRL: "The harness memory $\mathcal{M}$ records ... The harness
+   evolver $\mathcal{E}$ diagnoses failures ... Accepted updates carry the harness from $\mathcal{H}_t$ to
+   $\mathcal{H}_{t+1}$." Nothing is designed here, only placed.
+4. **State the objective in one sentence** when the method optimizes something (accuracy at no higher
+   cost, a distillation loss, a reward), so each module can later be judged against it.
+5. **The first subsection opens with the base process as an equation** that runs the workflow once
+   (HarnessRL: one training step, from $x_t\sim\operatorname{Cat}(p_t)$ to criterion scores), and then the
+   modules follow as run-in paragraphs, each a motivation, a design and an explanation.
+
+The formal setting belongs here, in the section's opening or the first subsection's opening, never as a
+bold run-in paragraph ("Problem Formulation.") placed between the overview and the modules. A run-in
+reads as one more component, hides the workflow the other paragraphs depend on, and usually states the
+setting without the modules that act on it. The order is always from the higher level to the lower: the
+workflow and its objects, then each module's motivation and design, then its details, then the appendix.
 
 ## Order: base model first, then causal order
 - **Formulate the inherited base model before adding anything.** Write it in the form its own papers
@@ -218,7 +250,8 @@ The author's skeleton, which this skill generalizes:
 
 ## Rules
 1. **Prior work is stated, our choices are argued.** Every design choice has its reason next to it.
-2. **The overview goes from goal to components to training**, one level below the introduction.
+2. **The overview goes from goal to components to training**, one level below the introduction, and
+   carries the workflow formulation (Rule 14).
 3. **The inherited base model is formulated first**, in its own papers' form.
 4. **Causal order, no forward references**: nothing is used before it is defined.
 5. **A new component is motivation, design ("we model X as Y because Z"), explanation**, with why here.
@@ -231,6 +264,9 @@ The author's skeleton, which this skill generalizes:
 12. **No invented rationale.** An unsupported constant is a setting with its value in the appendix.
 13. **Adapt the depth.** Full argument for central choices, one clause of why for common background,
     short background merged into the paragraph that uses it, short equations merged into one display.
+14. **The workflow comes before the modules.** The section opens with the method as a modeled object, the
+    pipeline figure, the end-to-end input and output with their symbols, each core module's role in the
+    workflow and the objective. No "Problem Formulation" run-in sits between the overview and the modules.
 
 ## Anti-patterns
 - **The premise as opening.** "A looped reasoner must decide ..." as the first sentence.
@@ -245,6 +281,9 @@ The author's skeleton, which this skill generalizes:
 - **The summary that contradicts the method.** "The gains train the gate" when the gains are held
   under stop-gradient.
 - **The undefined symbol.** $\mathcal{A}(s)$ used in a loss before any sentence defines it.
+- **The formulation run-in.** A bold "Problem Formulation." paragraph after the overview that states the
+  setting but never the workflow, so the reader meets the modules without knowing what flows between
+  them. The MemCodex author (2026-09-25): "the reader cannot get the overall workflow input and output".
 
 ## Companions
 `writing-paper` (the sentence, citations, the finding-first head) · `writing-style` (punctuation and
