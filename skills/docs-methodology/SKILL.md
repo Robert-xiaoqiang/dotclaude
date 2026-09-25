@@ -26,6 +26,7 @@ surround a hard equation. `writing-paper` owns the sentence, `docs-analysis` the
 - [Modules by inputs and outputs](#modules-by-inputs-and-outputs)
 - [Architecture before credit](#architecture-before-credit)
 - [Hard equations](#hard-equations)
+- [Formal blocks: prose first, then Formally](#formal-blocks-prose-first-then-formally)
 - [One hierarchy from abstract to method](#one-hierarchy-from-abstract-to-method)
 - [Checking a method section](#checking-a-method-section)
 - [Worked example: LatentHarness](#worked-example-latentharness)
@@ -197,6 +198,35 @@ theorem. Put its result inline where it motivates the design, and move the deriv
 behind the method's single appendix pointer. Keep a theorem environment only for a non-obvious claim
 the paper relies on.
 
+## Formal blocks: prose first, then Formally
+Do not interleave rationale, motivation and formal statements sentence by sentence. A paragraph that
+introduces a component runs in two blocks. The first block is prose: the motivation and the design
+overview, with no symbols the reader has to hold. The second block opens with a sharp marker,
+"Formally," "Precisely," or "Specifically," and then reads like a definition: "let $x$ be ..., given
+$y$ and $z$, the ... is given by Eq. (a), the ... is Eq. (b), and the whole process is Eq. (c), where
+$u$ is ... and $v$ is ...". Every symbol an equation uses is defined in the sentence just before it or
+in the where-clause just after it, so a reader looking at the equation never hunts for a symbol
+across the section. The author (2026-09-26): "when seeing the theorem, the reader does not need to
+find the symbol everywhere, just see the around before or after".
+```latex
+% WEAK: rationale, symbol, rationale, symbol
+The gate should favor deep results. Let $g_t=\sigma(w^\top h_{t+1}+\kappa n_t/N)$. A later state can
+then recall the result. The key is $k_t=W_kh_t/\lVert W_kh_t\rVert$ so that ...
+% STRONG: prose, then one formal block
+Think should store a result only when it is worth recalling later, and it should store it under the
+state it started from, so that a similar state can find it. Formally, let $k_t=W_kh_t/\lVert
+W_kh_t\rVert$ be the key formed from the current hidden state and $v_t=W_vh_{t+1}$ the value formed
+from the result. Think updates the state and the memory as
+    h_{t+1}=F_\theta(h_t), \quad n_{t+1}=n_t+1, \quad M_{t+1}=M_t+g_t(v_t-M_tk_t)k_t^\top,   (2)
+where $g_t=\sigma(w^\top h_{t+1}+\kappa n_t/N)$ is the write strength, $w$ a learned gate vector and
+$\kappa\ge0$ a learned scalar that favors deeper results.
+```
+Related short equations go on one display line separated by commas, as above. The exception is a
+derivation or an argument that genuinely alternates between a step and its justification, where an
+inline equation between sentences is right. That is the exception, and the default is the two blocks.
+The same rule shortens a section: once the prose block carries the why, the formal block carries only
+the what, and neither repeats the other.
+
 ## One hierarchy from abstract to method
 The abstract states the idea, the introduction motivates it and names its parts, the method
 formalizes them. The same claim appears at each level in the same terms, at increasing depth.
@@ -262,9 +292,12 @@ The author's skeleton, which this skill generalizes:
 10. **One hierarchy of terms and claims from abstract to introduction to method.**
 11. **Math is accepted only after two independent reviewers accept it.**
 12. **No invented rationale.** An unsupported constant is a setting with its value in the appendix.
-13. **Adapt the depth.** Full argument for central choices, one clause of why for common background,
+13. **Prose first, then Formally.** Motivation and design in prose, then one formal block whose
+    symbols are defined in the sentence before or the where-clause after each equation, related short
+    equations on one line. Interleaving is reserved for derivations.
+14. **Adapt the depth.** Full argument for central choices, one clause of why for common background,
     short background merged into the paragraph that uses it, short equations merged into one display.
-14. **The workflow comes before the modules.** The section opens with the method as a modeled object, the
+15. **The workflow comes before the modules.** The section opens with the method as a modeled object, the
     pipeline figure, the end-to-end input and output with their symbols, each core module's role in the
     workflow and the objective. No "Problem Formulation" run-in sits between the overview and the modules.
 
@@ -277,6 +310,8 @@ The author's skeleton, which this skill generalizes:
 - **The forward reference.** An action "writes by Eqs. 7 and 8" when Eqs. 7 and 8 are a subsection away.
 - **The parameterization-first module.** A softmax head defined before the reader knows what it decides.
 - **The bare equation.** A gradient displayed with no sentence of what it rewards.
+- **The interleaved paragraph.** A symbol, a sentence of rationale, another symbol, another rationale,
+  so that no equation can be read without re-reading the paragraph.
 - **The trivial theorem.** A covariance identity in a theorem environment with a proof environment.
 - **The summary that contradicts the method.** "The gains train the gate" when the gains are held
   under stop-gradient.
