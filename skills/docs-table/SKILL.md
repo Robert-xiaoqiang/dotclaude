@@ -298,7 +298,7 @@ typed. The same script feeds the figures.
 - **A table shrunk to fit a margin in every column**, where the summary columns alone should carry it.
 
 ## Companions
-`docs-figure` (the same question for pictures, and the shared generator directory) · `writing-paper`
+`docs-ablation` (which ablation variants exist and how the ablation table is grouped, the one table allowed to print changes) · `docs-figure` (the same question for pictures, and the shared generator directory) · `writing-paper`
 (the prose that leads with the finding and cites the table as evidence, and the `pp` convention) ·
 `output-analysis` (which runs belong in the comparison) · `writing-chatgpt` (the caption's prose) ·
 `docs-analysis` (the experiments and analysis section: setup, results paragraphs, ablations, evidence placement) · `conventions` (family index).

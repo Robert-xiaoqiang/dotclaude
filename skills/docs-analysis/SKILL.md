@@ -275,7 +275,7 @@ derivation once (System-1.5's 92.31% is 1-2/26 from the Steps column), and `Avg`
   text never says why.
 
 ## Companions
-`writing-paper` (the sentence and the finding-first head) · `docs-table` (the grid, marks, caption) ·
+`docs-ablation` (which ablation variants exist and how the ablation table is grouped, the one table allowed to print changes) · `writing-paper` (the sentence and the finding-first head) · `docs-table` (the grid, marks, caption) ·
 `docs-figure` (the picture) · `docs-literature` (the related-work section that follows) ·
 `writing-chatgpt` (prose goes through the writer) · `output-analysis` (which runs to compare) ·
 `conventions` (family index).
