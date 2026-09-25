@@ -47,7 +47,7 @@ figure trying to be readable on its own, which is a requirement nobody imposed.
 | **A baked caption** | duplicates the caption, and the two drift | caption |
 | **Bullets copied from the text** | the reader reads the same list twice, in a worse font | keep the text, cut from the figure |
 | **A legend entry that is a sentence** | legends are keys, not glossaries | shorten to the arm name |
-| **Units or definitions spelled out** (`accuracy (fraction of correct answers)`) | terse axis labels are the convention | caption, once |
+| **Units or definitions spelled out** (`accuracy (fraction of correct answers)`) | terse axis labels are the convention | the setup, once (`docs-caption`) |
 
 ### Style, which is where a figure looks amateur before it is read
 
@@ -69,7 +69,8 @@ idiom. Writing the loss out in full inside the panel is the failure it replaces.
 The trailing-node rule below is the commonest case of a wider one. **An explanatory annotation is a
 caption wherever it sits**, not only under a panel. Labels such as `dense credit`, `evidence, before
 decoding`, `one decision`, `one state, three operations` and `near-duplicate` all name the reader's
-takeaway rather than the object drawn, and all of them belong in the caption. The test is the same:
+takeaway rather than the object drawn, and none of them belongs in the drawing: the takeaway is the
+text's, and the caption only names what is shown (`docs-caption`). The test is the same:
 if deleting it removes no object, no symbol and no quantity, it was prose.
 
 **An illustration sells a concept and a formulation.** It is not text placed in boxes. If the panel
@@ -184,8 +185,9 @@ lossy version. Emit vector (`pdf`) for LaTeX and a raster preview only for revie
   **span**, drawn to the column its best published result reaches. No vertical offsets inside a
   discrete row. Tint the cell the paper occupies and put the surviving claim, with citations for
   every neighbour, in the caption.
-- **No panel title on the drawing.** `(a) Design space` above a panel is the caption's job, which
-  names the panels as "(a) noun phrase. (b) noun phrase." in reading order.
+- **No letter-and-phrase panel title on the drawing.** `(a) Design space` above a panel is a
+  caption in the image. A one-word identity (a class, a domain) inside the panel at the upper middle
+  is fine, and the caption then names only what the panels share (`docs-caption`).
 - **A workflow reads left to right in numbered panels, one concept per panel.** Panel = a stage the
   caption can name (MemArena, Agent, hierarchy; Archive, Diagnose, Propose, Evaluate); inside it, a
   large glyph and chips for the concrete objects (benchmarks, tiers, the program with its slots).
@@ -313,19 +315,17 @@ the bars lie about their ratios.
 points at, with a dot and its value or a short arrow. A figure where every point is equally
 unmarked makes the reader find the result; a figure with one marked point hands it over.
 
-**No sub-captions by default: the main caption names the panels.** A multi-panel figure
-carries no sub-captions under its panels. Its caption opens with one noun phrase for the whole
-figure, then names each panel in reading order as "(a) noun phrase. (b) noun phrase.", one
-concise noun concept per panel, so the caption reads "Training efficiency at Qwen3.5-4B. (a)
-Hours per hundred steps by stage. (b) Best OOD score against hours to reach it." and the text can
-say "Fig. 5b". Sub-captions are allowed only when the author asks for them, and then each is a
-centred line under its panel in the body face, the way a LaTeX `\subcaption` sits, starting with
-its letter, "(a) Methods", "(b) Modules of the harness". The anti-pattern is unchanged: the
-letter drawn as a title at the top left of the axes, "(a) Blind", with the sub-caption trailing
-under it or missing. A title reads as part of the plot, the letter has no caption to belong to,
-and the figure looks like a notebook export. Panels in a row share a y-axis and say so by
-drawing the tick labels once. Panels that do not share a scale must not be the same size and
-shape, or the reader will compare them anyway.
+**No sub-captions and no panel letters by default.** A multi-panel figure carries no
+sub-captions and draws no letters, and its caption names the panels by content or position as
+`docs-caption` says. A panel whose identity is one word (`blind`, `Medical`) carries it inside the
+panel at the upper middle. Letters and sub-captions are drawn only when the author asks for them,
+and then each sub-caption is a centred line under its panel in the body face, the way a LaTeX
+`\subcaption` sits, starting with its letter, "(a) Methods", "(b) Modules of the harness". The
+anti-pattern is unchanged: the letter drawn as a title at the top left of the axes, "(a) Blind",
+with the sub-caption trailing under it or missing. A title reads as part of the plot, the letter has
+no caption to belong to, and the figure looks like a notebook export. Panels in a row share a y-axis
+and say so by drawing the tick labels once. Panels that do not share a scale must not be the same
+size and shape, or the reader will compare them anyway.
 
 **A curve over training looks measured.** It is drawn through the evaluation points, one marker
 per evaluation, with the run-to-run noise those points actually carry. A spline through five
@@ -499,49 +499,14 @@ lifeline saturates, the reward falls when a bar is raised while quality keeps ri
 
 ### The caption
 
-A caption names what is shown and how to read the marks, and stops. Its shape, taken from the
-papers whose figures read fastest:
+`docs-caption` owns the caption. In short: it opens with a noun phrase naming the figure's object
+and the method in the paper's own terms ("Training dynamics of \ourmethod{}"), an overview figure
+gets one or two sentences telling the flow instead of `Module: contents` fragments, panels are named
+by content or by position and never by letters the figure does not draw, and nothing the figure,
+its legend, its axes or the setup already says is repeated (no "Dashed: guidance ceiling" beside an
+axis labelled `Ceiling`, no metric or checkpoint rule). What the figure draws decides what the
+caption may leave out, so a label moved into or out of a panel is a caption edit too.
 
-1. **A noun phrase with the metric and the setting.** "Abstention rate (line, left axis) and SR
-   improvement over the base agent (bars, right axis) across task-difficulty bins on WebArena."
-   Not a sentence, not a story.
-2. **The marks as label: value pairs.** "Dashed: GRPO's best checkpoint." "Bold: best per column.
-   Underline: second best." Each one a fragment ending in a full stop.
-3. **At most one sentence of reading, for a results figure only.** "Mem-π abstains on easy tasks,
-   generates on hard tasks, and improves most where memory is needed." That sentence is the
-   figure's claim, in bold in the text; the caption may echo it and nothing more.
-
-**A method comparison is one sentence, not a panel list.** When a diagram stacks systems to
-compare them (a prior loop, the same loop under a different objective, then ours), the caption is
-the comparison itself, written as one sentence in reading order: each system named with its
-citation and one clause on what distinguishes it. "Comparison of a looped reasoner
-(Ouro~\citep{...}), the same loop trained with an outcome reward that credits every latent state
-(RLTT~\citep{...}), and \ourmethod{}, which interleaves reasoning and memory in latent space and
-learns each latent action from its action gain." No position labels (`Top:`, `Left:`, `Middle:`)
-and no panel letters there, because the systems' names are already drawn on the figure and the
-sentence gives their order. Position labels and panel letters are for result plots whose panels
-carry no name of their own, never a requirement.
-
-Ten to thirty words for a results figure, up to fifty for a method overview, where each panel's
-name is followed by what it holds and not by what it shows. What a caption never does: narrate
-panel by panel, say why the design produces the result, define the quantities the text already
-defined, or say "top row shows" when "Top:" will do. A reader who wants the reading is in the
-text; a caption that carries it is read twice and drifts from the text the second time it is
-edited. Panels are named in reading order as "(a) noun phrase. (b) noun phrase.", one noun
-concept each, and a single-panel figure needs no letter.
-
-The caption is prose and goes through the writer like every other paragraph.
-
-**Before, 88 words:** "Training dynamics at Qwen3.5-4B on one step axis. Top row: share of
-response pairs in each signal class over training, a training-set statistic. Bottom row, left
-to right: share of tasks the sampling interface holds at each weight level; mean number of
-guidance fields per task against the scheduled ceiling, with the harness without a critic for
-contrast; accepted rubric operations per hundred steps by type; and the share of accepted
-rubric edits that reverse an edit on the same criterion within the previous two visits to it."
-
-**After, 32 words:** "Training dynamics at Qwen3.5-4B. Top: share of response pairs in each
-signal class. Bottom: sampling weight levels, guidance strength against the scheduled ceiling,
-accepted rubric operations per hundred steps, and the rubric-edit reversal rate.\"
 ---
 
 ## Reproducibility
@@ -608,6 +573,7 @@ A figure is regenerated whenever a run updates, so the generator is an artifact,
 report references a figure and what a placeholder spec contains) · `docs-slides` (how a figure reaches
 a slide: cropping a published one to the panel that carries the argument, rather than redrawing it) · `dataviz` (palette and mark detail for
 richer or interactive charts, whose default is a standalone dashboard, so strip its title and caption) ·
+`docs-caption` (the caption's wording and shape, and how panels are named) ·
 `docs-table` (the same question for a grid of numbers, and the shared generator) ·
 `layout-workspace` (where generators live) · `writing-style-zh` (the prose rules a Chinese figure's
 labels obey, and where the one-name-one-object rule lives) · `docs-analysis` (the experiments and analysis section: setup, results paragraphs, ablations, evidence placement) · `conventions` (family index).

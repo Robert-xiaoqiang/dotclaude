@@ -87,8 +87,9 @@ layers". The full system is the first row, tinted, with the paper's macro.
   one exception to `docs-table`'s "absolute values, not differences": an ablation's point is the
   change, and the absolute value stays beside it. Do not bold-and-underline an ablation table as well.
   The change marks carry the ranking.
-- **The caption** states that one component changes per row, defines the columns, says what the
-  parentheses are, and reports any budget differences.
+- **The caption** names the ablation axes and declares the marks (`docs-caption`). That one component
+  changes per row, what the columns hold and any budget difference are stated where the ablation is
+  introduced.
 
 ## The prose
 **One construction paragraph** in the setup says how each family's variants are built, in the order
@@ -136,8 +137,8 @@ whole-program rewrites against single-method edits, and it moved per-benchmark n
 1. **Families come from design decisions, one dimension each, two to four variants.**
 2. **Every family has at least one substitution or extreme.** A family of removals alone is not
    finished.
-3. **One component changes per row, at a matched budget**, and any budget difference is in the
-   caption.
+3. **One component changes per row, at a matched budget**, and any budget difference is stated
+   where the ablation is introduced.
 4. **Rows are named by what they are, in two to four words.** Definitions go in the construction
    paragraph.
 5. **Family rows group the table**, with no rules between families, and a long set is split into two

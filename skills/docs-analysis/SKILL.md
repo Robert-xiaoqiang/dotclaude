@@ -200,9 +200,9 @@ solved only by \ourmethod{}, and 10 solved by both the base agent and \ourmethod
 bolds CoT on GSM8K accuracy). The reference row shows `-` in its own ratio cells, and the paper's row goes
 last (System-1.5) or is shaded with `\rowcolor{bestcell}` (Mem-Pi). The main caption defines every
 abbreviated column and its reference and states the rule ("Best and second-best results are highlighted
-with \textbf{bold} and \underline{underline}, respectively.", System-1.5). An analysis caption may carry
-the finding for the reader who looks first (Mem-Pi: "(a)~The extra 7B inference call alone is worth
-2.2\,pp"). Every caption names its dataset and metric.
+with \textbf{bold} and \underline{underline}, respectively.", System-1.5). The caption itself follows
+`docs-caption`: it names the float's object and the method, declares the marks, and leaves the metric,
+the columns' definitions and the finding to the setup and the results paragraph.
 
 ## Numbers and traceability
 | | System-1.5 | Mem-Pi |
@@ -240,9 +240,10 @@ derivation once (System-1.5's 92.31% is 1-2/26 from the Steps column), and `Avg`
 8. **Each prose number is recomputed from a display, with abstract, introduction, conclusion and captions
    in the same pass.** Both papers shipped mismatches.
 9. **Seed dispersion is reported once and compared to the gaps.** Means alone cannot carry a ranking.
-10. **Captions define columns, marks and averaging, and name the dataset.** Mem-Pi's WorkArena `Avg`
-    cannot be recomputed from its cells, and System-1.5's ablation caption names neither dataset nor
-    metric, so its bars read only as "Performance".
+10. **Columns, averaging and the dataset are defined once, in the setup, and the caption names the
+    float's object (`docs-caption`).** Mem-Pi's WorkArena `Avg` cannot be recomputed from its cells,
+    and System-1.5's ablation figure never names what its bars measure, so they read only as
+    "Performance".
 11. **A results subsection reports a measured result, or it is cut.** Mem-Pi's Evolving-Bank
     Self-Improvement subsection says what a result "would establish" beside a table whose source banner
     reads "PLACEHOLDER NUMBERS -- NOT MEASURED".

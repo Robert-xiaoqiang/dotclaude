@@ -18,7 +18,7 @@ find by scanning every cell because nothing on the page marks it.
 - [The one rule](#the-one-rule)
 - [Number format](#number-format)
 - [Marking the winner](#marking-the-winner)
-- [The caption declares the convention](#the-caption-declares-the-convention)
+- [The caption](#the-caption)
 - [Rules](#rules)
 - [Structure](#structure)
 - [Organizing a results table like a technical report](#organizing-a-results-table-like-a-technical-report)
@@ -38,7 +38,8 @@ Two kinds of column fail this and both are common:
 **Metadata columns.** An `Ep.` column holding the epoch each arm peaked at, a `#Params` column where
 every arm is the same size, a `Seed` column. None of them is a result, all of them are read as one
 because they sit inside the rule, and each costs the width the real numbers needed. Metadata goes in
-the caption ("each arm at its best checkpoint") or in a setup paragraph, never in the grid.
+a setup paragraph ("each method's best checkpoint per evaluation set"), never in the grid, and not
+in the caption either (`docs-caption`).
 
 **Derived columns.** A `$\Delta$` column holding each arm's mean minus the baseline's mean prints the
 same comparison the `Mean` column already made, once per row, in a second place where it can drift.
@@ -80,7 +81,8 @@ right alignment leaves a hole on the left.
 
 **Differences carry a sign and a unit.** `{$+$}3.8` and `{$-$}2.0`, and percentage points are `pp`, never
 `\%`. A change from 57.8 to 64.6 is `{$+$}6.8\,pp`; calling it `{$+$}6.8\%` is a different and wrong
-quantity. State the unit in the caption once and drop it from the cells.
+quantity. State the unit once, in the column header or beside the caption's margin mark, and drop it
+from the cells.
 
 **Never print a constant column.** If every cell in a column is `0.0000` because it is the baseline's
 own delta against itself, the column is an artifact of how the numbers were computed.
@@ -144,23 +146,18 @@ paragraph, next to the claim each one supports. Never shrink the table to make e
 
 ---
 
-## The caption declares the convention
+## The caption
 
-A table caption is a noun phrase with the metric and the setting, then the marks as label:
-value pairs, then nothing. Ten to thirty words.
+`docs-caption` owns the caption. In short: a table caption opens with a noun phrase naming the
+table's object and the method in the paper's own terms ("Quantitative results of \ourmethod{} on the
+five-domain \corpus{} with Qwen3.5-4B and Qwen3.5-9B", "Ablations of \ourmethod{} on evolver
+components and control interfaces"), then declares the marks the grid cannot explain itself,
+`\textbf{Bold}: best. \underline{Underline}: second. Parentheses: \ourmethod{}'s margin over the best
+baseline.`, and stops. Metric definitions, benchmark lists, checkpoint rules and notation keys
+(subscripts, indentation) are protocol and live in the setup. A column that needs a caption note to
+be read is a column to test against the one rule above. The caption sits **above** the table, which is
+the `booktabs` convention every venue's template follows.
 
-```latex
-\caption{Task success rate (SR \%) across four agent benchmarks with gpt-5.4-mini as the base
-agent. \textbf{Bold}: best per column. \underline{Underline}: second best.}
-\caption{Ablation results (SR \%) on WebArena and ALFWorld. Subscripts: drop from the full model.}
-```
-
-Column abbreviations are defined in the caption once, in the form they appear, `WB, IFB,
-MMCQA: WritingBench, IFBench, MedMCQA`. Scores are `xx.y` and the caption never says `$\times 100$`. What the
-caption never carries: the experiment's design, the reason a row is there, or the finding,
-which is the text's first bold sentence and not the table's. The caption goes **above** a table
-and **below** a figure, which is the `booktabs` convention and every venue's template follows
-it. The caption is prose and goes through the writer like every other paragraph.
 ---
 
 ## Rules
@@ -170,15 +167,15 @@ it. The caption is prose and goes through the writer like every other paragraph.
   Sci., Writ., Role, IF, Avg.), never training-side readouts such as end-of-training signal-class
   shares, which belong in a figure or the appendix. One benchmark per domain, so the in-domain and
   transfer blocks share one set of tags.
-1. **A column carries a comparison or it is deleted.** Epoch, seed, parameter count and any column
-   derivable from two others belong in the caption.
+1. **A column carries a comparison or it is deleted.** Epoch, seed and parameter count belong in the
+   setup, and a column derivable from two others is deleted.
 2. **Three effective digits.** Scale to 0-100 rather than printing a leading `0.` in every cell.
 3. **One decimal count per column**, trailing zeros kept, numeric columns right-aligned.
 4. **Bold the best, underline the second best**, in every column, computed per column.
 5. **The winning cell carries its margin over the underlined cell**, signed, in points, inline as
    `64.6 (+3.8)`, never as a second line, and only in the summary columns when the row is tight.
-6. **The caption declares the setting, the scale and both marks**, never the result, and sits
-   above the table.
+6. **The caption names the table's object and declares the marks**, never the protocol or the
+   result, and sits above the table (`docs-caption`).
 7. **`booktabs` only.** `\toprule`, `\midrule`, `\cmidrule(lr){}`, `\bottomrule`. No vertical rules,
    no `\hline`, no full-width rule between every row.
 8. **One font size and one `\tabcolsep` across every table in the document.** A table set smaller
@@ -219,7 +216,7 @@ The flagship reports set their main table the same way, and the pattern is worth
 
 **Columns are benchmarks, grouped by what they test.** A spanning header over each group, joined by a
 `\cmidrule(lr)`, and an `Avg.` column closing every group. Short benchmark names in the header, with
-any abbreviation expanded once in the caption.
+any abbreviation expanded once in the setup, not in the caption (`docs-caption`).
 
 **Rows are methods, grouped twice.** The outer grouping is the base model or scale, set as an italic
 header row spanning the table (`\multicolumn{12}{l}{\textit{Qwen3.5-4B}}`), so several scales share
@@ -300,5 +297,5 @@ typed. The same script feeds the figures.
 ## Companions
 `docs-ablation` (which ablation variants exist and how the ablation table is grouped, the one table allowed to print changes) · `docs-figure` (the same question for pictures, and the shared generator directory) · `writing-paper`
 (the prose that leads with the finding and cites the table as evidence, and the `pp` convention) ·
-`output-analysis` (which runs belong in the comparison) · `writing-chatgpt` (the caption's prose) ·
+`output-analysis` (which runs belong in the comparison) · `docs-caption` (the caption's wording and shape) · `writing-chatgpt` (the caption's prose) ·
 `docs-analysis` (the experiments and analysis section: setup, results paragraphs, ablations, evidence placement) · `conventions` (family index).

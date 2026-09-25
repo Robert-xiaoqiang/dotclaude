@@ -445,27 +445,11 @@ the authors' own choices, or reads *what we found*.
 
 ## Captions
 
-A workflow or architecture caption narrates the workflow. It opens with *Illustration of the
-X workflow.*, then states the model in one sentence, then walks the loop in the order the drawing
-runs, naming what each stage does with the paper's own symbols, and closes on where the loop
-returns. The reader follows the numbered circles on the drawing with the caption in hand.
-
-```
-right:  \caption{Illustration of the \ourmethod{} workflow. We model memory as a four-tier
-        hierarchy $M_t$ over an immutable floor, every tier exposing the same five verbs.
-        Given a query $q_t$, the agent reads evidence $E_t=R(q_t,M_t)$ and answers $a_t$.
-        Based on the feedback $\mathbf{F}$, a rewriter evolves the in-layer verbs and the
-        cross-layer verbs of one tier; \cert{} admits the candidate only on a paired
-        improvement, and finally the accepted program returns to the archive.}
-wrong:  \caption{\textbf{X as two closed loops.} Top, the task loop: ... Bottom right, the
-        rewrite loop: ...}          a panel-by-panel inventory, not a workflow
-wrong:  \caption{Our method dominates every baseline on both axes.}     a claim
-```
-
-A results-figure caption names the figure's object in a bold lead phrase, then gives one sentence
-per panel saying what is drawn and against what; the finding stays in the body. A table caption
-takes the same lead phrase, then the one condition a reader must know to read the numbers (the
-fixed reader and judge, the $n$, the paired test), then nothing.
+Captions are owned by `docs-caption`. In short: the lead is a noun phrase that names the float's
+object and the method in the paper's own terms; an overview figure gets one or two sentences telling
+its flow; panels are named by position or by their joined contents, and by letters only when the
+figure draws them; protocol, legend text and findings stay out; a table caption declares only the
+marks (bold, underline, parentheses).
 
 ## Numbers
 Report a difference with an explicit sign and a unit, and bind the unit with a thin space:

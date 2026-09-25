@@ -209,9 +209,9 @@ in one order.
    differs from the paper's macro, a drawn concept the text never defines.
 
 ## The caption
-Narrate the workflow in running order, `Illustration of the X workflow.` then the top loop from
-the first stage to the answer, then the lower loop from selection to admission, with the paper's
-symbols, and nothing that is not on the drawing. See `writing-paper`, Captions.
+Tell the flow in one or two full sentences, in the drawing's order and with the names drawn on it:
+what conditions what, and how the loop returns. No `Module: contents` fragments, no acceptance rules.
+See `docs-caption`.
 
 ## Rules
 1. Start from `resources/templates/`, never from a blank slide.
@@ -236,5 +236,5 @@ symbols, and nothing that is not on the drawing. See `writing-paper`, Captions.
 
 ## Companions
 `docs-figure` (what a figure may contain; the chart idiom) · `docs-table` · `pptx` (deck
-building) · `drawing-gemini` (generated emblems) · `writing-paper` (captions) · `icons8` MCP
+building) · `drawing-gemini` (generated emblems) · `docs-caption` (captions) · `icons8` MCP
 (`search_icons`, `get_icon_png_url`).
