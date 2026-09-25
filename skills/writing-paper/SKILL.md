@@ -551,4 +551,4 @@ gain sits on a small base, because "50\% relative improvement" on a base of 4\% 
 (what a figure may contain and how to render it) · `naming-descriptive` (naming a method or an arm so
 the name states what it is) · `output-analysis` (producing the tables and curves the experiments
 section reports) · `writing-chatgpt` (hand the drafting to the writer tool, which applies this layer
-and the style layer; the agent patches the result) · `docs-analysis` (the experiments and analysis section: setup, results paragraphs, ablations, evidence placement) · `conventions` (the map).
+and the style layer; the agent patches the result) · `docs-methodology` (the method section: overview, base model first, motivated components, hard equations) · `docs-analysis` (the experiments and analysis section: setup, results paragraphs, ablations, evidence placement) · `conventions` (the map).
