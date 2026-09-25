@@ -39,7 +39,7 @@ Not for:
 - the table's columns, number format, and where bold, underline and margins go (`docs-table`),
 - which ablation rows exist (`docs-ablation`),
 - the prose paragraph that cites the float (`writing-paper`, `docs-analysis`),
-- polishing the caption's sentences once the content is right (`writing-chatgpt`).
+- the polishing pass itself, which every caption goes through (`writing-chatgpt`, rule 12).
 
 ---
 
@@ -311,9 +311,11 @@ Run on every caption, in order, and delete what fails.
     or by the first float, not in every caption.
 11. **Ten to thirty words for a results float, up to sixty for an overview or composite.** A
     longer caption is almost always carrying protocol, legend text or a finding.
-12. **A caption the agent drafts goes through the writer** (`writing-chatgpt`) with this skill as
-    context. A caption the author dictates is patched in as given, with only spelling and macros
-    fixed.
+12. **Every caption is text, so every caption goes through the writer** (`writing-chatgpt`) before it
+    is final, with this skill as context. A caption the agent drafts is polished there. A caption the
+    author dictates goes through too, with an instruction to keep the author's content, terms and
+    order and to fix only grammar, fluency and macros, and the reply is diffed against the author's
+    wording before it is patched in.
 
 ---
 
