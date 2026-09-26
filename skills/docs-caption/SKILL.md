@@ -68,12 +68,14 @@ one of them is edited.
 2. **For an overview or pipeline figure, one or two full sentences of flow** in place of the lead's
    full stop: what conditions what, and how the parts interact, in the order the drawing runs.
 3. **The panels' contents, when the float has several and the lead does not already cover them**,
-   joined as a list after a colon or named by position (`Top left:`, `Right:`). Letters only when the
-   figure draws them.
+   joined in reading order within one sentence. If the layout requires positions, each position
+   follows its content in parentheses (`X (left) and Y (right)`), or the caption states `The left and
+   right panels show X and Y, respectively.` Letters appear only when the figure draws them. A caption
+   carries at most one colon, which appears only before a joined list.
 4. **The marks that encode something invisible otherwise, as a sentence with each mark typeset in
    itself.** `\textbf{Bold}, \underline{underline}, and {\color{gaingreen}green} mark the best, the
    second best, and the margin over the second best, respectively.` In a figure, a symbol drawn without
-   definition (`judge scores $S$ and rubric-free quality order $Q$`), or `The dashed arrow points from
+   definition (`judge scores $S$ and oracle ranking $Q$`), or `The dashed arrow points from
    the strongest baseline to ours.` Never the colon key (`Bold: best. Underline: second.`). The author
    (2026-09-25): "I dont like such colon: xx in caption, how about use simple sentence, xxx means,
    represents, xxx, respectively; its more strong, especially we have many colons; showing not that
@@ -98,18 +100,20 @@ before: Rubric-reward failures under GRPO~\citep{...} on \corpus{} at Qwen3.5-4B
         quality order $Q$. (b) Failure-class shares and GRPO's training reward against rubric-free
         quality on held-out tasks. (c) Control loop over $p_t$, $g_t$ and $c_t$.
 after:  Rubric-reward failures under GRPO~\citep{...} on \corpus{} at Qwen3.5-4B, and
-        harness-controlled RL training in \ourmethod{}. Top left: failure classes on one criterion,
-        with judge scores $S$ and rubric-free quality order $Q$. Bottom left: failure-class shares and
-        GRPO's training reward against rubric-free quality on held-out tasks. Right: harness
-        $(p_t, g_t, c_t)$-controlled RL training.
+        harness-controlled RL training in \ourmethod{}: failure classes on one criterion with judge
+        scores $S$ and oracle ranking $Q$ (top left), failure-class proportions and GRPO's training
+        reward against oracle quality on held-out tasks (bottom left), and harness
+        $(p_t,g_t,c_t)$-controlled RL training (right).
 ```
 
 The figure draws no letters, so the caption names the three parts by where they sit, and in a
-two-column layout position is the only unambiguous order. The right panel is named by the title of
-Section 2.1, `Harness-Controlled RL Training`, not by a paraphrase ("control loop") that the reader
-must map back to it. The author rewrote the panel names and the right panel; the lead takes the same
-term so the caption does not name one object twice, and keeps `\ourmethod{}` so it still names the
-method. `$S$` and `$Q$` stay because the cards draw the letters without defining them.
+two-column layout position is the only unambiguous order. Each position sits in parentheses after
+its part, so the three parts stay one sentence with one colon before the list. The right panel is
+named by the title of Section 2.1, `Harness-Controlled RL Training`, not by a paraphrase ("control
+loop") that the reader must map back to it. The author rewrote the panel names and the right panel;
+the lead takes the same term so the caption does not name one object twice, and keeps `\ourmethod{}`
+so it still names the method. `$S$` and `$Q$` stay because the cards draw the letters without
+defining them.
 
 **Figure 2, the method overview.**
 
@@ -140,14 +144,15 @@ before: Results at two scales. In-domain: rubric mean. OOD: one benchmark per do
         margin over the best baseline. OOD benchmarks: MedQA, GPQA-Diamond, WritingBench, RoleBench,
         IFBench.
 after:  Quantitative results of \ourmethod{} on the five-domain \corpus{} with Qwen3.5-4B and
-        Qwen3.5-9B. \textbf{Bold}: best. \underline{Underline}: second. Parentheses: \ourmethod{}'s
-        margin over the best baseline.
+        Qwen3.5-9B. \textbf{Bold} and \underline{underline} mark the best and second-best results,
+        and parentheses give \ourmethod{}'s margin over the best baseline.
 ```
 
 "Results at two scales" names nothing a reader can locate: whose results, on what. The after names
 the method, the corpus and both policies. The metric definitions and the OOD benchmark list are
 protocol, already stated in the setup's Dataset paragraph and in Table 2, so they go. The three marks
-stay, because nothing in the grid says what bold, underline or a parenthesis means.
+stay, because nothing in the grid says what bold, underline or a parenthesis means, and they are
+declared in one sentence with each mark typeset in itself, never as `Bold: best.` keys (rule 7).
 
 **Table 2, the dataset.**
 
@@ -166,16 +171,18 @@ column to question under `docs-table`'s one rule. The after says what the table 
 
 ```latex
 before: Share of pairs by failure class at Qwen3.5-4B: (a) \clblind{}, (b) \clsat{}, (c) \clspur{}.
-after:  Fraction of pairs by failure class at Qwen3.5-4B during training.
+after:  Proportion of pairs by failure class at Qwen3.5-4B during training.
 ```
 
 The class names are one word each and sit inside the panels (`blind`, `saturated`, `spurious`, at the
-upper middle), so the enumeration repeated them under letters the figure never drew. "Fraction", not
-"ratio": a ratio compares part to part (blind pairs per saturated pair), while a fraction, proportion or
-share is part of a whole, which is what a percentage of all pairs is. The author asked which word is
-common, and a search of ML papers finds "fraction of pairs" far more often than "share" or "proportion",
-so the caption, the axis (`Fraction of pairs (%)`) and the text all move to it together: one object,
-one name, and the name readers expect. "During training" is the author's, and cheap: it says
+upper middle), so the enumeration repeated them under letters the figure never drew. "Proportion",
+not "ratio": a ratio compares part to part (blind pairs per saturated pair), while a proportion is
+part of a whole, which is what a percentage of all pairs represents. The author asked which word is
+common, and a search of LLM-judge and reward-model papers finds "proportion of pairs" and "percentage
+of pairs" as the usual wording (J1, arXiv 2505.10320; Pairwise Calibrated Rewards, arXiv 2506.06298;
+Reward Hacking in Rubric-Based RL, arXiv 2605.12474). The caption, the axis (`Pairs (%)`, and
+`Tasks (%)` for tasks) and the text therefore use the same term: one object, one name, and the name
+readers expect. "During training" is the author's, and cheap: it says
 what the x-axis spans without naming the axis.
 
 **Table 3, the ablations.**
@@ -185,12 +192,13 @@ before: Ablations of \ourmethod{} at Qwen3.5-4B: out-of-distribution scores at e
         checkpoint. Subscript $g$ or $c$: single-interface harness. Indentation: removed modules.
         \textbf{Bold}: best. \underline{Underline}: second.
 after:  Ablations of \ourmethod{} on evolver components and control interfaces.
-        \textbf{Bold}: best. \underline{Underline}: second.
+        \textbf{Bold} and \underline{underline} mark the best and second-best results.
 ```
 
 The lead now names the two axes the ablation varies, which is what a reader scanning for "does the
 critic matter" needs. The author's rewrite gave only the lead; the two marks stay by
-[rule 7](#rules), since the grid bolds and underlines and nothing in it says what that means. The
+[rule 7](#rules), since the grid bolds and underlines and nothing in it says what that means, and
+they are declared in one sentence with each mark typeset in itself. The
 checkpoint rule is protocol. The subscript and the indentation are notation the setup's Baselines
 paragraph defines ("a subscript restricts the harness to one interface"), and the column headers
 repeat the main table's, so none of them need a caption line.
@@ -201,8 +209,8 @@ repeat the main table's, so none of them need a caption line.
 before: Harness dynamics at Qwen3.5-4B. Dashed: guidance ceiling. (a) Tasks by guidance fields.
         (b) Accepted rubric updates per 100 steps. (c) Share of accepted rubric updates that undo an
         earlier update within two draws of the task.
-after:  Training dynamics of \ourmethod{}. Left: tasks by guidance fields. Middle: accepted rubric
-        updates per 100 steps. Right: reversed rubric updates.
+after:  Training dynamics of \ourmethod{}: tasks by guidance fields (left), accepted rubric updates
+        per 100 steps (middle), and reversed rubric updates (right).
    or:  Training dynamics of \ourmethod{}: tasks by guidance fields, accepted rubric updates per
         100 steps, and reversed rubric updates.
 ```
@@ -212,7 +220,8 @@ after:  Training dynamics of \ourmethod{}. Left: tasks by guidance fields. Middl
 definition of a reversed update is the text's (RQ2 defines it in full), so the caption uses the name
 the axis uses (`Reversed updates (%)`). `per 100 steps` stays because the middle axis says only
 `Accepted rubric updates`: the caption carries what the axis leaves out, never what it already says.
-Either form is fine: position words when the text points at one panel, a joined list when it does not.
+Either form is fine: positions in parentheses when the text points at one panel, a joined list when
+it does not.
 
 **Figure 5, two panels on cost.**
 
@@ -239,10 +248,10 @@ overhead, and leaves the fine list to the legend.
 before: One training task under \ourmethod{}. Top: task sampling and mounted guidance. Middle:
         rollout groups scored with and without the rubric. Bottom: four of the steps at which the
         harness acted, with labels, rollout excerpts, rubric operations, and criteria met or missed.
-after:  Case analysis of a randomly sampled training task \emph{``<the task query>''}. Top: task
-        sampling and mounted guidance. Middle: rollout groups scored with the dynamically evolving
-        rubric and the oracle quality. Bottom: intermediate steps at which the harness acted, with
-        labels, rollout excerpts, rubric operations, and criteria met or missed.
+after:  Case analysis of a randomly sampled training task \emph{``<the task query>''}. The figure
+        shows task sampling and mounted guidance (top), rollout groups scored with the dynamically
+        evolving rubric and the oracle quality (middle), and intermediate steps at which the harness
+        acted, with labels, rollout excerpts, rubric operations, and criteria met or missed (bottom).
 ```
 
 "Case analysis of" names the kind of float, and "a randomly sampled training task" says how the case
@@ -273,7 +282,7 @@ float already opens with it ("At Qwen3.5-4B, ...").
 | **Dataset table** | `<What the table decomposes> of <corpus>` | what the columns hold, in one clause | size conventions, calibration splits, shorthand |
 | **Training-curve figure** | `Training dynamics of \ourmethod{}`, or the quantity by what it is split on | the panels' contents, if more than one | line styles the legend shows, definitions the text gives |
 | **Efficiency figure** | `Training efficiency of \ourmethod{} measured by <the unit>` | the panels' contents, joined, a decomposition named by its conceptual groups (`RL loop and harness evolver overhead`) | hatch or colour keys the legend shows, the legend's fine stage list, a bare `by stage` |
-| **Multi-panel figure, no letters drawn** | as its kind | contents joined in reading order, or `Left:`, `Middle:`, `Right:`, `Top left:` when the layout is not one row or the text cites a panel | `(a)`, `(b)`, `(c)` |
+| **Multi-panel figure, no letters drawn** | as its kind | contents joined in reading order in one sentence, with `(left)`, `(middle)`, `(right)` or `(top left)` after each when the layout is not one row or the text cites a panel | `(a)`, `(b)`, `(c)`, and `Left:`, `Right:` fragments |
 | **Figure whose letters are drawn** (the author asked for them, `docs-figure`) | as its kind | `(a) <noun phrase>. (b) <noun phrase>.`, each letter matching the glyph on the figure | letters in the caption that are not on the figure, or the reverse |
 | **Case or qualitative figure** | `Case analysis of a randomly sampled <unit> \emph{``<its input>''}`: the kind, how the case was chosen, the quoted input | the panels' contents, scoring sources by the paper's concepts, `intermediate steps at which <the method> acted` | the story the case paragraph tells, a negation (`with and without the rubric`), a count the figure shows |
 | **Prompt box or listing** (appendix) | the role the prompt plays (`Harness attributor`) | nothing, the box is the content | `adapted from X` or any provenance note |
@@ -306,14 +315,17 @@ Run on every caption, in order, and delete what fails.
    name, the corpus macro)? Replace a generic label.
 2. Is it an overview figure? Then is it one or two sentences of flow rather than fragments?
 3. Does every `(a)` in the caption match a letter drawn on the figure? If none is drawn, rewrite with
-   position words or a joined list.
+   positions in parentheses inside one sentence (`X (left) and Y (right)`) or a joined list. Does the
+   caption carry more than one colon, or a `Left:` fragment? Rewrite it as one sentence.
 4. Does any clause state a metric, a scoring rule, a checkpoint rule, a cadence, a notation key or an
    acceptance rule? Check the setup or method states it, then delete it here.
 5. Does any clause repeat an axis label, a legend entry or an in-panel label? Delete it.
-6. Does any `Label: value.` define a mark the reader can decode without it? Delete it. Keep bold,
-   underline, parentheses and any symbol drawn without definition.
+6. Does any `Label: value.` key declare a mark, a panel or an abbreviation? Delete it if the reader
+   can decode the mark without it, and otherwise declare it in a plain sentence with the mark typeset
+   in itself (`\textbf{Bold} and \underline{underline} mark the best and second best,
+   respectively.`). Keep bold, underline, parentheses and any symbol drawn without definition.
 7. Does any clause state the finding? Move it to the results paragraph.
-8. Does each noun match the word the axis, the legend and the text use for the same object (fraction
+8. Does each noun match the word the axis, the legend and the text use for the same object (proportion
    rather than ratio, 100 rather than hundred, reversed updates rather than a paraphrase)?
 9. Is the setting (model scale, corpus) already stated by the paragraph that cites the float and
    constant across that analysis? Then drop it here, unless it is the float's defining setting.
@@ -358,7 +370,8 @@ Run on every caption, in order, and delete what fails.
    {\color{gaingreen}green} mark ..., respectively`), never as a `Label: value.` colon key, which reads
    as a legend pasted under the float.
 8. **One object, one name, across caption, axis, legend and text, and the name the field uses.**
-   Fraction (part of a whole, the common term in ML papers), never ratio (part to part). When the
+   Proportion (part of a whole, the usual term in LLM-judge and reward-model papers, with the axis
+   written `Pairs (%)` or `Tasks (%)`), never ratio (part to part). When the
    name changes, the axis and the text change with the caption. `100` when the axis says `100`.
 9. **Name splits and scoring sources by the paper's concepts.** A decomposition names the groups the
    reader cares about (`RL loop and harness evolver overhead`), not the legend's fine stage list and
