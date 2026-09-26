@@ -8,10 +8,12 @@ Two scenarios, one resolver.
   make   resolve free-text descriptions (paper, author, method) into correct
          entries, for citing something while writing
 
-A record is confirmed only when the title matches AND the author list agrees.
-An exact-title query for "Quantum machine learning" returns a 2025 arXiv
-preprint, not the 2017 Nature paper an entry may claim, so title similarity
-alone would certify the wrong record.
+A record is confirmed only when the normalised title is identical, the full
+author list agrees in order, and the year agrees (match.py holds the rules).
+Anything else is a MISMATCH, shown beside the claim and never written over it.
+The earlier matcher accepted the nearest fuzzy title and any one shared
+surname, and so replaced SOTOPIA with SOTOPIA-pi and InstructGPT with
+InstructPatentGPT.
 
 Preprints are preferred over the published version when both exist, because an
 arXiv id is stable, free to resolve and always reachable by a reader.
@@ -19,7 +21,6 @@ arXiv id is stable, free to resolve and always reachable by a reader.
 from __future__ import annotations
 
 import argparse
-import difflib
 import json
 import pathlib
 import re
@@ -27,24 +28,85 @@ import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 import s2client as C  # noqa: E402
+import match as M  # noqa: E402
 
-TITLE_OK, TITLE_MAYBE, YEAR_TOL = 0.93, 0.78, 2
+# Fuzzy similarity never accepts anything. Below this, the nearest candidate
+# is not even the same topic and the entry is reported NOT-FOUND.
+NEAREST_SHOWN = 0.78
 
 
 # --------------------------------------------------------------- bib parsing
-def parse_bib(text: str):
-    out = []
-    for m in re.finditer(r"@(\w+)\s*\{\s*([^,]+),(.*?)\n\}", text, re.S):
-        out.append({"type": m.group(1), "key": m.group(2).strip(),
-                    "raw": m.group(0), "body": m.group(3)})
+def _balanced(text: str, i: int, open_ch: str = "{", close_ch: str = "}") -> int:
+    """Index just past the group opening at text[i]."""
+    depth = 0
+    while i < len(text):
+        if text[i] == open_ch:
+            depth += 1
+        elif text[i] == close_ch:
+            depth -= 1
+            if depth == 0:
+                return i + 1
+        i += 1
+    return len(text)
+
+
+def _fields(body: str) -> dict:
+    """name = {..} | "..." | bare, joined by '#', one entry at a time.
+    Handles the one-line ACL Anthology dumps as well as hand-written entries."""
+    out, i, n = {}, 0, len(body)
+    while i < n:
+        m = re.compile(r"[\s,]*([A-Za-z][\w-]*)\s*=\s*").match(body, i)
+        if not m:
+            break
+        name, i, parts = m.group(1).lower(), m.end(), []
+        while i < n:
+            if body[i] == "{":
+                j = _balanced(body, i)
+                parts.append(body[i + 1:j - 1])
+            elif body[i] == '"':
+                j, depth = i + 1, 0
+                while j < n and not (body[j] == '"' and depth == 0):
+                    depth += (body[j] == "{") - (body[j] == "}")
+                    j += 1
+                parts.append(body[i + 1:j])
+                j += 1
+            else:
+                mm = re.compile(r"[^,#}\s]+").match(body, i)
+                j = mm.end() if mm else i + 1
+                parts.append(body[i:j])
+            i = j
+            mm = re.compile(r"\s*#\s*").match(body, i)
+            if not mm:
+                break
+            i = mm.end()
+        out[name] = re.sub(r"\s+", " ", "".join(parts)).strip()
     return out
 
 
-def field(body: str, name: str) -> str:
-    m = (re.search(rf"\b{name}\s*=\s*\{{(.+?)\}},?\s*\n", body, re.S)
-         or re.search(rf"\b{name}\s*=\s*\"(.+?)\",?\s*\n", body, re.S)
-         or re.search(rf"\b{name}\s*=\s*([^,\n}}]+)", body))
-    return re.sub(r"\s+", " ", m.group(1)).strip() if m else ""
+def parse_bib(text: str):
+    """Brace-balanced BibTeX parser. The previous regex needed a newline
+    before every closing brace, so it merged one-line entries and read the
+    last field of an entry as '{2024' (the year check then silently passed)."""
+    out, pos = [], 0
+    head = re.compile(r"@(\w+)\s*([{(])")
+    while True:
+        m = head.search(text, pos)
+        if not m:
+            break
+        close = "}" if m.group(2) == "{" else ")"
+        end = _balanced(text, m.start(2), m.group(2), close)
+        pos = end
+        if m.group(1).lower() in ("comment", "preamble", "string"):
+            continue
+        inner = text[m.end():end - 1]
+        key, _, body = inner.partition(",")
+        out.append({"type": m.group(1), "key": key.strip(), "raw": text[m.start():end],
+                    "body": body, "fields": _fields(body)})
+    return out
+
+
+def field(entry: dict, name: str) -> str:
+    return entry["fields"].get(name, "")
 
 
 # ------------------------------------------------------------------ resolve
@@ -61,18 +123,16 @@ WEB_VENUE = re.compile(
     r"technical report,\s*open|\burl\b", re.I)
 
 
-def web_source(body: str):
+def web_source(entry: dict):
     """Reason this entry is a web source rather than a paper, or None."""
-    if ARXIV_RE.search(body or "") or re.search(r"\bdoi\s*=", body or "", re.I):
+    body, f = entry["raw"], entry["fields"]
+    if ARXIV_RE.search(body) or "doi" in f:
         return None                      # it has a real identifier, it is a paper
-    venue = ""
-    m = re.search(r"(?:journal|booktitle|howpublished|publisher)\s*=\s*[\"{](.+?)[\"}]",
-                  body or "", re.S)
-    if m:
-        venue = re.sub(r"\s+", " ", m.group(1)).strip()
+    venue = next((f[k] for k in ("journal", "booktitle", "howpublished", "publisher")
+                  if f.get(k)), "")
     if venue and WEB_VENUE.search(venue):
         return f"venue is {venue!r}"
-    if re.search(r"\burl\s*=", body or "", re.I) and not venue:
+    if "url" in f and not venue:
         return "url only, no venue"
     return None
 
@@ -103,8 +163,7 @@ def candidates(title: str, body: str = ""):
     if hit:
         out.append(hit)
     out += (C.arxiv_match(title) or [])
-    if not any(difflib.SequenceMatcher(None, C.norm(title), C.norm(c["title"])).ratio() >= TITLE_OK
-               for c in out):
+    if not any(M.title_key(title) == M.title_key(c.get("title")) for c in out):
         out += C.crossref_match(title)
     return out
 
@@ -116,51 +175,53 @@ def author_requery(title: str, author: str):
     such as "Quantum machine learning" that record may be a different paper
     entirely. Before calling an entry wrong, ask again with the authors.
     """
-    names = " ".join(sorted(C.bib_surnames(author))[:4])
-    if not names:
+    names, _ = M.split_bib_authors(author)
+    surnames = [M.name_forms(n)[0][0] for n in names[:4]]
+    surnames = [x for x in surnames if x]
+    if not surnames:
         return []
-    return C.s2_search(f"{title} {names}", limit=5) or []
+    return C.s2_search(f"{title} {' '.join(surnames)}", limit=5) or []
 
 
-def judge(title, author, year, cands):
-    best, sim = None, 0.0
-    for c in cands:
-        s = difflib.SequenceMatcher(None, C.norm(title), C.norm(c.get("title", ""))).ratio()
-        if s > sim:
-            best, sim = c, s
-    if best is None:
-        return "NOT-FOUND", 0.0, None, "no candidate from any source"
-    want, got = C.bib_surnames(author), C.surnames(best.get("authors"))
-    # a corporate author such as "Meta AI" has no surname to match on
-    corporate = want <= {"ai", "team", "inc", "labs", "research"} or not want
-    author_ok = corporate or bool(want & got)
-    notes = []
-    if not author_ok:
-        notes.append(f"authors {sorted(want)[:3]} vs {sorted(got)[:3]}")
-    dy = 0
-    try:
-        if year and best.get("year"):
-            dy = abs(int(year) - int(best["year"]))
-    except (TypeError, ValueError):
-        dy = 0
-    if dy > YEAR_TOL:
-        notes.append(f"year {year} vs {best['year']}")
-    if best.get("by_id") and sim < TITLE_OK and author_ok:
-        return ("TITLE-WRONG", sim, best,
-                f"entry's own arXiv id resolves to a different title; " + "; ".join(notes))
-    if sim < TITLE_MAYBE:
-        v = "NOT-FOUND"
-    elif sim < TITLE_OK:
-        v = "REVIEW"
-    elif not author_ok:
-        v = "WRONG-RECORD"
-    elif dy > YEAR_TOL:
-        v = "REVIEW"
-    else:
-        v = "VERIFIED"
-    if corporate and v == "VERIFIED" and want:
-        notes.append("corporate author, not cross-checked")
-    return v, sim, best, "; ".join(notes)
+def _add_preprint_year(rec: dict):
+    """A preprint and its venue carry different years (posted 2023, ICLR
+    2024). Where a record has an arXiv id, its posting year is also a year of
+    the record."""
+    aid = (rec.get("externalIds") or {}).get("ArXiv")
+    if not aid or rec.get("alt_years") is not None:
+        return
+    r = C.arxiv_by_id(aid)
+    rec["alt_years"] = [r["year"]] if r and r.get("year") else []
+
+
+def judge(claim: dict, cands: list):
+    """(verdict, record, comparison) under the strict rule in match.py.
+
+    VERIFIED    title identical, full author list in order, year agrees
+    TITLE-WRONG the entry's own arXiv id resolves to another title
+    MISMATCH    the nearest record differs in title, authors or year
+    NOT-FOUND   no candidate, or none even close in title
+    Only VERIFIED is ever written back.
+    """
+    if not cands:
+        return "NOT-FOUND", None, None
+    scored = [(c, M.compare(claim, c)) for c in cands]
+    for c, k in scored:
+        if k["title_ok"] and k["authors_ok"] and not k["year_ok"]:
+            _add_preprint_year(c)
+    scored = [(c, M.compare(claim, c)) for c, _ in scored]
+    full = [(c, k) for c, k in scored if k["ok"]]
+    if full:
+        return "VERIFIED", full[0][0], full[0][1]
+    by_id = [(c, k) for c, k in scored if c.get("by_id")]
+    if by_id and not by_id[0][1]["title_ok"] and by_id[0][1]["authors_ok"]:
+        c, k = by_id[0]
+        k["reasons"].insert(0, "entry's own arXiv id resolves to a different title")
+        return "TITLE-WRONG", c, k
+    c, k = max(scored, key=lambda ck: M.rank(ck[1]))
+    if not k["title_ok"] and k["fuzzy"] < NEAREST_SHOWN:
+        return "NOT-FOUND", c, k
+    return "MISMATCH", c, k
 
 
 # ------------------------------------------------------------------- emit
@@ -185,52 +246,76 @@ def to_bibtex(key, rec, kind="article"):
     return "\n".join(lines)
 
 
+def claim_of(e: dict) -> dict:
+    f = e["fields"]
+    ids = ", ".join(x for x in (
+        f"ArXiv:{declared_arxiv(e['raw'])}" if declared_arxiv(e["raw"]) else "",
+        f"DOI:{f['doi']}" if f.get("doi") else "") if x)
+    return {"title": f.get("title", ""), "author": f.get("author", ""),
+            "year": f.get("year", ""), "ids": ids,
+            "venue": next((f[k] for k in ("booktitle", "journal", "howpublished",
+                                          "publisher") if f.get(k)), "")}
+
+
 # ------------------------------------------------------------------ audit
 def cmd_audit(a):
     src = pathlib.Path(a.bib)
     entries = parse_bib(src.read_text())
+    if a.keys:
+        want = set(a.keys)
+        entries = [e for e in entries if e["key"] in want]
+        missing = want - {e["key"] for e in entries}
+        if missing:
+            sys.exit(f"keys not in {src.name}: {', '.join(sorted(missing))}")
     cited = set()
     for t in a.tex or []:
         for m in re.findall(r"\\cite[a-zA-Z]*\{([^}]*)\}", pathlib.Path(t).read_text()):
             cited |= {k.strip() for k in m.split(",")}
     rows, fixed = [], []
     for i, e in enumerate(entries, 1):
-        t, au, yr = field(e["body"], "title"), field(e["body"], "author"), field(e["body"], "year")
-        web = web_source(e["body"])
+        claim = claim_of(e)
+        web = web_source(e)
         if web:
             rows.append({"key": e["key"], "cited": e["key"] in cited if cited else None,
-                         "verdict": "NOT-CITABLE", "sim": 0.0, "notes": web,
-                         "claim": {"title": t, "author": au, "year": yr},
-                         "match": None, "old_entry": e["raw"], "new_entry": e["raw"]})
+                         "verdict": "NOT-CITABLE", "reasons": [web], "claim": claim,
+                         "match": None, "author_rows": [], "side_by_side_md": [],
+                         "old_entry": e["raw"], "new_entry": e["raw"]})
             fixed.append(e["raw"])
-            print(f"[{i:>3}/{len(entries)}] {e['key']:<28}{'NOT-CITABLE':<14}{web[:40]}", flush=True)
+            print(f"[{i:>3}/{len(entries)}] {e['key']:<28}{'NOT-CITABLE':<13}{web[:60]}", flush=True)
             continue
-        cands = candidates(t, e["body"])
-        v, sim, best, notes = judge(t, au, yr, cands)
-        if v in ("WRONG-RECORD", "NOT-FOUND"):
-            extra = author_requery(t, au)
+        cands = candidates(claim["title"], e["raw"])
+        v, best, cmp = judge(claim, cands)
+        if v != "VERIFIED":
+            extra = author_requery(claim["title"], claim["author"])
             if extra:
-                v2, sim2, best2, notes2 = judge(t, au, yr, cands + extra)
-                if v2 == "VERIFIED" or sim2 > sim:
-                    v, sim, best, notes = v2, sim2, best2, notes2
-        new = to_bibtex(e["key"], best, e["type"]) if best and v in ("VERIFIED", "REVIEW") else e["raw"]
+                v2, best2, cmp2 = judge(claim, cands + extra)
+                if v2 == "VERIFIED" or (cmp2 and (not cmp or M.rank(cmp2) > M.rank(cmp))):
+                    v, best, cmp = v2, best2, cmp2
+        # only a record that agrees on title, every author in order and year
+        # may replace the entry; everything else is carried through verbatim
+        new = to_bibtex(e["key"], best, e["type"]) if v == "VERIFIED" else e["raw"]
         rows.append({"key": e["key"], "cited": e["key"] in cited if cited else None,
-                     "verdict": v, "sim": round(sim, 3), "notes": notes,
-                     "claim": {"title": t, "author": au, "year": yr},
+                     "verdict": v, "reasons": (cmp or {}).get("reasons", ["no candidate"]),
+                     "claim": claim,
                      "match": ({"title": best.get("title"), "year": best.get("year"),
+                                "alt_years": best.get("alt_years"),
                                 "venue": best.get("venue"),
                                 "ids": best.get("externalIds"),
-                                "authors": [x["name"] for x in (best.get("authors") or [])][:6]}
-                               if best else None),
+                                "authors": M.record_names(best)} if best else None),
+                     "author_rows": (cmp or {}).get("author_rows", []),
+                     "side_by_side_md": M.side_by_side_md(claim, best, cmp),
                      "old_entry": e["raw"], "new_entry": new})
         fixed.append(new)
-        print(f"[{i:>3}/{len(entries)}] {e['key']:<28}{v:<14}{sim:.2f}  "
-              f"{(best.get('externalIds') or {}).get('ArXiv') or (best.get('externalIds') or {}).get('DOI') or '-' if best else '-'}",
-              flush=True)
+        ids = (best or {}).get("externalIds") or {}
+        why = "" if v == "VERIFIED" else "; ".join((cmp or {}).get("reasons", []))
+        print(f"[{i:>3}/{len(entries)}] {e['key']:<28}{v:<13}"
+              f"{ids.get('ArXiv') or ids.get('DOI') or '-':<34} {why[:100]}", flush=True)
+        if a.diff == "all" or (a.diff == "mismatch" and v != "VERIFIED"):
+            print(M.side_by_side(claim, best, cmp) + "\n", flush=True)
     out = pathlib.Path(a.out or (src.parent / "cc2semantics.bib"))
     out.write_text("\n\n".join(fixed) + "\n")
     rep = out.with_suffix(".report.json")
-    rep.write_text(json.dumps(rows, indent=1))
+    rep.write_text(json.dumps(rows, indent=1, ensure_ascii=False))
     write_md_report(rows, out.with_suffix(".report.md"), src, out)
     print(f"\nwrote {out}\nwrote {rep}\nwrote {out.with_suffix('.report.md')}")
 
@@ -242,25 +327,23 @@ def write_md_report(rows, path, src, out):
         tally[r["verdict"]] = tally.get(r["verdict"], 0) + 1
     L = [f"# cc2bib audit of `{src.name}`", "",
          f"{n} entries. " + ", ".join(f"{v} {k}" for k, v in sorted(tally.items())), "",
-         f"Corrected file: `{out.name}`. Entries marked NOT-FOUND or WRONG-RECORD are "
-         "carried through unchanged, because inventing a replacement is the failure "
-         "this audit exists to catch.", ""]
-    for bad in ("NOT-CITABLE", "TITLE-WRONG", "NOT-FOUND", "WRONG-RECORD", "REVIEW"):
+         f"Corrected file: `{out.name}`. Only VERIFIED entries (identical normalised "
+         "title, full author list in order, same year) are rewritten. Every other "
+         "entry is carried through byte-identical and shown below beside the nearest "
+         "record, for a person to decide.", "",
+         "Marks: `=` identical, `~` same up to diacritics or initial format, "
+         "`!` differs, `+` on one side only.", ""]
+    for bad in ("NOT-CITABLE", "TITLE-WRONG", "MISMATCH", "NOT-FOUND"):
         sel = [r for r in rows if r["verdict"] == bad]
         if not sel:
             continue
         L += [f"## {bad} ({len(sel)})", ""]
         for r in sel:
             cite = "" if r["cited"] is None else (" **cited**" if r["cited"] else " (uncited)")
-            L += [f"### `{r['key']}`{cite}  sim={r['sim']}", "",
-                  f"- claimed: {r['claim']['title']} / {r['claim']['author'][:70]} / {r['claim']['year']}"]
-            if r["match"]:
-                m = r["match"]
-                L += [f"- matched: {m['title']} / {'; '.join(m['authors'][:3])} / {m['year']} / {m['venue']}",
-                      f"- ids: {m['ids']}"]
-            if r["notes"]:
-                L += [f"- why: {r['notes']}"]
-            L += [""]
+            L += [f"### `{r['key']}`{cite}", ""]
+            if r["reasons"]:
+                L += [f"- why: {'; '.join(r['reasons'])}", ""]
+            L += r["side_by_side_md"] + [""]
     ok = [r for r in rows if r["verdict"] == "VERIFIED" and r["old_entry"] != r["new_entry"]]
     if ok:
         L += [f"## VERIFIED with field corrections ({len(ok)})", "",
@@ -274,26 +357,92 @@ def write_md_report(rows, path, src, out):
 
 
 # -------------------------------------------------------------------- make
+def _dedupe(hits):
+    """One record per work: S2, arXiv and Crossref often return the same one."""
+    out = []
+    for h in hits:
+        if not any(M.same_work(h, o) for o in out):
+            out.append(h)
+    return out
+
+
+def _brief(h) -> str:
+    ids = h.get("externalIds") or {}
+    names = M.record_names(h)
+    au = "; ".join(names[:3]) + (f" +{len(names) - 3}" if len(names) > 3 else "")
+    return (f"{h.get('title')} / {au} / {h.get('year')} / "
+            f"{ids.get('ArXiv') or ids.get('DOI') or '-'}")
+
+
 def cmd_make(a):
-    """Resolve free-text descriptions into entries. For citing while writing."""
+    """Resolve descriptions into entries. For citing while writing.
+
+    An entry is emitted only for a record whose normalised title equals the
+    query. A relevance hit with a different title (SOTOPIA-pi for SOTOPIA) is
+    listed as a candidate and never emitted, so the caller reruns with the
+    exact title it means. --author and --year add the strict author-order and
+    year check; without them the header says authors were not checked.
+    """
     out = []
     for q in a.query:
+        claim = {"title": q, "author": a.author or "", "year": a.year or ""}
         hits = [C.s2_match(q)] if a.exact else C.s2_search(q, limit=a.limit)
         hits = [h for h in hits if h]
-        if not hits:
-            hits = C.arxiv_match(q) or []
-        if not hits:
-            print(f"NO MATCH: {q}"); continue
-        h = hits[0]
+        hits += C.arxiv_match(q) or []
+        if not any(M.title_key(h.get("title")) == M.title_key(q) for h in hits):
+            hits += C.crossref_match(q) or []
+        hits = _dedupe(hits)
+        exact = [h for h in hits if M.title_key(h.get("title")) == M.title_key(q)]
+        print(f"\n%% {q}")
+        if not exact:
+            print("%% NO EXACT TITLE. Nothing emitted. Candidates, none of them the query:")
+            for h in hits[:a.limit]:
+                print(f"%%   - {_brief(h)}")
+            if hits and a.diff:
+                print(M.side_by_side(claim, hits[0], left="query", right="nearest"))
+            print("%% rerun with --exact \"<the title you mean>\" to take one")
+            continue
+        if a.author or a.year:
+            scored = [(h, M.compare(claim, h)) for h in exact]
+            for h, k in scored:
+                if k["authors_ok"] and not k["year_ok"]:
+                    _add_preprint_year(h)
+            scored = [(h, M.compare(claim, h)) for h, _ in scored]
+            if not a.year:
+                ok = [(h, k) for h, k in scored if k["authors_ok"]]
+            elif not a.author:
+                ok = [(h, k) for h, k in scored if k["year_ok"]]
+            else:
+                ok = [(h, k) for h, k in scored if k["ok"]]
+            if not ok:
+                h, k = max(scored, key=lambda hk: M.rank(hk[1]))
+                print("%% MISMATCH. Nothing emitted. " + "; ".join(
+                    r for r in k["reasons"] if not r.startswith("title")))
+                print(M.side_by_side(claim, h, k, left="claim", right="record"))
+                continue
+            h, k = ok[0]
+            checked = "title exact, " + ("authors in order" if a.author else "authors not checked") \
+                + (", year" if a.year else "")
+        else:
+            if len(exact) > 1:
+                print("%% AMBIGUOUS. Several works carry this exact title. Nothing emitted; "
+                      "rerun with --author to pick one:")
+                for h in exact:
+                    print(f"%%   - {_brief(h)}")
+                continue
+            h, k = exact[0], None
+            checked = "title exact, authors not checked (pass --author to check order)"
         ids = h.get("externalIds") or {}
-        first = (h.get("authors") or [{}])[0].get("name", "anon").split()[-1].lower()
-        key = re.sub(r"[^a-z]", "", first) + str(h.get("year", "")) + \
+        first = (M.record_names(h) or ["anon"])[0].split()[-1].lower()
+        key = re.sub(r"[^a-z]", "", M.fold(first)) + str(h.get("year", "")) + \
             re.sub(r"[^a-z0-9]", "", C.norm(h.get("title", ""))[:14].split(" ")[0])
-        print(f"\n%% {q}\n%% -> {h.get('title')} ({h.get('year')}, {h.get('venue')})")
+        print(f"%% -> {h.get('title')} ({h.get('year')}, {h.get('venue')})  [{checked}]")
         if ids.get("ArXiv"):
             print(f"%%    https://arxiv.org/abs/{ids['ArXiv']}")
         elif ids.get("DOI"):
             print(f"%%    https://doi.org/{ids['DOI']}")
+        if a.diff:
+            print(M.side_by_side(claim, h, k, left="claim", right="record"))
         print(to_bibtex(key, h))
         out.append(to_bibtex(key, h))
     if a.out:
@@ -307,9 +456,15 @@ def main():
     pa = sub.add_parser("audit", help="verify every entry in a .bib")
     pa.add_argument("bib"); pa.add_argument("--tex", nargs="*", help="mark which keys are cited")
     pa.add_argument("--out", help="default: cc2semantics.bib beside the input")
+    pa.add_argument("--keys", nargs="*", help="audit only these keys, e.g. one at a time")
+    pa.add_argument("--diff", choices=("none", "mismatch", "all"), default="none",
+                    help="print entry and record side by side, per author")
     pa.set_defaults(fn=cmd_audit)
     pm = sub.add_parser("make", help="resolve descriptions into entries")
     pm.add_argument("query", nargs="+"); pm.add_argument("--exact", action="store_true")
+    pm.add_argument("--author", help="claimed BibTeX author list, checked in order")
+    pm.add_argument("--year", help="claimed year, checked")
+    pm.add_argument("--diff", action="store_true", help="print claim and record side by side")
     pm.add_argument("--limit", type=int, default=5); pm.add_argument("--out")
     pm.set_defaults(fn=cmd_make)
     a = p.parse_args()

@@ -41,17 +41,25 @@ Given free text, return the entry and the resolvable URL.
 CC2=$CPFS_HOME/.claude/skills/cc2bib/scripts/cc2bib.py
 python3 $CC2 make "large language diffusion models LLaDA" --limit 3
 python3 $CC2 make --exact "Attention is all you need"
+python3 $CC2 make --exact "Attention is all you need" --diff \
+    --author "Vaswani, Ashish and Shazeer, Noam and ..." --year 2017
 python3 $CC2 make "FlowQ-Net generative quantum circuit design" --out new.bib
 ```
 
-`--exact` uses the exact-title endpoint and is right when the title is known.
-Without it, relevance search runs, which is right when only the method name,
-an author and a rough topic are known. Always read back the matched title,
-authors and year printed above each entry before using it.
+An entry is emitted only for a record whose normalised title equals the query.
+Relevance search is for finding a work from a description; when no hit has the
+query's exact title, the hits are listed as candidates and nothing is emitted,
+so the next step is `--exact "<the title you mean>"`. Several works under one
+exact title are reported as ambiguous until `--author` picks one. `--author`
+and `--year` add the strict author-order and year check of an audit, and
+`--diff` prints the claim and the record side by side. The header of each
+emitted entry says which of title, authors and year were checked.
 
 ### 2. audit, existing .bib to corrected .bib
 ```sh
 python3 $CC2 audit claudetodo.bib --tex body.tex frontmatter.tex
+python3 $CC2 audit custom.bib --keys ouyang2022training --diff all   # one entry, side by side
+python3 $CC2 audit custom.bib --diff mismatch                         # every failure, side by side
 ```
 
 Writes three files next to the input:
@@ -63,27 +71,46 @@ Writes three files next to the input:
 | `cc2semantics.report.json` | the same, machine-readable |
 
 `--tex` marks which keys the manuscript actually cites, so attention goes to
-the ones that matter.
+the ones that matter. `--keys` restricts the audit to named entries, which is
+how a reviewer or a subagent works through a bibliography one entry at a time.
+`--diff mismatch` or `--diff all` prints each entry beside its nearest record,
+one author per row, marked `=` identical, `~` same up to diacritics or initial
+format, `!` different, `+` present on one side only. The markdown report
+carries the same table for every entry that is not VERIFIED.
 
 ## What counts as verified
 A title match is a candidate, never a verdict. An exact-title query for
 "Quantum machine learning" returns a 2025 arXiv preprint, not the 2017 Nature
-paper an entry may claim. Confirmation needs the author list too.
+paper an entry may claim. A relevance query for SOTOPIA returns SOTOPIA-π, and
+a Crossref query for the InstructGPT title returns "InstructPatentGPT:
+training patent language models to follow instructions with human feedback".
+The earlier matcher accepted the nearest fuzzy title (similarity 0.84 in both
+cases) together with any one shared surname, and wrote the wrong paper into
+the corrected file. Matching is now exact on three fields, and nothing else
+counts.
 
-| verdict | meaning |
+| field | accepted only when |
 |---|---|
-| `VERIFIED` | title similarity at least 0.93 and a first-author surname in common and year within 2 |
-| `NOT-CITABLE` | a blog post, model card, repository or bare URL, checked before any lookup |
-| `TITLE-WRONG` | the entry's own arXiv id resolves to a paper with a different title |
-| `REVIEW` | title between 0.78 and 0.93, or year off by more than 2 |
-| `WRONG-RECORD` | title matches but no author overlaps, so the entry points at a different paper |
-| `NOT-FOUND` | nothing above 0.78 from any source, the strongest hallucination signal |
+| title | the normalised titles are identical. Normalising folds case, LaTeX braces and commands, accents, greek letters (`$\pi$` and `π` both read `pi`) and punctuation, and nothing else, so a dropped or changed subtitle, or a suffix such as `-π`, is a mismatch |
+| authors | the full lists have the same length and agree position by position on surname and given names, where only diacritics and initial format may differ (`Sandhini`, `S.` and `S` agree; `Jeff` and `Jeffrey`, or `Chong` and `Chen`, do not). A list cut short with `and others` cannot be confirmed |
+| year | the claimed year is the record's year, or the posting year of the record's arXiv id |
 
-The year tolerance of 2 exists because a preprint and its publication
-legitimately differ, for example posted 2016 and published 2017.
+| verdict | meaning | written back |
+|---|---|---|
+| `VERIFIED` | title, full author list in order and year all agree | yes, the record replaces the entry |
+| `NOT-CITABLE` | a blog post, model card, repository or bare URL, checked before any lookup | no |
+| `TITLE-WRONG` | the entry's own arXiv id resolves to a paper with the same authors and a different title | no |
+| `MISMATCH` | the nearest record differs in title, authors or year; the report names which, shows both side by side, and marks each author row | no |
+| `NOT-FOUND` | no candidate from any source, or none close even in wording, the strongest hallucination signal | no |
 
-A corporate author such as "Meta AI" has no surname to cross-check, so it is
-accepted on title alone and the report says so.
+Fuzzy title similarity survives only to choose which non-matching record to
+show beside a `MISMATCH`; it never accepts anything. A `MISMATCH` whose only
+difference is the year is usually a preprint posted one year and published the
+next. The person resolving it picks the year, the tool does not.
+
+A corporate author such as `{Qwen Team}` is compared as one name like any
+other, so it verifies only against a record that carries the same corporate
+name, and otherwise comes back `MISMATCH` for a person to settle.
 
 ## Web sources are not citations
 A blog post, a model card, a repository or a bare URL is not a citable source.
@@ -107,10 +134,10 @@ reader needs. The published venue is kept in the entry.
 
 ## Output contract
 `cc2semantics.bib` is written beside the source and **the source is never
-modified**. Entries that came back `NOT-FOUND` or `WRONG-RECORD` are carried
-through byte-identical, because inventing a replacement is the exact failure
-this skill exists to catch. Those are listed in the report for a person to
-decide.
+modified**. Only `VERIFIED` entries are rewritten. Every other entry is carried
+through byte-identical, because a near miss written over a real reference is
+the exact failure this skill exists to catch. Those entries are listed in the
+report, beside the nearest record, for a person to decide.
 
 Applying the result is a separate, deliberate step: read the report, then
 replace the old `.bib` and, where a key changed, substitute it across the
@@ -145,16 +172,34 @@ author coverage.
 ## Rules
 1. **Never hand-write a citation this skill can resolve.** A plausible entry
    written from memory is the failure mode.
-2. **Read the matched title and authors before accepting an entry.** The tool
-   reports what it matched precisely so that this check is possible.
-3. **Never auto-replace a `NOT-FOUND` or `WRONG-RECORD` entry.** Surface it.
+2. **Accept only an exact match on all three fields.** Identical normalised
+   title, the full author list in the same order, and the same year. A
+   subtitle difference, a missing, extra or reordered author, or a changed
+   given name is a mismatch, whatever the similarity score.
+3. **Never auto-replace anything but `VERIFIED`.** `MISMATCH`, `TITLE-WRONG`,
+   `NOT-FOUND` and `NOT-CITABLE` are surfaced side by side, never written over.
 4. **The source `.bib` is read-only.** Output goes to `cc2semantics.bib`.
 5. **Prefer the preprint id** when both exist.
 6. **Rerun after editing the `.bib`.** The cache makes it cheap.
+7. **Review a failure with `--diff`, one entry at a time with `--keys`.**
+   The per-author rows show where a list diverges, which a one-line verdict
+   cannot.
 
 ## Anti-patterns
 - **Title-only verification.** Certifies the wrong paper whenever two works
   share a title, which is common for short generic titles.
+- **Nearest-hit acceptance.** Taking the closest fuzzy title, or the first
+  relevance hit, as the paper. It replaced SOTOPIA with SOTOPIA-π and
+  InstructGPT with InstructPatentGPT, both at similarity 0.84. A near title is
+  a different paper until every field says otherwise.
+- **First-author or any-surname checks.** One shared surname says nothing
+  about the rest of the list, and a set of surnames ignores order. Compare the
+  whole list, position by position.
+- **Tolerances on the accept path.** A similarity threshold, a year window or
+  a partial author overlap turns "close" into "confirmed". Tolerance belongs
+  only in normalisation (case, braces, accents, punctuation, initial format).
+- **Completing an `and others` list silently.** The record's full list may be
+  right, but the entry did not claim it; resolve it by hand from the report.
 - **Treating 429 as failure.** It means later. Backing off and retrying
   resolves almost everything.
 - **Auto-fixing everything.** The entries the audit cannot confirm are exactly

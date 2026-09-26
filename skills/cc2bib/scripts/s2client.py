@@ -190,30 +190,7 @@ def crossref_match(title: str):
 
 # ------------------------------------------------------------------ helpers
 def norm(t: str) -> str:
+    """Query text for a search endpoint. Comparison lives in match.py."""
     t = re.sub(r"[{}$\\]", "", (t or "").lower())
     t = re.sub(r"[^a-z0-9 ]+", " ", t)
     return re.sub(r"\s+", " ", t).strip()
-
-
-def surnames(authors) -> set:
-    """Surname set, tolerant of 'Last, F.', 'F. Last', umlauts and {braces}."""
-    out = set()
-    for a in authors or []:
-        n = a.get("name", "") if isinstance(a, dict) else str(a)
-        n = re.sub(r"[{}\\]", "", n)
-        n = n.split(",")[0].strip() if "," in n else n
-        parts = norm(n).split()
-        if parts:
-            out.add(parts[-1])
-    return out
-
-
-def bib_surnames(author_field: str) -> set:
-    out = set()
-    for a in re.split(r"\s+and\s+", (author_field or "").strip()):
-        a = re.sub(r"[{}\\'\"^`~]", "", a)
-        a = a.split(",")[0].strip() if "," in a else a
-        parts = norm(a).split()
-        if parts:
-            out.add(parts[-1])
-    return out
