@@ -1,7 +1,7 @@
 ---
 name: docs-caption
-description: "Write a paper's figure and table captions: open with a noun phrase that names the float's object and the paper's method in the paper's own terms, tell an overview figure's flow in one or two sentences, name panels by content or position and never by letters the figure does not draw, and keep protocol, legend text and findings out, learned from the author's rewrites of eight HarnessRL captions."
-when_to_use: "Use when writing, revising or reviewing any figure or table caption, when a caption opens with a generic label such as 'Results at two scales', reads as colon fragments ('Memory M_t: rollouts, ...'), enumerates (a)(b)(c) that are not drawn on the figure, restates the legend or an axis label, or carries metrics, checkpoint selection or notation that the setup already states."
+description: "Write a paper's figure and table captions: open with a noun phrase that names the float's object and the paper's method in the paper's own terms, tell an overview figure's flow in one or two sentences, name panels by content or position and never by letters the figure does not draw, and keep protocol, legend text, findings and provenance notes out, and trace a case figure to a randomly sampled, quoted input, learned from the author's rewrites of nine HarnessRL captions."
+when_to_use: "Use when writing, revising or reviewing any figure or table caption, when a caption opens with a generic label such as 'Results at two scales', reads as colon fragments ('Memory M_t: rollouts, ...'), enumerates (a)(b)(c) that are not drawn on the figure, restates the legend or an axis label, carries metrics, checkpoint selection or notation that the setup already states, splits by a vague 'by stage' or scores 'with and without' something, or ends a prompt box with 'adapted from X'."
 ---
 # Skill: docs-caption
 
@@ -14,7 +14,9 @@ marks, and both defer here for the caption.
 The failure it guards against is a caption that is long and still unhelpful: a generic subject
 ("Results at two scales"), then a row of `Label: value.` fragments that restate the legend, define the
 metric a second time, and name panels by letters nobody drew. The author rewrote eight HarnessRL
-captions in one pass, and every rewrite was shorter and named the paper's object more exactly.
+captions in one pass, and every rewrite was shorter and named the paper's object more exactly. A
+second pass on Figures 5 and 6 added words, each naming a concept of the paper where the first pass had
+a vague cut or a negation: exactness is the goal, and brevity follows from it only most of the time.
 
 ## Contents
 - [When to Use](#when-to-use)
@@ -39,7 +41,7 @@ Not for:
 - the table's columns, number format, and where bold, underline and margins go (`docs-table`),
 - which ablation rows exist (`docs-ablation`),
 - the prose paragraph that cites the float (`writing-paper`, `docs-analysis`),
-- the polishing pass itself, which every caption goes through (`writing-chatgpt`, rule 12).
+- the polishing pass itself, which every caption goes through (`writing-chatgpt`, rule 15).
 
 ---
 
@@ -60,16 +62,23 @@ one of them is edited.
 1. **The lead: a noun phrase naming the object and the method.** `Quantitative results of
    \ourmethod{} on ...`, `Training dynamics of \ourmethod{}`, `Ablations of \ourmethod{} on <the
    ablation axes>`. The words come from the paper: its section titles, its module names, its corpus
-   macro. A float compares the method against baselines, and the lead still names the method, because
-   the float is evidence about the method.
+   macro. The lead may add what the float is measured by (`Training efficiency of \ourmethod{}
+   measured by cluster hours per 100 steps`). A float compares the method against baselines, and the
+   lead still names the method, because the float is evidence about the method.
 2. **For an overview or pipeline figure, one or two full sentences of flow** in place of the lead's
    full stop: what conditions what, and how the parts interact, in the order the drawing runs.
 3. **The panels' contents, when the float has several and the lead does not already cover them**,
    joined as a list after a colon or named by position (`Top left:`, `Right:`). Letters only when the
    figure draws them.
-4. **The marks that encode something invisible otherwise.** In a table, `\textbf{Bold}: best.
-   \underline{Underline}: second. Parentheses: \ourmethod{}'s margin over the best baseline.` In a
-   figure, a symbol drawn without definition (`judge scores $S$ and rubric-free quality order $Q$`).
+4. **The marks that encode something invisible otherwise, as a sentence with each mark typeset in
+   itself.** `\textbf{Bold}, \underline{underline}, and {\color{gaingreen}green} mark the best, the
+   second best, and the margin over the second best, respectively.` In a figure, a symbol drawn without
+   definition (`judge scores $S$ and rubric-free quality order $Q$`), or `The dashed arrow points from
+   the strongest baseline to ours.` Never the colon key (`Bold: best. Underline: second.`). The author
+   (2026-09-25): "I dont like such colon: xx in caption, how about use simple sentence, xxx means,
+   represents, xxx, respectively; its more strong, especially we have many colons; showing not that
+   formal." The same holds for panels and abbreviations: `The left, middle, and right panels show X,
+   Y, and Z, respectively.` and `2WQA, MSQ, and HQA denote 2WikiMultihopQA, MuSiQue, and HotpotQA.`
 
 Nothing else. A results or table caption runs ten to thirty words, an overview or composite
 caption up to about sixty. The caption sits above a table and below a figure.
@@ -210,17 +219,43 @@ Either form is fine: position words when the text points at one panel, a joined 
 ```latex
 before: Training efficiency at Qwen3.5-4B. Hatched: one-off memory cold start. (a) Cluster hours per
         hundred steps by stage. (b) Best OOD score against cluster hours to reach it.
-after:  Training efficiency of \ourmethod{}: hours per 100 steps decomposed by stage, and hours to
-        the best checkpoint.
+then:   Training efficiency of \ourmethod{}: cluster hours per 100 steps decomposed by stage, and
+        cluster hours to the best checkpoint.
+after:  Training efficiency of \ourmethod{} measured by cluster hours per 100 steps, decomposed into
+        RL loop and harness evolver overhead, and cluster hours to the best checkpoint.
 ```
 
 The legend already carries `memory cold start (once)` with its hatch, and the axes already say
 `OOD performance` against `Cluster hours to best OOD checkpoint`. What is left is the two contents,
-joined, in reading order. `100`, not `hundred`, because the axis says `100`.
+joined, in reading order. `100`, not `hundred`, because the axis says `100`. The second pass fixed two
+things. The lead now says what efficiency is measured by, so the reader knows the unit before the
+bars. And "by stage" named a cut without saying which, while the legend lists every fine stage: the
+caption names the two groups the paper's cost claim is about, the RL loop and the harness evolver's
+overhead, and leaves the fine list to the legend.
 
-**What the eight rewrites share.** Every lead names the method or its object in the paper's words.
-Every letter went, because the figures draw none. Every protocol line went (metric, benchmark list,
-checkpoint rule, subscript key, calibration split, acceptance rule). Every line that repeated a
+**Figure 6, a case traced through training.**
+
+```latex
+before: One training task under \ourmethod{}. Top: task sampling and mounted guidance. Middle:
+        rollout groups scored with and without the rubric. Bottom: four of the steps at which the
+        harness acted, with labels, rollout excerpts, rubric operations, and criteria met or missed.
+after:  Case analysis of a randomly sampled training task \emph{``<the task query>''}. Top: task
+        sampling and mounted guidance. Middle: rollout groups scored with the dynamically evolving
+        rubric and the oracle quality. Bottom: intermediate steps at which the harness acted, with
+        labels, rollout excerpts, rubric operations, and criteria met or missed.
+```
+
+"Case analysis of" names the kind of float, and "a randomly sampled training task" says how the case
+was chosen, which answers the cherry-picking question before a reviewer asks it. The task's query,
+quoted, tells the reader what is being traced. "With and without the rubric" named one scoring source
+by its absence and hid the other, so the after names both by the paper's concepts, the dynamically
+evolving rubric and the oracle quality. "Four of the steps" counted what the figure shows, and
+"intermediate steps at which the harness acted" says instead where in training they fall and why they
+were drawn.
+
+**What the first eight rewrites share.** Every lead names the method or its object in the paper's
+words. Every letter went, because the figures draw none. Every protocol line went (metric, benchmark
+list, checkpoint rule, subscript key, calibration split, acceptance rule). Every line that repeated a
 legend or axis went. The model scale stayed where it is the float's defining setting (Figures 1 and
 3, and Table 1 where two scales are the point) and went where the analysis paragraph that cites the
 float already opens with it ("At Qwen3.5-4B, ...").
@@ -237,10 +272,11 @@ float already opens with it ("At Qwen3.5-4B, ...").
 | **Ablation table** | `Ablations of \ourmethod{} on <the axes varied>` | the marks | the notation key the setup defines, checkpoint selection |
 | **Dataset table** | `<What the table decomposes> of <corpus>` | what the columns hold, in one clause | size conventions, calibration splits, shorthand |
 | **Training-curve figure** | `Training dynamics of \ourmethod{}`, or the quantity by what it is split on | the panels' contents, if more than one | line styles the legend shows, definitions the text gives |
-| **Efficiency figure** | `Training efficiency of \ourmethod{}` | the panels' contents, joined | hatch or colour keys the legend shows |
+| **Efficiency figure** | `Training efficiency of \ourmethod{} measured by <the unit>` | the panels' contents, joined, a decomposition named by its conceptual groups (`RL loop and harness evolver overhead`) | hatch or colour keys the legend shows, the legend's fine stage list, a bare `by stage` |
 | **Multi-panel figure, no letters drawn** | as its kind | contents joined in reading order, or `Left:`, `Middle:`, `Right:`, `Top left:` when the layout is not one row or the text cites a panel | `(a)`, `(b)`, `(c)` |
 | **Figure whose letters are drawn** (the author asked for them, `docs-figure`) | as its kind | `(a) <noun phrase>. (b) <noun phrase>.`, each letter matching the glyph on the figure | letters in the caption that are not on the figure, or the reverse |
-| **Case or qualitative figure** | what is traced, and under what (`One training task under \ourmethod{}`) | the panels' contents | the story the case paragraph tells |
+| **Case or qualitative figure** | `Case analysis of a randomly sampled <unit> \emph{``<its input>''}`: the kind, how the case was chosen, the quoted input | the panels' contents, scoring sources by the paper's concepts, `intermediate steps at which <the method> acted` | the story the case paragraph tells, a negation (`with and without the rubric`), a count the figure shows |
+| **Prompt box or listing** (appendix) | the role the prompt plays (`Harness attributor`) | nothing, the box is the content | `adapted from X` or any provenance note |
 
 **Panels whose identity is one word** (a failure class, a domain, a benchmark) carry that word
 inside the panel, at the upper middle where plots leave space, and the caption names only what the
@@ -273,8 +309,14 @@ Run on every caption, in order, and delete what fails.
    rather than ratio, 100 rather than hundred, reversed updates rather than a paraphrase)?
 9. Is the setting (model scale, corpus) already stated by the paragraph that cites the float and
    constant across that analysis? Then drop it here, unless it is the float's defining setting.
-10. Is it over thirty words for a results float, or sixty for an overview or composite? Find what
-    else fails 4 to 7.
+10. Is it a case figure? Then does the lead name it a case analysis, say how the case was chosen
+    (randomly sampled), and quote the case input?
+11. Is a decomposition or a comparison named by the paper's concepts (RL loop and harness evolver
+    overhead, the dynamically evolving rubric and the oracle quality), not by a vague cut (`by stage`)
+    or a negation (`with and without the rubric`)?
+12. Does the float carry a provenance note (`adapted from X`)? Delete it.
+13. Is it over thirty words for a results float, or sixty for an overview, composite or case figure
+    (not counting a quoted input)? Find what else fails 4 to 7.
 
 ---
 
@@ -283,12 +325,13 @@ Run on every caption, in order, and delete what fails.
 1. **The lead is a noun phrase naming the float's object and the method, in the paper's terms.**
    `Quantitative results of \ourmethod{} on the five-domain \corpus{}`, not `Results at two scales`.
    A generic lead makes the reader find the object in the grid, and a paraphrase ("control loop" for
-   the section titled Harness-Controlled RL Training) makes them map it back.
+   the section titled Harness-Controlled RL Training) makes them map it back. The lead may add what
+   the float is measured by (`measured by cluster hours per 100 steps`).
 2. **An overview figure's caption is one or two full sentences telling the flow**: what conditions
    what, and how the parts interact, in the drawing's order and with the names drawn on it. Colon
    fragments list the parts and lose the arrows, which were the reason for drawing the figure.
-3. **No panel letters unless the figure draws them.** Name panels by position (`Left:`, `Top left:`)
-   or join their contents in reading order. A caption letter with no glyph to match sends the reader
+3. **No panel letters unless the figure draws them.** Name panels by position in a sentence (`The
+   left and right panels show X and Y, respectively.`) or join their contents in reading order. A caption letter with no glyph to match sends the reader
    searching the figure for something that is not there.
 4. **No protocol in a caption.** Metrics, scoring instruments, checkpoint selection, evaluation
    cadence, notation keys, calibration splits and acceptance rules live in the setup or the method,
@@ -301,17 +344,33 @@ Run on every caption, in order, and delete what fails.
    what the panels share.
 7. **Keep only the marks that encode something the reader cannot see otherwise**: bold, underline
    and the margin's parentheses in a table, and a symbol drawn without its definition. The shaded
-   row of the paper's method needs no key.
+   row of the paper's method needs no key. Every mark, panel name and abbreviation is declared in a
+   plain sentence with the mark typeset in itself (`\textbf{Bold}, \underline{underline}, and
+   {\color{gaingreen}green} mark ..., respectively`), never as a `Label: value.` colon key, which reads
+   as a legend pasted under the float.
 8. **One object, one name, across caption, axis, legend and text, and the name the field uses.**
    Fraction (part of a whole, the common term in ML papers), never ratio (part to part). When the
    name changes, the axis and the text change with the caption. `100` when the axis says `100`.
-9. **No finding in a caption.** The finding is the results paragraph's bold sentence, and a caption
-   that repeats it is left behind when the numbers move.
-10. **A setting constant across an analysis is stated once**, by the paragraph that cites the floats
+9. **Name splits and scoring sources by the paper's concepts.** A decomposition names the groups the
+   reader cares about (`RL loop and harness evolver overhead`), not the legend's fine stage list and
+   not a bare `by stage`. A comparison names each side positively (`the dynamically evolving rubric
+   and the oracle quality`), never by a negation (`with and without the rubric`), which hides what the
+   other side is.
+10. **No finding in a caption.** The finding is the results paragraph's bold sentence, and a caption
+    that repeats it is left behind when the numbers move.
+11. **A setting constant across an analysis is stated once**, by the paragraph that cites the floats
     or by the first float, not in every caption.
-11. **Ten to thirty words for a results float, up to sixty for an overview or composite.** A
-    longer caption is almost always carrying protocol, legend text or a finding.
-12. **Every caption is text, so every caption goes through the writer** (`writing-chatgpt`) before it
+12. **A case figure says what kind of analysis it is, how the case was chosen, and what the case
+    is.** `Case analysis of a randomly sampled training task \emph{``<query>''}`. Random sampling
+    pre-empts the cherry-picking question, and the quoted input tells the reader what is traced. The
+    traced points are `intermediate steps at which the harness acted`, not a count the figure shows.
+13. **No provenance notes on floats.** A prompt box, listing, figure or table does not end with
+    `This prompt is adapted from X`. Credit belongs in the text where the design is discussed, if
+    anywhere, and a note under the box reads as a disclaimer that shrinks the contribution.
+14. **Ten to thirty words for a results float, up to sixty for an overview, composite or case
+    figure, not counting a quoted case input.** A longer caption is almost always carrying protocol,
+    legend text or a finding.
+15. **Every caption is text, so every caption goes through the writer** (`writing-chatgpt`) before it
     is final, with this skill as context. A caption the agent drafts is polished there. A caption the
     author dictates goes through too, with an instruction to keep the author's content, terms and
     order and to fix only grammar, fluency and macros, and the reply is diffed against the author's
@@ -323,6 +382,8 @@ Run on every caption, in order, and delete what fails.
 
 - **The generic subject.** `Results at two scales`, `Harness dynamics`, `\corpus{} tasks`. Tempting
   because it is short and true. It names a category, not the object, and not the method.
+- **The colon key.** `Bold: best. Underline: second. Left: tasks by guidance fields.` A row of
+  keys reads as a pasted legend; the author asked for sentences with the marks typeset in themselves.
 - **Telegraphic colon fragments.** `Memory $\mathcal{M}_t$: rollouts, rubric states, outcomes,
   retrieved as $E_t$.` Tempting because it looks precise. It lists parts and drops how they connect,
   which the overview exists to show.
@@ -341,6 +402,12 @@ Run on every caption, in order, and delete what fails.
   of the above.
 - **A caption note that explains a column.** Usually the column fails `docs-table`'s one rule
   (`$\mathcal{D}_0$` in the dataset table).
+- **The vague cut or the negation.** `decomposed by stage`, `scored with and without the rubric`.
+  Tempting because it is short. It names neither the groups nor the other scoring source.
+- **The unexplained case.** `One training task under \ourmethod{}`. It leaves the reader asking how
+  the task was picked and what it asked.
+- **The provenance note.** `This prompt is adapted from AMARIS.` under a prompt box. It adds nothing
+  to the box and reads as a disclaimer.
 - **The writer's term in the lead.** `Harness dynamics` where the reader expects `Training dynamics
   of \ourmethod{}`.
 
