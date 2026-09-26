@@ -144,8 +144,8 @@ before: Results at two scales. In-domain: rubric mean. OOD: one benchmark per do
         margin over the best baseline. OOD benchmarks: MedQA, GPQA-Diamond, WritingBench, RoleBench,
         IFBench.
 after:  Quantitative results of \ourmethod{} on the five-domain \corpus{} with Qwen3.5-4B and
-        Qwen3.5-9B. \textbf{Bold} and \underline{underline} mark the best and second-best results,
-        and parentheses give \ourmethod{}'s margin over the best baseline.
+        Qwen3.5-9B. \textbf{Bold}, \underline{underline}, and {\color{oursfg}red} mark the best result,
+        the second-best result, and \ourmethod{}'s margin over the best baseline, respectively.
 ```
 
 "Results at two scales" names nothing a reader can locate: whose results, on what. The after names
@@ -368,7 +368,9 @@ Run on every caption, in order, and delete what fails.
    row of the paper's method needs no key. Every mark, panel name and abbreviation is declared in a
    plain sentence with the mark typeset in itself (`\textbf{Bold}, \underline{underline}, and
    {\color{gaingreen}green} mark ..., respectively`), never as a `Label: value.` colon key, which reads
-   as a legend pasted under the float.
+   as a legend pasted under the float. A mark is named by what the reader sees: a coloured margin
+   such as `(+3.0)` in red is declared as `{\color{oursfg}red}`, the colour word in its own colour,
+   not as `(parentheses)`, which names the typography instead of the signal.
 8. **One object, one name, across caption, axis, legend and text, and the name the field uses.**
    Proportion (part of a whole, the usual term in LLM-judge and reward-model papers, with the axis
    written `Pairs (%)` or `Tasks (%)`), never ratio (part to part). When the
