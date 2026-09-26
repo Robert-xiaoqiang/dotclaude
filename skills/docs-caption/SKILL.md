@@ -288,6 +288,14 @@ that is also fine, no need to always use left, right, or a, b, c." A one-row fig
 contents reads naturally as a list after a colon. Use position words when the layout is two
 dimensional (Figure 1) or when the text says "the right panel of Figure 4".
 
+**Positions sit in parentheses inside one sentence (author, 2026-09-25).** The form the author
+called "a very good pattern" is `X (left) and Y (right)`, one sentence joined by "and" or "or":
+"Memory systems by memory organization and design search (left), and average test accuracy against
+latency per query (right)." It keeps the caption's grammar, and the parenthetical still points the
+reader at the panel. A chain of `Left: X. Right: Y.` fragments is the same information as a legend
+pasted under the float, and a caption with several colons reads as informal, so a caption carries
+at most one colon, and only before a joined list.
+
 ---
 
 ## Checklist
@@ -330,8 +338,9 @@ Run on every caption, in order, and delete what fails.
 2. **An overview figure's caption is one or two full sentences telling the flow**: what conditions
    what, and how the parts interact, in the drawing's order and with the names drawn on it. Colon
    fragments list the parts and lose the arrows, which were the reason for drawing the figure.
-3. **No panel letters unless the figure draws them.** Name panels by position in a sentence (`The
-   left and right panels show X and Y, respectively.`) or join their contents in reading order. A caption letter with no glyph to match sends the reader
+3. **No panel letters unless the figure draws them.** Name panels by position inside one sentence
+   (`X (left) and Y (right)`, or `The left and right panels show X and Y, respectively.`) or join
+   their contents in reading order. At most one colon per caption. A caption letter with no glyph to match sends the reader
    searching the figure for something that is not there.
 4. **No protocol in a caption.** Metrics, scoring instruments, checkpoint selection, evaluation
    cadence, notation keys, calibration splits and acceptance rules live in the setup or the method,
