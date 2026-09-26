@@ -15,6 +15,15 @@ The earlier matcher accepted the nearest fuzzy title and any one shared
 surname, and so replaced SOTOPIA with SOTOPIA-pi and InstructGPT with
 InstructPatentGPT.
 
+One exception, by the entry's own claim rather than by a search hit: an entry
+that declares an arXiv id names one record, and when that record has the
+identical normalised title and the year rule holds, the id identifies the
+work. A full or prefix ("and others") author match is then VERIFIED from arXiv
+with the record's full author list written back; differing author names are
+ARXIV-FIX, the author list replaced from the record and written back, because
+a title and year confirmed by the entry's own id leave the author list as the
+only thing that can be wrong, and the record is the ground truth for it.
+
 Preprints are preferred over the published version when both exist, because an
 arXiv id is stable, free to resolve and always reachable by a reader.
 """
@@ -22,6 +31,8 @@ from __future__ import annotations
 
 import argparse
 import json
+import logging
+import os
 import pathlib
 import re
 import sys
@@ -162,7 +173,11 @@ def candidates(title: str, body: str = ""):
     hit = C.s2_match(title)
     if hit:
         out.append(hit)
-    out += (C.arxiv_match(title) or [])
+    # the record the id names, when it carries the entry's title, is judged
+    # before any search hit, so a title search of arXiv could add nothing the
+    # judge would look at; it is skipped, which spares the paced API
+    if not (out and out[0].get("by_id") and M.title_key(title) == M.title_key(out[0].get("title"))):
+        out += (C.arxiv_match(title) or [])
     if not any(M.title_key(title) == M.title_key(c.get("title")) for c in out):
         out += C.crossref_match(title)
     return out
@@ -194,14 +209,23 @@ def _add_preprint_year(rec: dict):
     rec["alt_years"] = [r["year"]] if r and r.get("year") else []
 
 
+WRITTEN_BACK = ("VERIFIED", "ARXIV-FIX")
+
+
 def judge(claim: dict, cands: list):
     """(verdict, record, comparison) under the strict rule in match.py.
 
-    VERIFIED    title identical, full author list in order, year agrees
+    VERIFIED    title identical, full author list in order, year agrees; or
+                the entry's own arXiv id resolves to the identical title, the
+                year rule holds and the entry's list is the record's, possibly
+                cut short with 'and others'
+    ARXIV-FIX   the entry's own arXiv id resolves to the identical title and
+                the year rule holds, but the author names differ; the record's
+                author list replaces the entry's
     TITLE-WRONG the entry's own arXiv id resolves to another title
     MISMATCH    the nearest record differs in title, authors or year
     NOT-FOUND   no candidate, or none even close in title
-    Only VERIFIED is ever written back.
+    Only VERIFIED and ARXIV-FIX are ever written back.
     """
     if not cands:
         return "NOT-FOUND", None, None
@@ -210,10 +234,27 @@ def judge(claim: dict, cands: list):
         if k["title_ok"] and k["authors_ok"] and not k["year_ok"]:
             _add_preprint_year(c)
     scored = [(c, M.compare(claim, c)) for c, _ in scored]
+    # the entry's own id first: the record it names is the candidate that is
+    # judged, whatever the title search returned, so a paper posted last month
+    # verifies from arXiv alone
+    by_id = [(c, k) for c, k in scored if c.get("by_id")]
+    if by_id and by_id[0][1]["title_ok"] and by_id[0][1]["year_ok"]:
+        c, k = by_id[0]
+        if k["authors_ok"]:
+            return "VERIFIED", c, k
+        if k["authors_prefix"]:
+            k["notes"].insert(0, "author list completed from the arXiv record "
+                              "after 'and others'")
+            k["reasons"] = []
+            return "VERIFIED", c, k
+        k["notes"].insert(0, "title and year confirmed by the entry's own arXiv "
+                          "id; author list replaced from the arXiv record")
+        return "ARXIV-FIX", c, k
     full = [(c, k) for c, k in scored if k["ok"]]
     if full:
         return "VERIFIED", full[0][0], full[0][1]
-    by_id = [(c, k) for c, k in scored if c.get("by_id")]
+    if by_id and by_id[0][1]["title_ok"]:
+        return "MISMATCH", by_id[0][0], by_id[0][1]      # own id, year fails
     if by_id and not by_id[0][1]["title_ok"] and by_id[0][1]["authors_ok"]:
         c, k = by_id[0]
         k["reasons"].insert(0, "entry's own arXiv id resolves to a different title")
@@ -244,6 +285,30 @@ def to_bibtex(key, rec, kind="article"):
         lines.append(f"  doi = {{{ids['DOI']}}},")
     lines.append("}")
     return "\n".join(lines)
+
+
+def rewrite(e: dict, rec: dict) -> str:
+    """The entry written back after a confirmed match. The entry keeps its
+    own fields (title, venue, pages, note), because the title is identical
+    after normalisation and the venue is what the record cannot know; the
+    author list is the record's full list, and the record's ids are added
+    where the entry lacks them."""
+    f = dict(e["fields"])
+    ids = rec.get("externalIds") or {}
+    f["author"] = " and ".join(M.record_names(rec))
+    if ids.get("ArXiv") and "eprint" not in f:
+        f["eprint"] = ids["ArXiv"]
+        f["archiveprefix"] = "arXiv"
+        if not any(f.get(k) for k in ("journal", "booktitle", "howpublished")):
+            f["journal"] = f"arXiv preprint arXiv:{ids['ArXiv']}"
+    if ids.get("DOI") and "doi" not in f:
+        f["doi"] = ids["DOI"]
+    if not f.get("year") and rec.get("year"):
+        f["year"] = str(rec["year"])
+    pretty = {"archiveprefix": "archivePrefix", "primaryclass": "primaryClass"}
+    lines = [f"@{e['type']}{{{e['key']},"]
+    lines += [f"  {pretty.get(k, k)} = {{{v}}}," for k, v in f.items()]
+    return "\n".join(lines) + "\n}"
 
 
 def claim_of(e: dict) -> dict:
@@ -285,21 +350,26 @@ def cmd_audit(a):
             continue
         cands = candidates(claim["title"], e["raw"])
         v, best, cmp = judge(claim, cands)
-        if v != "VERIFIED":
+        if v not in WRITTEN_BACK:
             extra = author_requery(claim["title"], claim["author"])
             if extra:
                 v2, best2, cmp2 = judge(claim, cands + extra)
-                if v2 == "VERIFIED" or (cmp2 and (not cmp or M.rank(cmp2) > M.rank(cmp))):
+                if v2 in WRITTEN_BACK or (cmp2 and (not cmp or M.rank(cmp2) > M.rank(cmp))):
                     v, best, cmp = v2, best2, cmp2
-        # only a record that agrees on title, every author in order and year
-        # may replace the entry; everything else is carried through verbatim
-        new = to_bibtex(e["key"], best, e["type"]) if v == "VERIFIED" else e["raw"]
+        # only a record that agrees on title, every author in order and year,
+        # or the record the entry's own arXiv id names, may replace the
+        # entry; everything else is carried through verbatim
+        new = rewrite(e, best) if v in WRITTEN_BACK else e["raw"]
+        source = (best or {}).get("source", "") if best else ""
         rows.append({"key": e["key"], "cited": e["key"] in cited if cited else None,
-                     "verdict": v, "reasons": (cmp or {}).get("reasons", ["no candidate"]),
+                     "verdict": v, "source": source,
+                     "reasons": (cmp or {}).get("reasons", ["no candidate"]),
+                     "notes": (cmp or {}).get("notes", []),
                      "claim": claim,
                      "match": ({"title": best.get("title"), "year": best.get("year"),
                                 "alt_years": best.get("alt_years"),
-                                "venue": best.get("venue"),
+                                "venue": best.get("venue"), "source": source,
+                                "transport": best.get("transport"),
                                 "ids": best.get("externalIds"),
                                 "authors": M.record_names(best)} if best else None),
                      "author_rows": (cmp or {}).get("author_rows", []),
@@ -307,10 +377,11 @@ def cmd_audit(a):
                      "old_entry": e["raw"], "new_entry": new})
         fixed.append(new)
         ids = (best or {}).get("externalIds") or {}
-        why = "" if v == "VERIFIED" else "; ".join((cmp or {}).get("reasons", []))
-        print(f"[{i:>3}/{len(entries)}] {e['key']:<28}{v:<13}"
-              f"{ids.get('ArXiv') or ids.get('DOI') or '-':<34} {why[:100]}", flush=True)
-        if a.diff == "all" or (a.diff == "mismatch" and v != "VERIFIED"):
+        why = "; ".join(((cmp or {}).get("notes") or []) +
+                        ([] if v in WRITTEN_BACK else (cmp or {}).get("reasons", [])))
+        print(f"[{i:>3}/{len(entries)}] {e['key']:<28}{v:<13}{source or '-':<9}"
+              f"{ids.get('ArXiv') or ids.get('DOI') or '-':<34} {why[:110]}", flush=True)
+        if a.diff == "all" or (a.diff == "mismatch" and v not in WRITTEN_BACK):
             print(M.side_by_side(claim, best, cmp) + "\n", flush=True)
     out = pathlib.Path(a.out or (src.parent / "cc2semantics.bib"))
     out.write_text("\n\n".join(fixed) + "\n")
@@ -328,12 +399,16 @@ def write_md_report(rows, path, src, out):
     L = [f"# cc2bib audit of `{src.name}`", "",
          f"{n} entries. " + ", ".join(f"{v} {k}" for k, v in sorted(tally.items())), "",
          f"Corrected file: `{out.name}`. Only VERIFIED entries (identical normalised "
-         "title, full author list in order, same year) are rewritten. Every other "
+         "title, full author list in order, year rule) and ARXIV-FIX entries (the "
+         "entry's own arXiv id resolves to the identical title under the year rule; "
+         "the author list is replaced from that record) are rewritten, keeping the "
+         "entry's own fields and taking the record's full author list. Every other "
          "entry is carried through byte-identical and shown below beside the nearest "
-         "record, for a person to decide.", "",
+         "record, for a person to decide. The source column names the service whose "
+         "record confirmed the entry (S2, arXiv, Crossref).", "",
          "Marks: `=` identical, `~` same up to diacritics or initial format, "
          "`!` differs, `+` on one side only.", ""]
-    for bad in ("NOT-CITABLE", "TITLE-WRONG", "MISMATCH", "NOT-FOUND"):
+    for bad in ("NOT-CITABLE", "TITLE-WRONG", "MISMATCH", "NOT-FOUND", "ARXIV-FIX"):
         sel = [r for r in rows if r["verdict"] == bad]
         if not sel:
             continue
@@ -341,17 +416,23 @@ def write_md_report(rows, path, src, out):
         for r in sel:
             cite = "" if r["cited"] is None else (" **cited**" if r["cited"] else " (uncited)")
             L += [f"### `{r['key']}`{cite}", ""]
+            if r.get("source"):
+                L += [f"- source: {r['source']}", ""]
+            if r.get("notes"):
+                L += [f"- note: {'; '.join(r['notes'])}", ""]
             if r["reasons"]:
                 L += [f"- why: {'; '.join(r['reasons'])}", ""]
             L += r["side_by_side_md"] + [""]
-    ok = [r for r in rows if r["verdict"] == "VERIFIED" and r["old_entry"] != r["new_entry"]]
+    ok = [r for r in rows if r["verdict"] == "VERIFIED"]
     if ok:
-        L += [f"## VERIFIED with field corrections ({len(ok)})", "",
-              "| key | field change |", "| --- | --- |"]
+        L += [f"## VERIFIED ({len(ok)})", "",
+              "| key | source | id | written back | note |", "| --- | --- | --- | --- | --- |"]
         for r in ok:
             ids = (r["match"] or {}).get("ids") or {}
-            gained = "adds " + ", ".join(k for k in ("ArXiv", "DOI") if ids.get(k)) if ids else "metadata"
-            L.append(f"| `{r['key']}` | {gained} |")
+            wb = "unchanged" if r["old_entry"] == r["new_entry"] else "author list, ids"
+            L.append(f"| `{r['key']}` | {r.get('source') or '-'} | "
+                     f"{ids.get('ArXiv') or ids.get('DOI') or '-'} | {wb} | "
+                     f"{'; '.join(r.get('notes') or [])} |")
         L += [""]
     path.write_text("\n".join(L))
 
@@ -436,7 +517,8 @@ def cmd_make(a):
         first = (M.record_names(h) or ["anon"])[0].split()[-1].lower()
         key = re.sub(r"[^a-z]", "", M.fold(first)) + str(h.get("year", "")) + \
             re.sub(r"[^a-z0-9]", "", C.norm(h.get("title", ""))[:14].split(" ")[0])
-        print(f"%% -> {h.get('title')} ({h.get('year')}, {h.get('venue')})  [{checked}]")
+        print(f"%% -> {h.get('title')} ({h.get('year')}, {h.get('venue')})  "
+              f"[{checked}; source {h.get('source') or '-'}]")
         if ids.get("ArXiv"):
             print(f"%%    https://arxiv.org/abs/{ids['ArXiv']}")
         elif ids.get("DOI"):
@@ -452,6 +534,8 @@ def cmd_make(a):
 
 def main():
     p = argparse.ArgumentParser(prog="cc2bib", description=__doc__.split("\n")[0])
+    p.add_argument("--debug", action="store_true",
+                   help="log every request and which arXiv transport answered (also CC2BIB_DEBUG=1)")
     sub = p.add_subparsers(dest="cmd", required=True)
     pa = sub.add_parser("audit", help="verify every entry in a .bib")
     pa.add_argument("bib"); pa.add_argument("--tex", nargs="*", help="mark which keys are cited")
@@ -468,6 +552,9 @@ def main():
     pm.add_argument("--limit", type=int, default=5); pm.add_argument("--out")
     pm.set_defaults(fn=cmd_make)
     a = p.parse_args()
+    logging.basicConfig(
+        level=logging.DEBUG if a.debug or os.environ.get("CC2BIB_DEBUG") else logging.WARNING,
+        format="%(levelname)s %(message)s", stream=sys.stderr)
     a.fn(a)
 
 

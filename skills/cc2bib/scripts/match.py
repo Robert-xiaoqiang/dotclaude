@@ -11,7 +11,16 @@ A candidate record is the claimed paper only when all three agree:
            each pair on surname and on given names, where only diacritics and
            initial format may differ ("Jeffrey", "J.", "J" agree; "Jeff" and
            "Jeffrey" do not)
-  year     the claimed year is a year of the record
+  year     the claimed year is a year of the record (its own year, the posting
+           year of its arXiv id, or any date a journal record carries), or the
+           arXiv posting year plus one when the entry names a venue other than
+           arXiv, which is a preprint published at the next year's conference
+
+A list cut short with "and others" is never a full match. It is reported as a
+prefix ("authors_prefix") when every name it does give agrees position by
+position with the record and the record is at least as long; the caller
+decides what a prefix is worth (an entry's own arXiv id may complete it, a
+title search may not).
 
 There is no similarity threshold on the accept path. The previous matcher
 accepted the nearest fuzzy title and any shared surname, which let it replace
@@ -249,6 +258,9 @@ def compare(claim: dict, rec: dict) -> dict:
         if mark in "!+":
             bad.append(i + 1)
     a_ok = bool(names) and not truncated and not bad and len(names) == len(got)
+    # the claimed names, though cut short, are the start of the record's list
+    prefix = bool(names) and truncated and len(names) <= len(got) and \
+        all(r[3] in "=~" for r in rows[:len(names)])
     if truncated:
         reasons.append(f"entry truncates the author list with 'and others' after "
                        f"{len(names)} names, record has {len(got)}")
@@ -265,14 +277,35 @@ def compare(claim: dict, rec: dict) -> dict:
     cy = year_of(claim.get("year"))
     ry = {year_of(y) for y in [rec.get("year"), *(rec.get("alt_years") or [])] if year_of(y)}
     y_ok = bool(cy) and cy in ry
+    notes = []
+    posted = posting_year(rec)
+    venue = claim.get("venue") or ""
+    if not y_ok and cy and posted and int(cy) == int(posted) + 1 \
+            and venue and not re.search(r"arxiv", venue, re.I):
+        y_ok = True
+        notes.append(f"year {cy} is the arXiv posting year {posted} plus one, "
+                     f"venue {venue}")
     if not y_ok:
         reasons.append(f"year {cy or '?'} vs {'/'.join(sorted(ry)) or '?'}")
 
-    return {"title_ok": t_ok, "authors_ok": a_ok, "year_ok": y_ok,
+    return {"title_ok": t_ok, "authors_ok": a_ok, "authors_prefix": prefix,
+            "year_ok": y_ok,
             "ok": t_ok and a_ok and y_ok, "author_rows": rows,
-            "reasons": reasons,
+            "reasons": reasons, "notes": notes,
             "fuzzy": difflib.SequenceMatcher(None, title_key(claim.get("title")),
                                              title_key(rec.get("title"))).ratio()}
+
+
+def posting_year(rec: dict) -> str:
+    """The year the record's arXiv id was posted, or '' when unknown: the
+    record's own year for an arXiv record, else the preprint year fetched by
+    its id (alt_years, see _add_preprint_year in cc2bib)."""
+    if not ((rec or {}).get("externalIds") or {}).get("ArXiv"):
+        return ""
+    if rec.get("source") == "arXiv" or rec.get("venue") == "arXiv":
+        return year_of(rec.get("year"))
+    alt = [year_of(y) for y in rec.get("alt_years") or [] if year_of(y)]
+    return alt[0] if alt else ""
 
 
 def rank(c: dict):

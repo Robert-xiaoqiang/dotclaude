@@ -18,6 +18,7 @@ description into a correct entry, and auditing a `.bib` that already exists.
 - [What counts as verified](#what-counts-as-verified)
 - [Output contract](#output-contract)
 - [Rate limits and robustness](#rate-limits-and-robustness)
+- [arXiv transport](#arxiv-transport)
 - [Usage](#usage)
 - [Rules](#rules)
 - [Anti-patterns](#anti-patterns)
@@ -76,7 +77,9 @@ how a reviewer or a subagent works through a bibliography one entry at a time.
 `--diff mismatch` or `--diff all` prints each entry beside its nearest record,
 one author per row, marked `=` identical, `~` same up to diacritics or initial
 format, `!` different, `+` present on one side only. The markdown report
-carries the same table for every entry that is not VERIFIED.
+carries the same table for every entry that is not VERIFIED. Each verdict line,
+and the report, names the source of the confirming record (S2, arXiv,
+Crossref), so a paper that only arXiv knows yet reads `VERIFIED arXiv`.
 
 ## What counts as verified
 A title match is a candidate, never a verdict. An exact-title query for
@@ -92,21 +95,31 @@ counts.
 | field | accepted only when |
 |---|---|
 | title | the normalised titles are identical. Normalising folds case, LaTeX braces and commands, accents, greek letters (`$\pi$` and `π` both read `pi`) and punctuation, and nothing else, so a dropped or changed subtitle, or a suffix such as `-π`, is a mismatch |
-| authors | the full lists have the same length and agree position by position on surname and given names, where only diacritics and initial format may differ (`Sandhini`, `S.` and `S` agree; `Jeff` and `Jeffrey`, or `Chong` and `Chen`, do not). A list cut short with `and others` cannot be confirmed |
-| year | the claimed year is the record's year, or the posting year of the record's arXiv id |
+| authors | the full lists have the same length and agree position by position on surname and given names, where only diacritics and initial format may differ (`Sandhini`, `S.` and `S` agree; `Jeff` and `Jeffrey`, or `Chong` and `Chen`, do not). A list cut short with `and others` cannot be confirmed by a title search; it can be completed by the entry's own arXiv id when the names it does give are the start of the record's list |
+| year | the claimed year is the record's year, the posting year of the record's arXiv id, or any date a journal record carries (online in December, in print in January); or the arXiv posting year plus one when the entry names a venue other than arXiv, a preprint published at the next year's conference, which the report says in so many words |
 
 | verdict | meaning | written back |
 |---|---|---|
-| `VERIFIED` | title, full author list in order and year all agree | yes, the record replaces the entry |
+| `VERIFIED` | title, full author list in order and year all agree, from S2, arXiv or Crossref; or the entry's own arXiv id resolves to the identical title under the year rule and the entry's list is the record's, possibly cut short with `and others`. The verdict names the source | yes: the entry keeps its own fields, takes the record's full author list, gains the record's ids |
+| `ARXIV-FIX` | the entry's own arXiv id resolves to the identical title under the year rule, but the author names differ. Title and year are confirmed by the entry's own claim, so the author list is the one thing left to be wrong, and the record is the ground truth for it | yes, the author list replaced from the arXiv record |
 | `NOT-CITABLE` | a blog post, model card, repository or bare URL, checked before any lookup | no |
 | `TITLE-WRONG` | the entry's own arXiv id resolves to a paper with the same authors and a different title | no |
-| `MISMATCH` | the nearest record differs in title, authors or year; the report names which, shows both side by side, and marks each author row | no |
+| `MISMATCH` | the nearest record differs in title, authors or year; the report names which, shows both side by side, and marks each author row. An entry whose own id gives the identical title but fails the year rule lands here | no |
 | `NOT-FOUND` | no candidate from any source, or none close even in wording, the strongest hallucination signal | no |
 
 Fuzzy title similarity survives only to choose which non-matching record to
 show beside a `MISMATCH`; it never accepts anything. A `MISMATCH` whose only
 difference is the year is usually a preprint posted one year and published the
-next. The person resolving it picks the year, the tool does not.
+next; when the entry names the venue, the plus-one case above covers it, and
+otherwise the person resolving it picks the year, the tool does not.
+
+`ARXIV-FIX` is the one exception to the rule that a search hit never rewrites
+an entry, and it is not a search hit. The id is the entry's own claim: it
+names one record, and that record's title is the entry's title. Title searches
+without an id keep the strict verdicts above. The arXiv record an entry's id
+names is always the first candidate judged, so when Semantic Scholar has
+nothing or a near miss for a paper posted last month, the entry still verifies
+from arXiv alone.
 
 A corporate author such as `{Qwen Team}` is compared as one name like any
 other, so it verifies only against a record that carries the same corporate
@@ -134,10 +147,15 @@ reader needs. The published venue is kept in the entry.
 
 ## Output contract
 `cc2semantics.bib` is written beside the source and **the source is never
-modified**. Only `VERIFIED` entries are rewritten. Every other entry is carried
-through byte-identical, because a near miss written over a real reference is
-the exact failure this skill exists to catch. Those entries are listed in the
-report, beside the nearest record, for a person to decide.
+modified**. Only `VERIFIED` and `ARXIV-FIX` entries are rewritten, and a
+rewrite keeps the entry's own fields: the title (identical after
+normalisation, and the entry's braces protect its capitals), the venue, pages
+and note, which no record knows better. The author list is taken from the
+record in full, and `eprint`, `archivePrefix` or `doi` are added where the
+entry lacks them. Every other entry is carried through byte-identical, because
+a near miss written over a real reference is the exact failure this skill
+exists to catch. Those entries are listed in the report, beside the nearest
+record, for a person to decide.
 
 Applying the result is a separate, deliberate step: read the report, then
 replace the old `.bib` and, where a key changed, substitute it across the
@@ -160,7 +178,32 @@ in `ti:` is percent-encoded, so the field prefix stays literal. And through a
 local proxy `urllib` succeeds on its first call and returns 406 on every later
 one, so each request is a fresh `curl` process.
 
-Tune with `CC2BIB_MIN_GAP` (default 1.6 s) and `CC2BIB_CACHE`.
+Tune with `CC2BIB_MIN_GAP` (default 1.6 s), `CC2BIB_ARXIV_GAP` (default 3 s,
+what arXiv asks for) and `CC2BIB_CACHE`. `--debug` (or `CC2BIB_DEBUG=1`) logs
+every request with its status and which arXiv transport answered.
+
+## arXiv transport
+Every arXiv request is a fresh `curl` process that walks a chain and stops at
+the first answer. First a direct connection with `--noproxy '*'`, which
+bypasses every proxy variable, because a proxy that mangles or rate-limits the
+API must never be the first thing tried. Then the environment proxy as `curl`
+sees it. Then, for an id lookup only, the abstract page
+`https://arxiv.org/abs/<id>`, read from its `citation_title`,
+`citation_author` (`Last, First`) and `citation_date` (the v1 posting date)
+meta tags. A title search (`search_query=ti:"<title>"`, the colon literal, the
+title percent-encoded with spaces as `+`) has no page to fall back on, so it
+ends after the proxy and Semantic Scholar and Crossref carry it.
+
+The symptom that made the chain: `export.arxiv.org/api/query` answering
+`406 Not Acceptable` with an empty body. Measured on 2026-09-26 it did so on
+every request that missed its CDN cache (`x-cache: MISS`, `cache-control:
+private, no-store`), through the proxy and directly alike, and answered 200
+only from cache (`age: 2874`), so an id that had been fetched recently "worked
+direct" while a cold one did not. No `Accept`, user agent or HTTP version
+changed it. The abstract page answered on both routes throughout, which is why
+it is in the chain: id lookups, the ones that confirm an entry, survive the API
+being down. The cache is keyed by url, so a record fetched over any transport
+is reused, and the 3 s gap is kept across the whole chain.
 
 ## Usage
 The key lives in `$CPFS_HOME/.secret` as `SEMANTIC_SCHOLAR_API_KEY` and is read
@@ -176,14 +219,25 @@ author coverage.
    title, the full author list in the same order, and the same year. A
    subtitle difference, a missing, extra or reordered author, or a changed
    given name is a mismatch, whatever the similarity score.
-3. **Never auto-replace anything but `VERIFIED`.** `MISMATCH`, `TITLE-WRONG`,
-   `NOT-FOUND` and `NOT-CITABLE` are surfaced side by side, never written over.
+3. **Never auto-replace anything but `VERIFIED` and `ARXIV-FIX`.** `MISMATCH`,
+   `TITLE-WRONG`, `NOT-FOUND` and `NOT-CITABLE` are surfaced side by side,
+   never written over. `ARXIV-FIX` is allowed because the id is the entry's
+   own claim, not a search hit.
 4. **The source `.bib` is read-only.** Output goes to `cc2semantics.bib`.
 5. **Prefer the preprint id** when both exist.
 6. **Rerun after editing the `.bib`.** The cache makes it cheap.
 7. **Review a failure with `--diff`, one entry at a time with `--keys`.**
    The per-author rows show where a list diverges, which a one-line verdict
    cannot.
+8. **An entry's own arXiv id outranks every search hit.** The record it names
+   is judged first, so a paper Semantic Scholar has not indexed yet verifies
+   from arXiv alone, and the verdict says which source confirmed it.
+9. **A year one past the arXiv posting year needs a venue.** The plus-one
+   case is a preprint published at the next year's conference; an entry whose
+   venue is arXiv gets no such allowance.
+10. **Try arXiv directly before the proxy, and read the abstract page when
+    the API will not answer.** A 406 with an empty body is the API, not the
+    network; the abstract page carries the same title, authors and date.
 
 ## Anti-patterns
 - **Title-only verification.** Certifies the wrong paper whenever two works
@@ -198,11 +252,22 @@ author coverage.
 - **Tolerances on the accept path.** A similarity threshold, a year window or
   a partial author overlap turns "close" into "confirmed". Tolerance belongs
   only in normalisation (case, braces, accents, punctuation, initial format).
-- **Completing an `and others` list silently.** The record's full list may be
-  right, but the entry did not claim it; resolve it by hand from the report.
+- **Completing an `and others` list from a title search.** The record's full
+  list may be right, but the entry did not claim it; resolve it by hand from
+  the report. Only the entry's own arXiv id may complete it, and the report
+  says it did.
 - **Treating 429 as failure.** It means later. Backing off and retrying
   resolves almost everything.
 - **Auto-fixing everything.** The entries the audit cannot confirm are exactly
   the ones a person has to look at.
 - **Clearing the cache between runs.** Turns a free rerun into a rate-limited
   one.
+
+A title search has no abstract page to fall back on, so when the API will not
+answer it reads the listing page `https://arxiv.org/search/?searchtype=title`
+with the title as a quoted phrase (up to 100 results), keeps only results whose
+normalised title equals the query, and takes the year from the "originally
+announced" date, so a paper found this way carries its first posting year.
+This is the re-test stage for entries Semantic Scholar has not indexed yet: an
+id resolves through the abstract page, a bare title through the listing page,
+and both are judged under the same exact-title, full-author-list rule.
