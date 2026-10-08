@@ -39,5 +39,9 @@ __pycache__/
 # independently of this file), not in a settings blob.
 # settings.local.json stays out: machine-local by convention, and it carries
 !/skills/
+# skills/synced/ is Claude Code's own download of the first-party skills, re-synced
+# every few minutes and Anthropic-licensed. Not ours to version: it churns, and it
+# must not be republished from this public repo.
+/skills/synced/
 # Strategy: IGNORE EVERYTHING by default, then allow-list only the
 #   telemetry/  statsig/  cache/  shell-snapshots/
