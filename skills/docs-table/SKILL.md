@@ -7,7 +7,7 @@ when_to_use: "Use when building or revising any results, ablation or comparison 
 
 ## Purpose
 A table is a ranking the reader performs with their eyes, and every convention here exists to make
-that ranking possible in one pass. `docs-figure` owns what a picture may contain; this owns the same
+that ranking possible in one pass. `writing-figure` owns what a picture may contain; this owns the same
 question for a grid of numbers. `writing-paper` owns the prose that cites the table.
 
 The failure this guards against is a table that is complete and unreadable: nine columns where four
@@ -39,7 +39,7 @@ Two kinds of column fail this and both are common:
 every arm is the same size, a `Seed` column. None of them is a result, all of them are read as one
 because they sit inside the rule, and each costs the width the real numbers needed. Metadata goes in
 a setup paragraph ("each method's best checkpoint per evaluation set"), never in the grid, and not
-in the caption either (`docs-caption`).
+in the caption either (`writing-caption`).
 
 **Derived columns.** A `$\Delta$` column holding each arm's mean minus the baseline's mean prints the
 same comparison the `Mean` column already made, once per row, in a second place where it can drift.
@@ -148,7 +148,7 @@ paragraph, next to the claim each one supports. Never shrink the table to make e
 
 ## The caption
 
-`docs-caption` owns the caption. In short: a table caption opens with a noun phrase naming the
+`writing-caption` owns the caption. In short: a table caption opens with a noun phrase naming the
 table's object and the method in the paper's own terms ("Quantitative results of \ourmethod{} on the
 five-domain \corpus{} with Qwen3.5-4B and Qwen3.5-9B", "Ablations of \ourmethod{} on evolver
 components and control interfaces"), then declares the marks the grid cannot explain itself,
@@ -175,7 +175,7 @@ the `booktabs` convention every venue's template follows.
 5. **The winning cell carries its margin over the underlined cell**, signed, in points, inline as
    `64.6 (+3.8)`, never as a second line, and only in the summary columns when the row is tight.
 6. **The caption names the table's object and declares the marks**, never the protocol or the
-   result, and sits above the table (`docs-caption`).
+   result, and sits above the table (`writing-caption`).
 7. **`booktabs` only.** `\toprule`, `\midrule`, `\cmidrule(lr){}`, `\bottomrule`. No vertical rules,
    no `\hline`, no full-width rule between every row.
 8. **One font size and one `\tabcolsep` across every table in the document.** A table set smaller
@@ -216,7 +216,7 @@ The flagship reports set their main table the same way, and the pattern is worth
 
 **Columns are benchmarks, grouped by what they test.** A spanning header over each group, joined by a
 `\cmidrule(lr)`, and an `Avg.` column closing every group. Short benchmark names in the header, with
-any abbreviation expanded once in the setup, not in the caption (`docs-caption`).
+any abbreviation expanded once in the setup, not in the caption (`writing-caption`).
 
 **Rows are methods, grouped twice.** The outer grouping is the base model or scale, set as an italic
 header row spanning the table (`\multicolumn{12}{l}{\textit{Qwen3.5-4B}}`), so several scales share
@@ -229,7 +229,7 @@ states the grouping without a label.
 one table with two row groups. Three tables that differ only in which arms they list are one table.
 Splitting them makes the reader carry numbers between floats.
 
-**Endpoints only.** A table compares end states. A per-epoch trajectory is a figure (`docs-figure`),
+**Endpoints only.** A table compares end states. A per-epoch trajectory is a figure (`writing-figure`),
 and once that figure exists the per-epoch table is deleted.
 
 **Ablations share the main table's conventions** and add one column naming what each variant keeps,
@@ -295,7 +295,7 @@ typed. The same script feeds the figures.
 - **A table shrunk to fit a margin in every column**, where the summary columns alone should carry it.
 
 ## Companions
-`docs-ablation` (which ablation variants exist and how the ablation table is grouped, the one table allowed to print changes) · `docs-figure` (the same question for pictures, and the shared generator directory) · `writing-paper`
+`writing-ablation` (which ablation variants exist and how the ablation table is grouped, the one table allowed to print changes) · `writing-figure` (the same question for pictures, and the shared generator directory) · `writing-paper`
 (the prose that leads with the finding and cites the table as evidence, and the `pp` convention) ·
-`output-analysis` (which runs belong in the comparison) · `docs-caption` (the caption's wording and shape) · `writing-chatgpt` (the caption's prose) ·
-`docs-analysis` (the experiments and analysis section: setup, results paragraphs, ablations, evidence placement) · `conventions` (family index).
+`output-analysis` (which runs belong in the comparison) · `writing-caption` (the caption's wording and shape) · `writing-chatgpt` (the caption's prose) ·
+`writing-analysis` (the experiments and analysis section: setup, results paragraphs, ablations, evidence placement) · `conventions` (family index).

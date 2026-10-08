@@ -196,6 +196,19 @@ and the rules that say how to push safely are no longer loaded. `model`, `effort
    two sections disagreeing is the failure this skill exists to prevent.
 5. **Update `Companions` on BOTH sides** when a boundary moves. A one-way companion link is how two
    skills come to claim the same concern.
+6. **Run the audit after any rename, merge or removal**, naming the old skills so their leftovers are
+   found:
+
+   ```bash
+   python3 "${CLAUDE_SKILL_DIR}/scripts/audit_skills.py" "${CLAUDE_SKILL_DIR}/.." \
+     --gone <old-name> ... --also <memory dir> <project dirs that cite skills>
+   ```
+
+   It checks names against titles, the description length cap, every backticked skill reference,
+   `skills/` and `${CLAUDE_SKILL_DIR}` paths, table-of-contents anchors, `Companions` and the
+   `conventions` map, and exits with the number of failures. Written for the 2026-10-08 restructure,
+   where its first run found 52 problems a reading had missed, including a companion that had never
+   existed and an anchor that had never resolved.
 
 ## Rules
 
@@ -217,6 +230,13 @@ and the rules that say how to push safely are no longer loaded. `model`, `effort
    of a rule drift, and the reader cannot tell which is current.
 10. **A skill that has never been used is deleted, not kept.** Dead rules make the live ones cheaper to
     ignore.
+11. **The name prefix says what kind of thing a skill governs**, as `conventions` defines it:
+    `writing-*` for what a paper says, `docs-*` for a deliverable and its tooling. A skill whose
+    prefix disagrees with its job gets renamed, and the audit above is run before the rename is
+    called done.
+12. **A skill we do not own is pointed at, never copied in.** Anthropic's first-party skills are
+    licensed for use inside the service only; a repository keeps the part that was written here and
+    names the first-party skill for the rest.
 
 ## Anti-patterns
 

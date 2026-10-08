@@ -163,3 +163,6 @@ done
 - The helper rewrites three path forms: JSON-escaped native (functional `cwd`),
   forward-slash, and git-bash drive (`/d/...`).
 - Always do a `--dry-run` and confirm "valid JSON: True" before the real run.
+
+## Companions
+`platform-migrate` (moving the persistent home itself; this skill only re-points session history at its new path) · `claude-debrief` (what to read first in a resumed session).

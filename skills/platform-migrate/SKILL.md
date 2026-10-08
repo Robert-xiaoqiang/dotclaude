@@ -229,4 +229,4 @@ tooling. `reinstall` emits them in that order.
 `platform-env` (landing on a new environment, the inverse of this) · `platform-runtime` (the
 driver/image/venv stack a job needs) · `layout-output` (what in a run output tree is resume
 state vs deliverable vs junk, which is how to decide whether a run dir must move in full) ·
-`output-cleanup` (reclaiming space, the same classification applied to deletion).
+`output-cleanup` (reclaiming space, the same classification applied to deletion) · `conventions` (the family index).

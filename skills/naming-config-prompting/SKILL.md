@@ -68,8 +68,8 @@ loader must split deterministically.
 ## Registration
 Registration happens at import time, into one registry:
 
-- **Duplicate name = hard error.** Two components claiming `judge.score` is the two-publishers
-  collision of `platform-queue-shepherd`, in miniature: the loser's text vanishes with no error.
+- **Duplicate name = hard error.** Two components claiming `judge.score` is a two-writers collision
+  in miniature: both publish under one name, and the loser's text vanishes with no error.
 - **Byte-identical re-registration is a no-op.** This is what lets a composition assemble the same
   role twice (e.g. under reload) without tripping the duplicate check — and it doubles as the
   byte-identity proof: if a "re-registration" errors, two sources genuinely disagree.

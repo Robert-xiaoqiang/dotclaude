@@ -31,8 +31,7 @@ what it must leave to the cluster.
 - A submit is rejected, or a job lands with the wrong image, driver or quota.
 - Deciding whether a field belongs in the task spec or in the cluster stack.
 - The user says "submit this to the cluster", "launch a job", "make it run on Slurm too".
-- NOT for choosing *which* cluster has room, or for migrating a stuck submission — that is
-  `platform-queue-shepherd`. NOT for diagnosing a CUDA / driver / ABI failure in a job that is
+- NOT for choosing *which* cluster has room, or for moving a stuck submission elsewhere. NOT for diagnosing a CUDA / driver / ABI failure in a job that is
   already running — that is `platform-runtime`. NOT for naming the launcher — `naming-config`.
 
 ## The interface: one spec per run
@@ -184,7 +183,6 @@ instance's life.
 ## Companions
 `naming-config` (the launcher's *name* + config triple) · `layout-workspace` (where `launcher/`
 lives, and the config tree it selects from) · `platform-runtime` (the driver/image/venv stack the job
-runs on, and why a run is or is not portable to other silicon) · `platform-queue-shepherd` (which
-cluster to submit to, and when to move a stuck claim) · `platform-env` (the machine env the stack
+runs on, and why a run is or is not portable to other silicon) · `platform-env` (the machine env the stack
 assumes) · `platform-migrate` (moving the persistent home the stack points at) · `conventions` (the
 family index).

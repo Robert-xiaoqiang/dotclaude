@@ -19,7 +19,7 @@ output dirs aligned so a config name uniquely identifies what runs.
 - [The name IS the inheritance chain](#the-name-is-the-inheritance-chain)
 - [Assembled names: the name IS the component list](#assembled-names-the-name-is-the-component-list)
 - [Hard rules](#hard-rules)
-- [Steps when adding / reviewing a config](#steps-when-adding-reviewing-a-config)
+- [Steps when adding / reviewing a config](#steps-when-adding--reviewing-a-config)
 - [Anti-patterns](#anti-patterns)
 - [Output](#output)
 - [Division of labour with `layout-workspace`](#division-of-labour-with-layout-workspace)

@@ -118,4 +118,4 @@ When a location on the mount replaces an old dir in the ephemeral home, retire t
 `platform-migrate` (leaving an environment, the inverse of this: what is actually worth moving
 to the next mount, and why file count rather than size decides how long it takes) ·
 `platform-runtime` (the driver, image, venv and storage stack a job runs on) · `platform-run`
-(submitting a neutral run spec to a scheduler).
+(submitting a neutral run spec to a scheduler) · `conventions` (the family index).

@@ -144,4 +144,4 @@ when liveness matters, and pair it with a second independent signal before calli
 `claude-auto-research` (owns the campaign and the durable ledger this reads from) · `output-analysis`
 (produces the comparisons a results block cites) · `layout-output` (where a run's evidence lives, so a
 claim can name a path) · `docs-weekly` (the meeting deliverable, written from settled results) ·
-`writing-style` (the prose rules, when a debrief is written down rather than spoken).
+`writing-style` (the prose rules, when a debrief is written down rather than spoken) · `conventions` (the family index).

@@ -54,3 +54,6 @@ Push local commits to the correct remote repository and branch, using an SSH pri
 - NEVER push automatically after a commit. Auto git-commit is allowed, auto git-push is NOT.
 - If you just committed changes, report what was committed and STOP. Do not chain `&& git push`.
 - Wait for the user's explicit instruction before invoking this skill.
+
+## Companions
+`git-commit` (the commit side, including the hook that strips signatures before a commit exists) · `naming-descriptive` (what a branch is called).

@@ -92,4 +92,4 @@ skill does not govern Chinese deliverables) ·
 these rules and add the constraint that the notes must be speakable aloud) · `docs-plan` and
 `docs-arch` (the living project docs) · `writing-chatgpt` (the writer tool whose prompt stack
 encodes these rules, for drafting rather than judging) · `git-commit` (version-control text, which
-these rules deliberately do not govern).
+these rules deliberately do not govern) · `conventions` (the family index).

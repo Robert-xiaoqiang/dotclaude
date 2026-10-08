@@ -9,8 +9,8 @@ when_to_use: "Use when drawing a system overview, a workflow with a feedback loo
 This is the drawing idiom the author signed off on for the MemDGM paper's Fig 2 (2026-09-23/24),
 after a dozen rejected versions. It owns **how a workflow figure is laid out and drawn**: the grid,
 the icons, the code panels, the zoom, the arrows, the type scale, and the checks that keep all of
-it aligned. `docs-figure` still owns what a figure may contain (no annotation sentences, no
-baked captions); `drawing-gemini` owns generated images; `pptx` owns decks.
+it aligned. `writing-figure` still owns what a figure may contain (no annotation sentences, no
+baked captions); `drawing-gemini` owns generated images; `docs-slides` owns decks.
 
 The reference drawings are in `resources/examples/`, the generators that produced them in
 `resources/templates/`, and every icon they use in `resources/icons/` with its Icons8 id in
@@ -211,7 +211,7 @@ in one order.
 ## The caption
 Tell the flow in one or two full sentences, in the drawing's order and with the names drawn on it:
 what conditions what, and how the loop returns. No `Module: contents` fragments, no acceptance rules.
-See `docs-caption`.
+See `writing-caption`.
 
 ## Rules
 1. Start from `resources/templates/`, never from a blank slide.
@@ -235,6 +235,6 @@ See `docs-caption`.
 - Subscripts by baseline shift, text boxes narrower than their text, edge labels smaller than body.
 
 ## Companions
-`docs-figure` (what a figure may contain; the chart idiom) · `docs-table` · `pptx` (deck
-building) · `drawing-gemini` (generated emblems) · `docs-caption` (captions) · `icons8` MCP
-(`search_icons`, `get_icon_png_url`).
+`writing-figure` (what a figure may contain; the chart idiom) · `docs-table` · `docs-slides` (deck
+building, and the geometry audit and LibreOffice wrapper for any .pptx) · `drawing-gemini` (generated emblems) · `writing-caption` (captions) · `icons8` MCP
+(`search_icons`, `get_icon_png_url`) · `conventions` (the family index).

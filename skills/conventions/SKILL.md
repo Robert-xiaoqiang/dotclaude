@@ -1,6 +1,6 @@
 ---
 name: conventions
-description: "The map of the project-convention skill family. Names each concern - naming, layout, docs, platform, outputs, figures, code style - and routes to the focused skill for it."
+description: "The map of the project-convention skill family. Names each concern - naming, layout, docs, writing, platform, outputs, code style - and routes to the focused skill for it."
 when_to_use: "Use when setting up or reorganizing a project, or when you want the convention but do not know which skill owns it."
 ---
 # Skill: conventions
@@ -24,20 +24,31 @@ starting or organizing a project, or when unsure which convention applies.
 | **prompting** | how is prompt text named, stored, rendered, hashed, and ablated? | `naming-config-prompting` (deep-dive of `naming-config`: prompts as registered `<owner>.<role>` files with sha8 provenance, composition bands, and output contracts) |
 | **layout** | where does this doc / script / run output live? | `layout-workspace` (`docs/`, `scripts/`, reports/plans, what's committed) · `layout-output` (the run-output tree under `$OUTPUT_DIR_HOME`) |
 | **docs** | how do I write/maintain the living docs? | `docs-plan` (`docs/plans/<date>-<topic>.md`) · `docs-arch` (`docs/ARCH.md`) · `docs-weekly` (the staged Chinese+English weekly report) |
-| **platform** | how do I set up, submit to, and match the runtime of a compute platform? | `platform-env` (env.sh / cluster setup) · `platform-run` (neutral `task.yaml` → DLC/Slurm/EAI) · `platform-runtime` (driver × image × venv × storage stack) · `platform-migrate` (moving a persistent home to another mount) · `platform-queue-shepherd` (one claim per service on a busy fleet; migrate a stuck submission only into measured empty nodes) |
+| **platform** | how do I set up, submit to, and match the runtime of a compute platform? | `platform-env` (env.sh / cluster setup) · `platform-run` (neutral `task.yaml` → DLC/Slurm/EAI) · `platform-runtime` (driver × image × venv × storage stack) · `platform-migrate` (moving a persistent home to another mount) |
 | **code style** | may this input have a default? | `code-no-fallbacks` (required inputs fail loudly; defaults are only for values the code legitimately owns) |
 | **outputs** | how do I compare runs or reclaim their space? | `output-analysis` (latitude vs longitude) · `output-cleanup` (resume-safe reclaim) |
-| **papers** | where does the citation go, and why does this paragraph say nothing? | `writing-paper` (citation placement, themed related work, findings-first section openers) · `writing-style` (the punctuation and word rules it builds on) · `writing-chatgpt` (route the drafting to the writer tool at `$PROJECTS_HOME/ChatGPTMCP`; the agent patches the result) |
-| **figures** | what may a figure contain, and how do I render it? | `docs-figure` (TikZ / Mermaid / HTML / matplotlib, embed-not-standalone) |
+| **papers** | where does the citation go, and why does this paragraph say nothing? | `writing-paper` (citation placement, themed related work, findings-first section openers) · `writing-style` and `writing-style-zh` (the punctuation and word rules it builds on, English and Chinese) · `writing-chatgpt` (route the drafting to the writer tool at `$PROJECTS_HOME/ChatGPTMCP`; the agent patches the result) |
+| **methodology** | how is a method section ordered, and how is each new component and hard equation introduced? | `writing-methodology` (learned from the LatentHarness method rewrites: an overview from goal to components to training, the base model formulated first, our own choices argued as motivation, design and explanation, modules by inputs and outputs, intuition and a standard-design contrast around hard equations) |
+| **analysis** | how is an experiments section shaped? | `writing-analysis` (learned from System-1.5 and Mem-Pi: the setup, finding-framed or question-framed results and ablations, which evidence is a table, a figure or an appendix entry, every number traceable) |
+| **ablations** | which ablation variants exist, how are they grouped, and how is the ablation table laid out? | `writing-ablation` (learned from LatentHarness: families along design decisions, same-function substitutions beside removals, one change per row at a matched budget, short row names, the change from the full system) |
+| **literature** | how is related work shaped, and are its citations recent enough? | `writing-literature` (learned from Mem-Pi and System-1.5: direction paragraphs, lines of work with two named exemplars, a one- or two-sentence closing difference, a fifth to a quarter of citations from the last six months) |
+| **figures** | what may a figure contain, and how do I render it? | `writing-figure` (what a figure may and may not contain; TikZ / Mermaid / HTML / matplotlib) · `docs-workflow` (a workflow or architecture figure drawn in python-pptx) · `drawing-gemini` (generated images, never for a figure whose labels must be exact) |
+| **captions** | how is a figure or table caption worded? | `writing-caption` (a lead that names the object and the method in the paper's terms, panels by position, no protocol, legend text or finding) |
 | **tables** | what may a results table contain, and how is its winner marked? | `docs-table` (a column carries a comparison, three effective digits, bold best over underlined second best) |
-| **captions** | how is a figure or table caption worded? | `docs-caption` (learned from the author's HarnessRL rewrites: a lead that names the object and the method in the paper's terms, flow sentences for an overview, panels by position or joined contents and never by undrawn letters, no protocol, legend text or finding) |
-| **methodology** | how is a method section ordered, and how is each new component and hard equation introduced? | `docs-methodology` (learned from the LatentHarness method rewrites: an overview from goal to components to training, the base model formulated first, prior work stated and our own choices argued as motivation, design and explanation, modules by inputs and outputs, intuition and a standard-design contrast around hard equations, one hierarchy from abstract to method) |
-| **analysis** | how is an experiments section shaped, and how are ablations designed? | `docs-analysis` (learned from System-1.5 and Mem-Pi: the setup, finding-framed or question-framed results and ablations, which evidence is a table, a figure or an appendix entry, every number traceable) |
-| **ablations** | which ablation variants exist, how are they grouped, and how is the ablation table laid out? | `docs-ablation` (learned from LatentHarness: families along design decisions, same-function substitutions beside removals, one change per row at a matched budget, short row names, two-half table with the change from the full system) |
-| **literature** | how is related work shaped, and are its citations recent enough? | `docs-literature` (learned from Mem-Pi and System-1.5: direction paragraphs, lines of work with two named exemplars, a one- or two-sentence closing difference, a fifth to a quarter of citations from the last six months) |
-| **talks** | how do I build slides that can be linted, timed and rebuilt? | `docs-slides` (one source compiled to several backends, one bibliography, cropped paper figures, notes as the spoken script, and the discipline of what to strip off a slide) |
+| **citations** | is every `.bib` entry real and correct? | `docs-bib` (resolve and audit BibTeX against Semantic Scholar, arXiv and Crossref; accept only an exact title, author list and year) |
+| **talks** | how do I build slides that can be linted, timed and rebuilt? | `docs-slides` (one source compiled to several backends, one bibliography, cropped paper figures, notes as the spoken script; and for a `.pptx` it did not build, a geometry audit and a LibreOffice wrapper, with the package mechanics left to `anthropic-skills:pptx`) |
 | **debrief** | I left it running and came back, what do I need to know? | `claude-debrief` (verdict, blockers, live state, results, failures with verification, next) |
 | **campaign** | how do I run all of the above unattended for days, and resume after a context reset? | `claude-auto-research` (the plan-plus-ledger in `docs/plans/<date>-<topic>/`, and the autonomy boundary) |
+
+## Families by prefix
+The prefix says what kind of thing a skill governs, so a new skill's name follows from its job.
+`writing-*` governs what a paper **says**: the prose, each section's shape, the caption, and what a
+figure may contain. `docs-*` governs a **deliverable and its tooling**: a plan, the architecture
+reference, the weekly report, a deck, a drawn workflow figure, the bibliography, a results table.
+`naming-*`, `layout-*`, `platform-*` and `output-*` are the project-convention concerns above, and
+`claude-*` and `git-*` are about the agent and the repository rather than the project. One skill per
+job: when a tool's mechanics belong to a skill we do not own, as `.pptx` packaging belongs to
+`anthropic-skills:pptx`, ours points at it and keeps only what was written here.
 
 ## The philosophy (one line each)
 - **code style** — a required input has three sources (the environment, an argument, the job
@@ -60,6 +71,8 @@ starting or organizing a project, or when unsure which convention applies.
 - **tables** — a column earns its place by changing how the rows rank, so epoch and delta columns
   go to the caption, and the winner is bold above an underlined runner-up it carries its margin
   over (`docs-table`).
+- **citations** — a `.bib` entry is accepted only when its title, full author list and year match a
+  real record exactly, because a plausible-looking citation is the one nobody checks (`docs-bib`).
 - **talks** — a deck is compiled from a source and linted before it is shown (`docs-slides`), because
   typesetting fails silently and the failure is only visible from the back of the room.
 - **platform** — working on a compute platform means setting up a persistent env on it
@@ -83,4 +96,4 @@ derive mechanically under `OUTPUT_DIR_HOME` (never the project dir).
 
 ## Companions
 Every skill in the family should link back here. Non-family skills (`git-commit`,
-`git-push`, `writing-style`, `claude-migrate`) are separate.
+`git-push`, `claude-migrate`, `claude-skill-authoring`) are separate.

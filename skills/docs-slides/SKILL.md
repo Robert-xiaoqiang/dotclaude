@@ -10,13 +10,13 @@ Produce a slide deck the way a paper is produced, by **compiling one plain-text 
 artifacts** rather than dragging boxes until it looks right. A deck built this way can be linted
 before it is shown, timed against the slot it has to fill, cited from a single bibliography, and
 rebuilt from what is checked in. This skill owns the deck as a build product and the visual
-discipline applied to it. It does not own what a figure may contain (`docs-figure`) or the prose
+discipline applied to it. It does not own what a figure may contain (`writing-figure`) or the prose
 inside it (`writing-style`).
 
 The reference implementation is **cc2slides**, at `https://github.com/Robert-xiaoqiang/cc2slides`,
 installed with `pip install git+https://github.com/Robert-xiaoqiang/cc2slides`. The rules here are
 the reusable part and hold for any deck compiler, but where a rule names a mechanism, that is the one
-it was extracted from. The skill was called `docs-pptx` while there was one backend; the plural is
+it was extracted from. The skill was called docs-pptx while there was one backend; the plural is
 the point, and the format argument that used to open it is settled and now lives in the repository's
 README.
 
@@ -34,6 +34,7 @@ README.
 - [Speaker notes are the script](#speaker-notes-are-the-script)
 - [Verifying the numbers before they reach a slide](#verifying-the-numbers-before-they-reach-a-slide)
 - [The register of a pitch deck](#the-register-of-a-pitch-deck)
+- [A .pptx the compiler did not build](#a-pptx-the-compiler-did-not-build)
 - [The gates a deck build must have](#the-gates-a-deck-build-must-have)
 - [Rules](#rules)
 - [Anti-patterns](#anti-patterns)
@@ -46,7 +47,7 @@ README.
 - Stripping back a deck that has grown dense, or restructuring one whose argument changed.
 - Text ran off the bottom of a slide, or a talk written for thirty minutes ran forty.
 
-**Not for**: what a figure may contain or which plotting pipeline draws it, which is `docs-figure`.
+**Not for**: what a figure may contain or which plotting pipeline draws it, which is `writing-figure`.
 Not for the prose rules the slide text and the notes obey, which is `writing-style`. Not for the
 research that fills the deck, and not for posters or papers.
 
@@ -177,7 +178,7 @@ the audience a question the speaker is about to answer.
 
 ## What to remove
 
-The governing principle, shared with `docs-figure`: **the slide carries structure and quantity, the
+The governing principle, shared with `writing-figure`: **the slide carries structure and quantity, the
 script carries claim and explanation.** Anything in small type that explains rather than names is
 dead weight, because the speaker is already saying it.
 
@@ -381,6 +382,50 @@ reproducibility metadata, not a hedge, and it stays. And run status is still tra
 the deliverable**: the working notes record which rows have runs behind them, so the author always
 knows exactly what they are standing behind, while the deck itself carries only the claim.
 
+## A .pptx the compiler did not build
+
+Some decks are not compiled from a source: a figure deck drawn by a python-pptx script, a template
+someone else owns, a pptxgenjs deck. The rules above still apply to what is on the slide. What changes
+is the tooling, and three pieces are ours.
+
+**The package mechanics belong to `anthropic-skills:pptx`.** Unpacking, adding and cleaning slides,
+schema validation, pptxgenjs gotchas: use that skill for them. It is Anthropic's, licensed for use
+inside the service only, so this repository points at it and does not keep a copy. One used to live
+here as a skill of its own; it was removed for that reason, and what follows is the part of it that
+was written here.
+
+**Audit the geometry, not only the render.** `${CLAUDE_SKILL_DIR}/scripts/overlap_audit.py deck.pptx`
+reads the shape geometry and reports three things a rendered image makes you hunt for: shapes that
+fall off the slide, text that sits on top of other text or on a box it does not belong to, and edges
+that are within a hair of aligning without actually aligning. Run it before the visual pass, because
+it finds the defects that are one millimetre wide and it names the shapes, which the eye does not. It
+cannot see text that overflows its own box, so the visual pass still happens. It needs python-pptx:
+
+```bash
+uv run --with python-pptx python3 "${CLAUDE_SKILL_DIR}/scripts/overlap_audit.py" deck.pptx [--tol 0.02]
+```
+
+It was written while rebuilding two paper figures, where every defect it named had survived three
+passes of looking at the rendered image.
+
+**Name the arrowhead.** Connectors default to no head at all, and the first thing anyone reaches for is
+the filled triangle, which reads heavy at print size and swallows the shaft of a short connector. Set
+the head on the line's `<a:ln>`: `<a:tailEnd type="stealth" w="med" len="med"/>`, adding
+`<a:headEnd .../>` for a double arrow. `stealth` is the swept head; `triangle` is the solid one. Keep
+one kind per deck. `writing-figure` carries the same rule spelled for TikZ and matplotlib.
+
+**Convert with `${CLAUDE_SKILL_DIR}/scripts/soffice.sh`**, not bare `soffice`:
+
+```bash
+"${CLAUDE_SKILL_DIR}/scripts/soffice.sh" --convert-to pdf deck.pptx --outdir .
+```
+
+It runs LibreOffice headless in a throwaway profile, so a second instance or a stale lock cannot hang
+it, and it **fails loudly when LibreOffice is absent**. The wrapper it replaced was always called with
+its output sent to `/dev/null`, so on a box without LibreOffice the PDF step of four figure builds
+failed in silence and the PDFs on disk went stale without anyone being told. A build script that calls
+this must not swallow its exit status.
+
 ## The gates a deck build must have
 
 An error-severity finding fails the build, and an override flag is fine while an override default is
@@ -473,7 +518,7 @@ title long enough to wrap, an uncited number, and the timing estimate against th
   part the room remembers.
 
 ## Companions
-`docs-figure` (what a figure may contain and which pipeline draws it, plus the connector, arrowhead
+`writing-figure` (what a figure may contain and which pipeline draws it, plus the connector, arrowhead
 and spacing geometry a slide figure has to survive, where this skill says how a figure reaches a slide
 and how much of it to show) · `writing-style` (the punctuation and prose rules the slide text and the
 speaker notes obey) · `writing-style-zh` (the same for a Chinese deck, including the declarative-title
@@ -481,4 +526,5 @@ and no-invented-takeaway rules the slide titles obey) · `docs-weekly` (the othe
 which carries an argument rather than a log) · `naming-descriptive` (naming the talk directory and its
 assets) · `writing-chatgpt` (the writer tool's `slide` task drafts title, bullets and script in this
 register; the deck's gates still run here) · `code-no-fallbacks` (why an unknown cite key and an
-out-of-range crop fail loudly rather than defaulting).
+out-of-range crop fail loudly rather than defaulting) · `docs-workflow` (a paper figure drawn as a
+.pptx, whose geometry audit and PDF conversion are the ones described here) · `conventions` (the family index).

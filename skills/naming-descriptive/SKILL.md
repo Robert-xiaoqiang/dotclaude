@@ -49,5 +49,6 @@ Sequence IDs carry order but no meaning, and they rot when the roadmap is
 reordered or a phase is dropped. A content-revealing name stays accurate and lets
 the next reader (often future-you) understand the artifact at a glance.
 
-(Companion: see `naming-config` for naming *config files* by a
-slot grammar, and `git-commit` for commit-message conventions.)
+## Companions
+`naming-config` (naming *config files* by a slot grammar, the experiment-facing use of this
+primitive) · `git-commit` (commit-message conventions) · `conventions` (the family index).

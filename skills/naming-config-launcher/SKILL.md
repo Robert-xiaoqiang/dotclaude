@@ -81,8 +81,8 @@ Two more committed-variant cases the taxonomy owns:
 
 ## The bundled grid scripts
 `/mnt/data/xqwang/.claude/skills/naming-config-launcher/scripts/` ships the grid machinery as a portable engine, extracted from a
-working fleet and generalized the same way `platform-queue-shepherd` ships its shepherd: the engine
-knows files and hooks, never a scheduler or a project.
+working fleet and generalized so that the engine knows files and hooks, never a scheduler or a
+project.
 
 | script | job | hooks it needs |
 |---|---|---|
@@ -134,4 +134,4 @@ launcher name alone states what runs) · `layout-workspace` (selection-vs-specif
 launcher lives, and `references/overrides.md` for classifying a long submit line) · `platform-run`
 (how the template renders and submits to a scheduler) · `naming-config-prompting` (the sibling
 deep-dive: the same frozen-template-plus-overlay doctrine applied to prompt text) ·
-`code-no-fallbacks` (why a required invocation value fails loudly instead of defaulting).
+`code-no-fallbacks` (why a required invocation value fails loudly instead of defaulting) · `conventions` (the family index).

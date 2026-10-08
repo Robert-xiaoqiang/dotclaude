@@ -54,3 +54,6 @@ Create or update structured task plans in docs/plans/.
 ## Output
 - Confirm plan file path
 - Summarize key steps briefly
+
+## Companions
+`docs-arch` (the living architecture reference a finished plan updates) · `claude-auto-research` (a campaign is a plan in directory form, with a ledger) · `layout-workspace` (where `docs/plans/` lives) · `conventions` (the family index).

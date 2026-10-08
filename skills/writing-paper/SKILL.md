@@ -173,7 +173,7 @@ that says what one cited method fails to do ("X ... but does not place retrieval
 set") is the gap stated early and aimed at one paper, and it reads as an attack. Name at most two
 exemplars per line of work and let the grouped bracket carry the rest. The citation list must also
 be current: a fifth to a quarter of the section's citations from the last six months. The full
-section recipe, learned from Mem-Pi and System-1.5, with the recency count, is `docs-literature`.
+section recipe, learned from Mem-Pi and System-1.5, with the recency count, is `writing-literature`.
 
 ## The leading sentence carries the finding
 The first sentence of a section, subsection, or paragraph is the most-read sentence in it. Spend it on
@@ -322,7 +322,7 @@ mechanism the method was built around. A paragraph that walks through every suit
 every variant says the same thing six times, buries the one comparison that mattered, and never
 says why.
 
-`docs-analysis` gives worked examples of this shape from System-1.5 and Mem-Pi, and owns the rest
+`writing-analysis` gives worked examples of this shape from System-1.5 and Mem-Pi, and owns the rest
 of the experiments section: setup, ablation framing, and where each piece of evidence goes.
 
 **Structure the section as questions, not as tables.** Ablations and analyses are numbered research
@@ -445,7 +445,7 @@ the authors' own choices, or reads *what we found*.
 
 ## Captions
 
-Captions are owned by `docs-caption`. In short: the lead is a noun phrase that names the float's
+Captions are owned by `writing-caption`. In short: the lead is a noun phrase that names the float's
 object and the method in the paper's own terms; an overview figure gets one or two sentences telling
 its flow; panels are named by position or by their joined contents, and by letters only when the
 figure draws them; protocol, legend text and findings stay out; a table caption declares only the
@@ -531,8 +531,8 @@ gain sits on a small base, because "50\% relative improvement" on a base of 4\% 
 - **A contribution in the abstract with no experiment.** The fastest way to lose a reviewer.
 
 ## Companions
-`docs-literature` (the related-work section: shape, closing, recency) · `writing-style` (the punctuation, word, and sentence-structure rules this inherits, load it alongside) · `writing-style-zh` (the same layer for a Chinese-language paper) · `docs-figure`
+`writing-literature` (the related-work section: shape, closing, recency) · `writing-style` (the punctuation, word, and sentence-structure rules this inherits, load it alongside) · `writing-style-zh` (the same layer for a Chinese-language paper) · `writing-figure`
 (what a figure may contain and how to render it) · `naming-descriptive` (naming a method or an arm so
 the name states what it is) · `output-analysis` (producing the tables and curves the experiments
 section reports) · `writing-chatgpt` (hand the drafting to the writer tool, which applies this layer
-and the style layer; the agent patches the result) · `docs-methodology` (the method section: overview, base model first, motivated components, hard equations) · `docs-analysis` (the experiments and analysis section: setup, results paragraphs, ablations, evidence placement) · `conventions` (the map).
+and the style layer; the agent patches the result) · `writing-methodology` (the method section: overview, base model first, motivated components, hard equations) · `writing-analysis` (the experiments and analysis section: setup, results paragraphs, ablations, evidence placement) · `conventions` (the map).
