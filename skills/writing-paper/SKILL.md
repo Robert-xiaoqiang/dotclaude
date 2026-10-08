@@ -531,7 +531,7 @@ gain sits on a small base, because "50\% relative improvement" on a base of 4\% 
 - **A contribution in the abstract with no experiment.** The fastest way to lose a reviewer.
 
 ## Companions
-`writing-literature` (the related-work section: shape, closing, recency) · `writing-style` (the punctuation, word, and sentence-structure rules this inherits, load it alongside) · `writing-style-zh` (the same layer for a Chinese-language paper) · `writing-figure`
+`writing-literature` (the related-work section: shape, closing, recency) · `writing-style` (the punctuation, word, and sentence-structure rules this inherits, load it alongside) · `writing-style-zh` (the same layer for a Chinese-language paper) · `drawing-figure`
 (what a figure may contain and how to render it) · `naming-descriptive` (naming a method or an arm so
 the name states what it is) · `output-analysis` (producing the tables and curves the experiments
 section reports) · `writing-chatgpt` (hand the drafting to the writer tool, which applies this layer

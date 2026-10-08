@@ -693,4 +693,5 @@ run hash like any other axis. Composition (ordered fragments with banded orders)
 rule 6 derives) · `platform-run` (the launcher's neutral spec) · `naming-config-launcher` (deep-dive:
 the template-vs-invocation contract behind the `tag` slot — variants are named configs or CLI
 overlays, never copies or mode flags) · `naming-config-prompting` (deep-dive: prompts as registered,
-named, hashed data) · `conventions` (the family index).
+named, hashed data) · `code-abstraction` (the interface a selected variant answers, and keeping
+an old `class_path` importable when a class moves) · `conventions` (the family index).

@@ -10,7 +10,7 @@ Produce a slide deck the way a paper is produced, by **compiling one plain-text 
 artifacts** rather than dragging boxes until it looks right. A deck built this way can be linted
 before it is shown, timed against the slot it has to fill, cited from a single bibliography, and
 rebuilt from what is checked in. This skill owns the deck as a build product and the visual
-discipline applied to it. It does not own what a figure may contain (`writing-figure`) or the prose
+discipline applied to it. It does not own what a figure may contain (`drawing-figure`) or the prose
 inside it (`writing-style`).
 
 The reference implementation is **cc2slides**, at `https://github.com/Robert-xiaoqiang/cc2slides`,
@@ -47,7 +47,7 @@ README.
 - Stripping back a deck that has grown dense, or restructuring one whose argument changed.
 - Text ran off the bottom of a slide, or a talk written for thirty minutes ran forty.
 
-**Not for**: what a figure may contain or which plotting pipeline draws it, which is `writing-figure`.
+**Not for**: what a figure may contain or which plotting pipeline draws it, which is `drawing-figure`.
 Not for the prose rules the slide text and the notes obey, which is `writing-style`. Not for the
 research that fills the deck, and not for posters or papers.
 
@@ -178,7 +178,7 @@ the audience a question the speaker is about to answer.
 
 ## What to remove
 
-The governing principle, shared with `writing-figure`: **the slide carries structure and quantity, the
+The governing principle, shared with `drawing-figure`: **the slide carries structure and quantity, the
 script carries claim and explanation.** Anything in small type that explains rather than names is
 dead weight, because the speaker is already saying it.
 
@@ -412,7 +412,7 @@ passes of looking at the rendered image.
 the filled triangle, which reads heavy at print size and swallows the shaft of a short connector. Set
 the head on the line's `<a:ln>`: `<a:tailEnd type="stealth" w="med" len="med"/>`, adding
 `<a:headEnd .../>` for a double arrow. `stealth` is the swept head; `triangle` is the solid one. Keep
-one kind per deck. `writing-figure` carries the same rule spelled for TikZ and matplotlib.
+one kind per deck. `drawing-figure` carries the same rule spelled for TikZ and matplotlib.
 
 **Convert with `${CLAUDE_SKILL_DIR}/scripts/soffice.sh`**, not bare `soffice`:
 
@@ -518,7 +518,7 @@ title long enough to wrap, an uncited number, and the timing estimate against th
   part the room remembers.
 
 ## Companions
-`writing-figure` (what a figure may contain and which pipeline draws it, plus the connector, arrowhead
+`drawing-figure` (what a figure may contain and which pipeline draws it, plus the connector, arrowhead
 and spacing geometry a slide figure has to survive, where this skill says how a figure reaches a slide
 and how much of it to show) · `writing-style` (the punctuation and prose rules the slide text and the
 speaker notes obey) · `writing-style-zh` (the same for a Chinese deck, including the declarative-title
@@ -526,5 +526,5 @@ and no-invented-takeaway rules the slide titles obey) · `docs-weekly` (the othe
 which carries an argument rather than a log) · `naming-descriptive` (naming the talk directory and its
 assets) · `writing-chatgpt` (the writer tool's `slide` task drafts title, bullets and script in this
 register; the deck's gates still run here) · `code-no-fallbacks` (why an unknown cite key and an
-out-of-range crop fail loudly rather than defaulting) · `docs-workflow` (a paper figure drawn as a
+out-of-range crop fail loudly rather than defaulting) · `drawing-workflow` (a paper figure drawn as a
 .pptx, whose geometry audit and PDF conversion are the ones described here) · `conventions` (the family index).

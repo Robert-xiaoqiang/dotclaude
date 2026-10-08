@@ -8,7 +8,7 @@ when_to_use: "Use when writing, revising or reviewing any figure or table captio
 ## Purpose
 A caption names what the float shows in the paper's own terms and says nothing the float or the setup
 already says. This skill owns the caption's wording and shape for every figure and table in a paper.
-`writing-figure` owns what the image contains and `docs-table` owns the grid, its number format and its
+`drawing-figure` owns what the image contains and `docs-table` owns the grid, its number format and its
 marks, and both defer here for the caption.
 
 The failure it guards against is a caption that is long and still unhelpful: a generic subject
@@ -37,7 +37,7 @@ a vague cut or a negation: exactness is the goal, and brevity follows from it on
 - Moving a figure between panel layouts, which changes how its panels are named.
 
 Not for:
-- what the image may contain, its labels, legend and panel titles (`writing-figure`),
+- what the image may contain, its labels, legend and panel titles (`drawing-figure`),
 - the table's columns, number format, and where bold, underline and margins go (`docs-table`),
 - which ablation rows exist (`writing-ablation`),
 - the prose paragraph that cites the float (`writing-paper`, `writing-analysis`),
@@ -283,7 +283,7 @@ float already opens with it ("At Qwen3.5-4B, ...").
 | **Training-curve figure** | `Training dynamics of \ourmethod{}`, or the quantity by what it is split on | the panels' contents, if more than one | line styles the legend shows, definitions the text gives |
 | **Efficiency figure** | `Training efficiency of \ourmethod{} measured by <the unit>` | the panels' contents, joined, a decomposition named by its conceptual groups (`RL loop and harness evolver overhead`) | hatch or colour keys the legend shows, the legend's fine stage list, a bare `by stage` |
 | **Multi-panel figure, no letters drawn** | as its kind | contents joined in reading order in one sentence, with `(left)`, `(middle)`, `(right)` or `(top left)` after each when the layout is not one row or the text cites a panel | `(a)`, `(b)`, `(c)`, and `Left:`, `Right:` fragments |
-| **Figure whose letters are drawn** (the author asked for them, `writing-figure`) | as its kind | `(a) <noun phrase>. (b) <noun phrase>.`, each letter matching the glyph on the figure | letters in the caption that are not on the figure, or the reverse |
+| **Figure whose letters are drawn** (the author asked for them, `drawing-figure`) | as its kind | `(a) <noun phrase>. (b) <noun phrase>.`, each letter matching the glyph on the figure | letters in the caption that are not on the figure, or the reverse |
 | **Case or qualitative figure** | `Case analysis of a randomly sampled <unit> \emph{``<its input>''}`: the kind, how the case was chosen, the quoted input | the panels' contents, scoring sources by the paper's concepts, `intermediate steps at which <the method> acted` | the story the case paragraph tells, a negation (`with and without the rubric`), a count the figure shows |
 | **Prompt box or listing** (appendix) | the role the prompt plays (`Harness attributor`) | nothing, the box is the content | `adapted from X` or any provenance note |
 
@@ -438,10 +438,10 @@ Run on every caption, in order, and delete what fails.
 ---
 
 ## Companions
-`writing-figure` (what the image contains, including the in-panel labels a caption must not repeat and
+`drawing-figure` (what the image contains, including the in-panel labels a caption must not repeat and
 when panel letters are drawn) · `docs-table` (the grid, number format, and the bold, underline and
 margin marks the caption declares) · `writing-ablation` (which ablation rows exist, whose axes the
-ablation caption's lead names) · `docs-workflow` (drawing the overview figure whose flow the caption
+ablation caption's lead names) · `drawing-workflow` (drawing the overview figure whose flow the caption
 tells) · `writing-analysis` and `writing-paper` (the setup that owns the protocol, and the results
 paragraph that owns the finding) · `writing-chatgpt` (polishing a drafted caption's sentences) ·
 `conventions` (family index).

@@ -25,14 +25,14 @@ starting or organizing a project, or when unsure which convention applies.
 | **layout** | where does this doc / script / run output live? | `layout-workspace` (`docs/`, `scripts/`, reports/plans, what's committed) · `layout-output` (the run-output tree under `$OUTPUT_DIR_HOME`) |
 | **docs** | how do I write/maintain the living docs? | `docs-plan` (`docs/plans/<date>-<topic>.md`) · `docs-arch` (`docs/ARCH.md`) · `docs-weekly` (the staged Chinese+English weekly report) |
 | **platform** | how do I set up, submit to, and match the runtime of a compute platform? | `platform-env` (env.sh / cluster setup) · `platform-run` (neutral `task.yaml` → DLC/Slurm/EAI) · `platform-runtime` (driver × image × venv × storage stack) · `platform-migrate` (moving a persistent home to another mount) |
-| **code style** | may this input have a default? | `code-no-fallbacks` (required inputs fail loudly; defaults are only for values the code legitimately owns) |
+| **code style** | may this input have a default, and when do several implementations earn one contract? | `code-no-fallbacks` (required inputs fail loudly; defaults are only for values the code legitimately owns) · `code-abstraction` (name the role by its job, type the boundary, one interface per axis, variants selected by name in config) |
 | **outputs** | how do I compare runs or reclaim their space? | `output-analysis` (latitude vs longitude) · `output-cleanup` (resume-safe reclaim) |
 | **papers** | where does the citation go, and why does this paragraph say nothing? | `writing-paper` (citation placement, themed related work, findings-first section openers) · `writing-style` and `writing-style-zh` (the punctuation and word rules it builds on, English and Chinese) · `writing-chatgpt` (route the drafting to the writer tool at `$PROJECTS_HOME/ChatGPTMCP`; the agent patches the result) |
 | **methodology** | how is a method section ordered, and how is each new component and hard equation introduced? | `writing-methodology` (learned from the LatentHarness method rewrites: an overview from goal to components to training, the base model formulated first, our own choices argued as motivation, design and explanation, modules by inputs and outputs, intuition and a standard-design contrast around hard equations) |
 | **analysis** | how is an experiments section shaped? | `writing-analysis` (learned from System-1.5 and Mem-Pi: the setup, finding-framed or question-framed results and ablations, which evidence is a table, a figure or an appendix entry, every number traceable) |
 | **ablations** | which ablation variants exist, how are they grouped, and how is the ablation table laid out? | `writing-ablation` (learned from LatentHarness: families along design decisions, same-function substitutions beside removals, one change per row at a matched budget, short row names, the change from the full system) |
 | **literature** | how is related work shaped, and are its citations recent enough? | `writing-literature` (learned from Mem-Pi and System-1.5: direction paragraphs, lines of work with two named exemplars, a one- or two-sentence closing difference, a fifth to a quarter of citations from the last six months) |
-| **figures** | what may a figure contain, and how do I render it? | `writing-figure` (what a figure may and may not contain; TikZ / Mermaid / HTML / matplotlib) · `docs-workflow` (a workflow or architecture figure drawn in python-pptx) · `drawing-gemini` (generated images, never for a figure whose labels must be exact) |
+| **figures** | what may a figure contain, and how do I render it? | `drawing-figure` (what a figure may and may not contain; TikZ / Mermaid / HTML / matplotlib) · `drawing-workflow` (a workflow or architecture figure drawn in python-pptx) · `drawing-gemini` (generated images, never for a figure whose labels must be exact) |
 | **captions** | how is a figure or table caption worded? | `writing-caption` (a lead that names the object and the method in the paper's terms, panels by position, no protocol, legend text or finding) |
 | **tables** | what may a results table contain, and how is its winner marked? | `docs-table` (a column carries a comparison, three effective digits, bold best over underlined second best) |
 | **citations** | is every `.bib` entry real and correct? | `docs-bib` (resolve and audit BibTeX against Semantic Scholar, arXiv and Crossref; accept only an exact title, author list and year) |
@@ -42,9 +42,11 @@ starting or organizing a project, or when unsure which convention applies.
 
 ## Families by prefix
 The prefix says what kind of thing a skill governs, so a new skill's name follows from its job.
-`writing-*` governs what a paper **says**: the prose, each section's shape, the caption, and what a
-figure may contain. `docs-*` governs a **deliverable and its tooling**: a plan, the architecture
-reference, the weekly report, a deck, a drawn workflow figure, the bibliography, a results table.
+`writing-*` governs what a paper **says**: the prose, each section's shape, the caption.
+`drawing-*` governs a **figure**: what it may contain, and how it is drawn, whether plotted, drawn in
+python-pptx or generated. `docs-*` governs a **deliverable and its tooling**: a plan, the architecture
+reference, the weekly report, a deck, the bibliography, a results table. `code-*` governs **how code
+is written**: which inputs may default, and when a family of implementations earns a shared base.
 `naming-*`, `layout-*`, `platform-*` and `output-*` are the project-convention concerns above, and
 `claude-*` and `git-*` are about the agent and the repository rather than the project. One skill per
 job: when a tool's mechanics belong to a skill we do not own, as `.pptx` packaging belongs to
@@ -53,7 +55,9 @@ job: when a tool's mechanics belong to a skill we do not own, as `.pptx` packagi
 ## The philosophy (one line each)
 - **code style** — a required input has three sources (the environment, an argument, the job
   config); if none supplied it the chain is broken, so fail there rather than guess and
-  relocate the run (`code-no-fallbacks`).
+  relocate the run (`code-no-fallbacks`). When a third implementation of one job arrives, the
+  shared role gets a typed contract and the variants plug in by config, so the next one edits no
+  caller (`code-abstraction`).
 - **debrief** — a person returning asks what needs doing before what happened, so the report leads
   with a verdict and blockers, grounds every claim in an id or a path, and says what did not
   happen as well as what did (`claude-debrief`).

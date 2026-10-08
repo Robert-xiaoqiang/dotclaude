@@ -58,7 +58,7 @@ grid. For longitude, plot each run on its own step grid.
   only when the user wants a single float in the paper.
 
 ## Figure style
-**Owned by `writing-figure`.** Read it before emitting anything: the figure is not self-contained, so no
+**Owned by `drawing-figure`.** Read it before emitting anything: the figure is not self-contained, so no
 title, no baked caption, no claim or explanation printed on the image, terse labels, one colour per run
 fixed across every figure, vector output, and the null drawn as a band. Arms one config slot apart go on
 **one** axes with a legend.
@@ -80,11 +80,11 @@ only copy in a chat scratchpad, because the point is to rerun the figure when a 
    triples needs the user to say why.
 3. Align on steps and state gaps. No silent interpolation.
 4. One color per run, reused across every figure.
-5. Embed style per `writing-figure`. No title, no caption, no claim on the image.
+5. Embed style per `drawing-figure`. No title, no caption, no claim on the image.
 6. Emit a rerunnable script, not just an inline one-off.
 
 ## Companions
 `layout-output` (the run schema this reads) · `naming-config` (how runs are labeled and
 paired) · `layout-workspace` (where the script and report live) · `writing-style` (prose
-around the tables) · `writing-figure` (what a figure may contain, and the renderer rules) · `dataviz`
+around the tables) · `drawing-figure` (what a figure may contain, and the renderer rules) · `dataviz`
 (palette and marks for richer charts) · `conventions` (index).

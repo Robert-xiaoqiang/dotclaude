@@ -252,4 +252,5 @@ are named configs or CLI overlays, with the bundled grid engine) · `naming-conf
 (prompts as registered, hashed data) · `platform-run` (the flat run-control layer under `launcher/`) ·
 `layout-output` (the run-output tree, the sibling `layout-` concern) · `docs-plan` (writes
 `docs/plans/…`) · `docs-arch` (maintains `docs/ARCH.md`) · `naming-descriptive` (how to name) ·
-`git-commit` (commit conventions) · `conventions` (the family index).
+`git-commit` (commit conventions) · `code-abstraction` (what goes behind a `class_path`: one
+contract per role, variants selected by name) · `conventions` (the family index).

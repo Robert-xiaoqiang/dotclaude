@@ -34,7 +34,7 @@ grouped.
 - Compressing a long ablation table that no longer fits.
 
 Not for: the main results table (`docs-table`), the order and shape of the results section
-(`writing-analysis`), or sweeps over one hyperparameter (a figure, `writing-figure`).
+(`writing-analysis`), or sweeps over one hyperparameter (a figure, `drawing-figure`).
 
 ## Families along design dimensions
 Start from the method's **design decisions**, not its module list. Each decision the paper claims to

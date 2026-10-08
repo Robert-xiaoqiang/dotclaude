@@ -1,6 +1,6 @@
 ---
 name: drawing-gemini
-description: Generate an image from a text prompt through ModelRouter's image models (gpt-image, and the Gemini and Seedream families when the key carries them), for concept art, cover images, and candidate figure treatments a reviewer can compare against a hand-built one. Covers the endpoint, the three request shapes, prompt discipline for a scientific figure, and the limit that decides whether a generated image may ship. - Use when asked to generate or draw a picture from a description, to produce alternative renderings of a paper figure, or when a deliverable wants an illustration no vector pipeline is going to hand-draw. Not for a figure whose labels, numbers or arrows have to be exactly right, which belongs to writing-figure.
+description: Generate an image from a text prompt through ModelRouter's image models (gpt-image, and the Gemini and Seedream families when the key carries them), for concept art, cover images, and candidate figure treatments a reviewer can compare against a hand-built one. Covers the endpoint, the three request shapes, prompt discipline for a scientific figure, and the limit that decides whether a generated image may ship. - Use when asked to generate or draw a picture from a description, to produce alternative renderings of a paper figure, or when a deliverable wants an illustration no vector pipeline is going to hand-draw. Not for a figure whose labels, numbers or arrows have to be exactly right, which belongs to drawing-figure.
 ---
 
 # Skill: drawing-gemini
@@ -11,7 +11,7 @@ endpoint and key the writer uses, so the credentials, the rate limit and the fai
 already understood. The scripts live in this skill rather than in a separate project, so the skill is
 the whole of it: read `SKILL.md`, run `scripts/genimage.py`, get a PNG.
 
-It owns **how to get an image**. It does not own **what a figure may contain**, which is `writing-figure`,
+It owns **how to get an image**. It does not own **what a figure may contain**, which is `drawing-figure`,
 and it does not own the vector pipeline that produces the figure a paper actually ships.
 
 ## Contents
@@ -32,7 +32,7 @@ and it does not own the vector pipeline that produces the figure a paper actuall
 
 Not for a figure whose arrows, labels and numbers have to be right. Generators misspell, invent
 labels, and route arrows into the wrong box, and they do it confidently. That figure is built in
-TikZ, matplotlib or PowerPoint under `writing-figure`.
+TikZ, matplotlib or PowerPoint under `drawing-figure`.
 
 ## The endpoint and what answers today
 The base URL and key are `MODELROUTER_BASE_URL` and `MODELROUTER_API_KEY` in `$CPFS_HOME/.secret`,
@@ -160,7 +160,7 @@ are anchored.
   with a different path will not fix it.
 
 ## Companions
-`writing-figure` (what a figure may contain, and the vector pipelines that produce the one that ships) ·
+`drawing-figure` (what a figure may contain, and the vector pipelines that produce the one that ships) ·
 `docs-slides` (the PowerPoint path, when a figure should stay editable by hand) · `writing-chatgpt` (the
 same endpoint and key, for prose) · `icons8` and `icons8:ouch` (real icons and illustrations, for
 when the need is a symbol rather than a scene) · `conventions` (the family index).

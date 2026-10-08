@@ -13,7 +13,7 @@ on such a draft was that it "always rushes to state its position and facts". The
 Every choice the paper makes itself owes the reader a motivation before it and an explanation after
 it. This skill fixes the order of the section, the shape of each component paragraph, and what must
 surround a hard equation. `writing-paper` owns the sentence, `writing-analysis` the experiments,
-`writing-figure` the method figure.
+`drawing-figure` the method figure.
 
 ## Contents
 - [When to Use](#when-to-use)
@@ -324,4 +324,4 @@ The author's skeleton, which this skill generalizes:
 `writing-paper` (the sentence, citations, the finding-first head) · `writing-style` (punctuation and
 word rules) · `writing-chatgpt` (every paragraph goes through the writer, and `critique` for review) ·
 `writing-analysis` (the experiments section that follows) · `writing-ablation` (ablations along the design
-decisions this section argues for) · `writing-figure` (the method figure) · `conventions` (family index).
+decisions this section argues for) · `drawing-figure` (the method figure) · `conventions` (family index).

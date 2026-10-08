@@ -97,4 +97,5 @@ A required variable nobody supplies is the same outage, arriving sooner.
 ## Companions
 `platform-run` (what a launcher may pass — names and overrides, never behaviour) ·
 `layout-workspace` (config specifies, launcher selects) · `platform-migrate` (the audit that
-surfaces stale defaults) · `conventions` (the map).
+surfaces stale defaults) · `code-abstraction` (the same rule for variants: an unknown
+name fails, an abstract method returns nothing) · `conventions` (the map).

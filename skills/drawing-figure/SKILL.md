@@ -1,9 +1,9 @@
 ---
-name: writing-figure
+name: drawing-figure
 description: "Decide what a figure may and may not contain when it is destined for a document, and render it in whichever pipeline fits: TikZ, Mermaid, HTML/SVG, or matplotlib."
 when_to_use: "Use when drawing a workflow, architecture or formulation diagram, or producing an experiment plot such as bars, curves, violins, heatmaps or scatter."
 ---
-# Skill: writing-figure
+# Skill: drawing-figure
 
 ## Purpose
 Decide **what a figure may and may not contain** when it is destined for a document, and render it in

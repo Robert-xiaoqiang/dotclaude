@@ -533,7 +533,7 @@ Name and path are not decoration. They are how a reader regenerates the figure, 
 against the analysis code, and how you find it again in six weeks. A figure referenced but not shown, or
 shown but unnamed, fails §Format dealbreakers.
 
-**Figure content and style are owned by `writing-figure`.** Read it before generating. The rules that bite
+**Figure content and style are owned by `drawing-figure`.** Read it before generating. The rules that bite
 most often in a weekly report:
 - **Nothing on the image that the report already says.** No headline claim, no explanatory sentence, no
   bullets copied out of the text. The report is the caption.
@@ -955,6 +955,6 @@ because a list of thirty findings does not say where to start. One worked harnes
 ## Companions
 `writing-style` (**`en` mode only**) · `writing-style-zh` (**`zh` mode only** — the Chinese word,
 punctuation and sentence rules live there in full, and this skill does not restate them) ·
-`writing-figure` (what the embedded
+`drawing-figure` (what the embedded
 figures may contain) · `output-analysis` (comparing the runs behind them) · `docs-plan` (the actionable plan a report's next-week section points at) ·
 `layout-workspace` (where reports live) · `conventions` (the family index).

@@ -1,15 +1,15 @@
 ---
-name: docs-workflow
+name: drawing-workflow
 description: "Build a paper's workflow or architecture figure, and small concept illustrations, as a python-pptx drawing in the accepted MemDGM Fig 2 idiom: aligned panel grid, Icons8 Fluency icon plus concept word, code-editor windows with syntax highlighting and a code-review diff, a zoom band into a framed loop, one type scale, measured text, orthogonal arrows."
 when_to_use: "Use when drawing a system overview, a workflow with a feedback loop, a zoom-in onto one component, a code or interface panel inside a figure, or a small concept illustration that replaces a paragraph of method prose."
 ---
-# Skill: docs-workflow
+# Skill: drawing-workflow
 
 ## Purpose
 This is the drawing idiom the author signed off on for the MemDGM paper's Fig 2 (2026-09-23/24),
 after a dozen rejected versions. It owns **how a workflow figure is laid out and drawn**: the grid,
 the icons, the code panels, the zoom, the arrows, the type scale, and the checks that keep all of
-it aligned. `writing-figure` still owns what a figure may contain (no annotation sentences, no
+it aligned. `drawing-figure` still owns what a figure may contain (no annotation sentences, no
 baked captions); `drawing-gemini` owns generated images; `docs-slides` owns decks.
 
 The reference drawings are in `resources/examples/`, the generators that produced them in
@@ -44,7 +44,7 @@ The reference drawings are in `resources/examples/`, the generators that produce
 
 ## The pipeline
 ```sh
-T=$CPFS_HOME/.claude/skills/docs-workflow/resources/templates
+T=$CPFS_HOME/.claude/skills/drawing-workflow/resources/templates
 cp $T/figlib.py $T/fig2_build.py src/            # the full figure; figlib for small ones
 python3 src/fig2_build.py                        # writes out/<name>.pptx, prints OVERFLOW lines
 cd out && soffice --headless --convert-to pdf <name>.pptx
@@ -235,6 +235,6 @@ See `writing-caption`.
 - Subscripts by baseline shift, text boxes narrower than their text, edge labels smaller than body.
 
 ## Companions
-`writing-figure` (what a figure may contain; the chart idiom) · `docs-table` · `docs-slides` (deck
+`drawing-figure` (what a figure may contain; the chart idiom) · `docs-table` · `docs-slides` (deck
 building, and the geometry audit and LibreOffice wrapper for any .pptx) · `drawing-gemini` (generated emblems) · `writing-caption` (captions) · `icons8` MCP
 (`search_icons`, `get_icon_png_url`) · `conventions` (the family index).

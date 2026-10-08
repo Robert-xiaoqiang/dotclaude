@@ -7,7 +7,7 @@ when_to_use: "Use when building or revising any results, ablation or comparison 
 
 ## Purpose
 A table is a ranking the reader performs with their eyes, and every convention here exists to make
-that ranking possible in one pass. `writing-figure` owns what a picture may contain; this owns the same
+that ranking possible in one pass. `drawing-figure` owns what a picture may contain; this owns the same
 question for a grid of numbers. `writing-paper` owns the prose that cites the table.
 
 The failure this guards against is a table that is complete and unreadable: nine columns where four
@@ -229,7 +229,7 @@ states the grouping without a label.
 one table with two row groups. Three tables that differ only in which arms they list are one table.
 Splitting them makes the reader carry numbers between floats.
 
-**Endpoints only.** A table compares end states. A per-epoch trajectory is a figure (`writing-figure`),
+**Endpoints only.** A table compares end states. A per-epoch trajectory is a figure (`drawing-figure`),
 and once that figure exists the per-epoch table is deleted.
 
 **Ablations share the main table's conventions** and add one column naming what each variant keeps,
@@ -295,7 +295,7 @@ typed. The same script feeds the figures.
 - **A table shrunk to fit a margin in every column**, where the summary columns alone should carry it.
 
 ## Companions
-`writing-ablation` (which ablation variants exist and how the ablation table is grouped, the one table allowed to print changes) · `writing-figure` (the same question for pictures, and the shared generator directory) · `writing-paper`
+`writing-ablation` (which ablation variants exist and how the ablation table is grouped, the one table allowed to print changes) · `drawing-figure` (the same question for pictures, and the shared generator directory) · `writing-paper`
 (the prose that leads with the finding and cites the table as evidence, and the `pp` convention) ·
 `output-analysis` (which runs belong in the comparison) · `writing-caption` (the caption's wording and shape) · `writing-chatgpt` (the caption's prose) ·
 `writing-analysis` (the experiments and analysis section: setup, results paragraphs, ablations, evidence placement) · `conventions` (family index).

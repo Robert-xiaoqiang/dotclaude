@@ -33,4 +33,5 @@ Keep docs/ARCH.md consistent with the current codebase.
 - Brief summary of changes
 
 ## Companions
-`docs-plan` (dated plans for work in flight; this file is the living reference they update) · `layout-workspace` (where `docs/` lives and what is committed) · `claude-auto-research` (a campaign's ledger links back to the architecture it changes) · `conventions` (the family index).
+`docs-plan` (dated plans for work in flight; this file is the living reference they update) · `layout-workspace` (where `docs/` lives and what is committed) · `claude-auto-research` (a campaign's ledger links back to the architecture it changes) · `code-abstraction` (the roles and contracts this file
+records) · `conventions` (the family index).
