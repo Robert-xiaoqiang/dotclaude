@@ -1,6 +1,6 @@
 ---
 name: drawing-icons
-description: "Find, fetch and keep the icons a figure, a deck or a page uses, one family per document: Lucide through Iconify as TikZ macros for LaTeX, Icons8 Fluency as PNGs for python-pptx figures, and every file recorded in a MANIFEST.md that can fetch the set back. Bundles cc2icon (search, get, sync, copy, check), and covers how the Icons8 MCP server reaches a session, why a script cannot use it, and what the bundled client does instead."
+description: "Find, fetch and keep the icons a figure, a deck or a page uses, one family per document: Lucide through Iconify as TikZ macros for LaTeX, Icons8 Fluency as PNGs for python-pptx figures, and every file recorded in a MANIFEST.md that can fetch the set back. Bundles cc2icon (search, get, sync, copy, check), and covers installing the Icons8 plugin that brings the MCP server, using its tools in a session, turning a search hit into a recorded icon, and why a script uses the bundled client instead."
 when_to_use: "Use when a figure, slide or page needs icons, when choosing a document's icon family, when moving icons into a project or between projects, when an icon directory holds files nobody can trace, or when setting up Icons8 on a new machine. Not for what a figure may contain (drawing-figure), how a workflow figure is laid out around its icons (drawing-workflow), or a picture generated from a prompt (drawing-gemini)."
 ---
 # Skill: drawing-icons
@@ -19,7 +19,8 @@ fetching and record keeping, so the same steps run from a session, a build scrip
 - [cc2icon](#cc2icon)
 - [The manifest](#the-manifest)
 - [Where icons live](#where-icons-live)
-- [Icons8: the MCP, the plugin and the script](#icons8-the-mcp-the-plugin-and-the-script)
+- [Installing the Icons8 plugin](#installing-the-icons8-plugin)
+- [Using the Icons8 MCP in a session](#using-the-icons8-mcp-in-a-session)
 - [Licences](#licences)
 - [Rules](#rules)
 - [Anti-patterns](#anti-patterns)
@@ -42,9 +43,11 @@ icons (`drawing-workflow`), or a picture generated from a prompt (`drawing-gemin
 | python-pptx figure | Icons8 Fluency, `icons8-fluency:` | a 256 px RGBA PNG | the colour idiom the `drawing-workflow` figures were accepted in |
 | HTML page or artifact | Lucide | the `.svg`, inline | free SVG under the ISC licence, and it scales with the text |
 
-**One family per document.** A deck that mixes Lucide outlines with Fluency colour reads as two decks.
-When a concept has no icon in the family, take the nearest metaphor inside the family first. If
-nothing fits, fetch from outside it with a recorded reason, which `cc2icon` asks for.
+**One family per document.** A deck that mixes Lucide outlines with Fluency colour reads as two
+decks. For an Icons8 pack, choose it the way the plugin's `icons8` skill says, by coverage of every
+concept the document needs. When a concept has no icon in the family, take the nearest metaphor
+inside the family first. If nothing fits, fetch from outside it with a recorded reason, which
+`cc2icon` asks for.
 
 ## cc2icon
 ```sh
@@ -116,30 +119,81 @@ the manifest and let `sync` restore the files.
 - **A directory made before its manifest** gets one by running `get` again for each of its icons.
   The files are rewritten identically, and the rows appear.
 
-## Icons8: the MCP, the plugin and the script
-- **A skill cannot carry an MCP server.** Claude Code loads servers from its settings, a project's
-  `.mcp.json` or a plugin. The Icons8 server arrives with Icons8's own plugin, `icons8@icons8`, under
-  Apache-2.0, which also brings the `icons8:icons8` and `icons8:ouch` skills.
-- **The plugin does not travel with the dotfiles.** It is enabled in `~/.claude/settings.json`, which
-  dotclaude deliberately leaves untracked, so a new machine needs it installed once:
+## Installing the Icons8 plugin
+The Icons8 MCP server is not configured by hand. It ships inside Icons8's own plugin, under
+Apache-2.0, which also brings the `icons8` and `icons8:ouch` skills. A **marketplace** is a catalogue
+of plugins, and the **plugin** is the installable unit in it.
 
-  ```sh
-  claude plugin marketplace add icons8/agent-skills
-  claude plugin install icons8@icons8
-  ```
+**dotclaude records it.** The config repository is itself a marketplace named `dotclaude`, and its
+tracked `.claude-plugin/marketplace.json` lists this plugin by its git source and the commit it was
+tested at. The installed id is therefore `icons8@dotclaude`. On a machine with the checkout, one
+command installs everything the record lists:
 
-  The server asks for a browser sign-in the first time a session uses it.
-- **A script cannot use the MCP.** The endpoint answers 401 without that sign-in, which a script does
-  not have. `cc2icon` calls the public search API the MCP wraps, and the free PNG URLs, so it needs
-  no key and runs wherever curl runs. Icons8 asks anonymous callers to get an API key and has said
-  anonymous access may end. When it does, `cc2icon search` stops with Icons8's message rather than
-  returning nothing.
-- **SVG belongs to the MCP, and this account is not entitled to it.** `get_icon_svg` needs a paid
-  plan, and our account answered "does not have MCP API access". A 256 px PNG stays sharp at the half
-  to one centimetre a figure uses.
-- **In a session, browse with whichever is quicker, then record with `cc2icon get`.** The MCP's search
-  and previews are good for choosing. A choice that is not in the manifest cannot be rebuilt. The
-  plugin's own skill keeps its lock in an `icons8.json`, and ours keeps it as the manifest's family.
+```sh
+claude plugin install icons8 --marketplace "$CLAUDE_CONFIG_DIR"    # adds the marketplace too
+# inside a session: /plugin marketplace add <that path>, then /plugin install icons8@dotclaude
+```
+
+The server asks for a browser sign-in the first time a session calls it. `claude mcp list` then shows
+`plugin:icons8:icons8mcp` as connected. Moving the pin is an edit to the manifest, then
+`claude plugin marketplace update dotclaude` and `claude plugin update icons8@dotclaude`. The tool
+names come from the plugin's own name, never the marketplace's, so they read the same whichever
+catalogue it came from.
+
+**Without dotclaude,** install from Icons8's own catalogue. It is the same plugin under the id
+`icons8@icons8`, and never both at once, because two enabled copies of one plugin conflict:
+
+```sh
+claude plugin marketplace add icons8/agent-skills && claude plugin install icons8@icons8
+```
+
+Codex has the same plugin: `codex plugin marketplace add icons8/agent-skills`, then install it from
+`/plugins`, then `codex mcp login icons8mcp`.
+
+**What stays machine-local.** The install writes Claude Code's cache under `plugins/` and two keys in
+`settings.json`, and neither is tracked. The record is the manifest. A box that mounts an existing
+config directory already has the plugin, and only a machine with its own config directory runs the
+install.
+
+**A personal API key is the other route.** It registers the bare server, without the plugin's
+skills, and is the one way to SVG on a plan that includes it:
+`claude mcp add --transport http icons8mcp https://mcp.icons8.com/mcp/ --header "Authorization: Bearer <key>"`.
+We have no key, and the key would live in machine-local config, never in a tracked file.
+
+## Using the Icons8 MCP in a session
+The MCP is for choosing, and `cc2icon` is for recording. A pick that never reaches the manifest
+cannot be refetched, resized or credited.
+
+| need | MCP tool | note |
+|---|---|---|
+| find icons in one style | `search_icons(query, platform="fluent", amount=20)` | Fluency's code is `fluent` |
+| the other style codes | `list_platforms()` | |
+| look at one before choosing | `get_icon_png_url(icon_id, size=256)` | free |
+| an icon that moves | `search_icons(..., animated=True)` | each hit carries free GIF and APNG links |
+| a scene rather than a symbol | `search_illustrations(...)` | the `icons8:ouch` skill covers these |
+| vector | `get_icon_svg(icon_id)` | paid; this account is refused, retested 2026-10-09 |
+
+**From a hit to a recorded icon.** A search hit carries an `id`, a `commonName` and a `platform`.
+Record it with the common name under the family name:
+
+```sh
+python3 ${CLAUDE_SKILL_DIR}/scripts/cc2icon.py get icons8-fluency:<commonName> --as <concept> --out icons
+```
+
+`cc2icon` resolves the name through the same search the MCP wraps, so it lands on the hit's id. The
+manifest records that id, and `trophy` resolved to `kPENNmiEJv3b` both ways.
+
+**Choosing the pack is the plugin's subject.** Before a document's family is fixed, the plugin's
+`icons8` skill says how: list every concept the document needs, then take the pack that covers them
+all, with plain metaphors over logos. That skill keeps its lock in an `icons8.json`. Ours is the
+manifest's family, which `cc2icon get` enforces, so the two agree when the manifest names the pack
+the plugin chose.
+
+**A script cannot use the MCP.** The endpoint answers 401 without the browser sign-in, which a script
+does not have. `cc2icon` calls the public search API the MCP wraps, and the free PNG URLs, so it needs
+no key and runs wherever curl runs. Icons8 asks anonymous callers to get an API key and has said
+anonymous access may end. When it does, `cc2icon search` stops with Icons8's message rather than
+returning nothing.
 
 ## Licences
 - **Lucide** is ISC-licensed.

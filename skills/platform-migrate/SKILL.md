@@ -65,7 +65,10 @@ while looking perfectly intact.
 Venv trees are also usually the worst file-count offender in the whole home, so this is the
 rare case where the expensive thing to copy is also the wrong thing to copy. Rebuild from each
 project's installer instead. The same reasoning applies to anything embedding absolute paths:
-compiled extensions, `.pth` files, tool configs written with a literal prefix.
+compiled extensions, `.pth` files, tool configs written with a literal prefix. Claude Code's
+plugins are one: `settings.json` registers a directory marketplace by absolute path, and after
+the move the plugin fails to load until `claude plugin marketplace add "$CLAUDE_CONFIG_DIR"`
+repoints it.
 
 ## Copying is the easy half — the cutover is where migrations fail
 

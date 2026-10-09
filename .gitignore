@@ -17,6 +17,9 @@
 .DS_Store
 !/.gitattributes
 !/.gitignore
+# The marketplace manifest: which plugins this config uses, pinned. Plugin install state
+# (plugins/, settings.json) stays machine-local.
+!/.claude-plugin/
 !/hooks/
 # isn't explicitly un-ignored below.
 # NEVER allow-list these (here as a reminder, already ignored by /*):

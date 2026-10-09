@@ -106,7 +106,8 @@ RAPTOR, MemOS, DGM, HyperAgents, AutoMem). Code shown in an editor window follow
 ## Retrieving icons
 - One family: **Icons8 Fluency** (colourful flat, soft gradients). Fetching, the PNG check and the
   `MANIFEST.md` row all belong to `drawing-icons`. Copy from this set into the project first, and
-  fetch only what it lacks:
+  fetch only what it lacks. In a session, browse with the Icons8 MCP's
+  `search_icons(query, platform="fluent")`, then record the pick with `cc2icon get`:
   ```sh
   I=$CPFS_HOME/.claude/skills/drawing-icons/scripts/cc2icon.py
   python3 $I copy accuracy latency --from $CPFS_HOME/.claude/skills/drawing-workflow/resources/icons --to icons

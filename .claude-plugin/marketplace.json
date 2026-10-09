@@ -1,0 +1,21 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "dotclaude",
+  "description": "The plugins this Claude config uses, each pinned to the commit it was tested at. A third-party plugin is referenced by its git source and commit, never copied in.",
+  "owner": {
+    "name": "Robert-xiaoqiang",
+    "url": "https://github.com/Robert-xiaoqiang/dotclaude"
+  },
+  "plugins": [
+    {
+      "name": "icons8",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/icons8/agent-skills.git",
+        "sha": "409499684e18b748d5b0aecb605410e5cd4135e1"
+      },
+      "description": "Icons8's own plugin (Apache-2.0): the Icons8 MCP server plus its icons8 and ouch skills. skills/drawing-icons uses the server for choosing icons.",
+      "homepage": "https://github.com/icons8/agent-skills"
+    }
+  ]
+}
