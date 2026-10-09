@@ -104,17 +104,22 @@ RAPTOR, MemOS, DGM, HyperAgents, AutoMem). Code shown in an editor window follow
 (`class Layer`, `score(q, scope)`, `src(x)`).
 
 ## Retrieving icons
-- One family: **Icons8 Fluency** (colourful flat, soft gradients). Search with the Icons8 MCP tool
-  `search_icons(query, platform='fluency')`, then download the permanent PNG:
-  `curl -sL -o name.png "https://img.icons8.com/?id=<ID>&format=png&size=256"`. Check it is an
-  RGBA PNG (PIL), not an HTML page. Append a line to `MANIFEST.md` (concept, file, name, id, url,
-  glyph).
+- One family: **Icons8 Fluency** (colourful flat, soft gradients). Fetching, the PNG check and the
+  `MANIFEST.md` row all belong to `drawing-icons`. Copy from this set into the project first, and
+  fetch only what it lacks:
+  ```sh
+  I=$CPFS_HOME/.claude/skills/drawing-icons/scripts/cc2icon.py
+  python3 $I copy accuracy latency --from $CPFS_HOME/.claude/skills/drawing-workflow/resources/icons --to icons
+  python3 $I search judge --family icons8-fluency
+  python3 $I get icons8-fluency:court-judge --as judge_person --out icons
+  ```
 - Recolour an icon to carry a semantic colour by keeping alpha and luminance and replacing hue
   (`latent_purple.png` is `latent_interface.png` moved to the latent purple #7B5EA7).
 - An agent icon must not repeat the author's other papers (Mem-Pi and HarnessRL use robot heads);
   the sparkle assistant `task_agent.png` is the accepted one.
-- `resources/icons/` holds all 43 icons used so far. Prefer reusing them over fetching new ones,
-  so figures across a paper share one visual vocabulary.
+- `resources/icons/` holds all 50 icons used so far, each with its manifest row, so `cc2icon.py sync`
+  can fetch the set back. Prefer reusing them over fetching new ones, so figures across a paper
+  share one visual vocabulary.
 
 ## Arrows and lines
 - Orthogonal only. Diagonals appear once, as the dashed edge of a zoom band.
@@ -236,5 +241,5 @@ See `writing-caption`.
 
 ## Companions
 `drawing-figure` (what a figure may contain; the chart idiom) · `docs-table` · `docs-slides` (deck
-building, and the geometry audit and LibreOffice wrapper for any .pptx) · `drawing-gemini` (generated emblems) · `writing-caption` (captions) · `icons8` MCP
-(`search_icons`, `get_icon_png_url`) · `conventions` (the family index).
+building, and the geometry audit and LibreOffice wrapper for any .pptx) · `drawing-gemini` (generated emblems) · `writing-caption` (captions) · `drawing-icons` (fetching,
+copying and recording icons, and the Icons8 MCP) · `conventions` (the family index).

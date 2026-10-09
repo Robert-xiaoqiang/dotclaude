@@ -162,5 +162,5 @@ are anchored.
 ## Companions
 `drawing-figure` (what a figure may contain, and the vector pipelines that produce the one that ships) ·
 `docs-slides` (the PowerPoint path, when a figure should stay editable by hand) · `writing-chatgpt` (the
-same endpoint and key, for prose) · `icons8` and `icons8:ouch` (real icons and illustrations, for
-when the need is a symbol rather than a scene) · `conventions` (the family index).
+same endpoint and key, for prose) · `drawing-icons` (real icons, for when the need is a symbol rather than
+a scene) · `icons8:ouch` (Icons8 illustrations) · `conventions` (the family index).

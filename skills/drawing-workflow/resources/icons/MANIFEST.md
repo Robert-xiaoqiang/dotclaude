@@ -42,6 +42,23 @@ The Task Agent icon was chosen so it does not match the agent icons in the autho
 | rewriter | `rewriter.png` | Edit Pencil (`edit`) | `OWRPl8fxkRvG` | fluency | https://img.icons8.com/?id=OWRPl8fxkRvG&format=png&size=256 | Yellow pencil with a red eraser, drawn diagonally |
 | budget | `budget.png` | Coin Wallet (`coin-wallet`) | `WpfQ7DvG8Z3W` | fluency | https://img.icons8.com/?id=WpfQ7DvG8Z3W&format=png&size=256 | Red-orange wallet with a gold coin tucked in the top |
 | focus_set | `focus_set.png` | Filter (`filter--v2`) | `UT0KFoaguV2Z` | fluency | https://img.icons8.com/?id=UT0KFoaguV2Z&format=png&size=256 | Orange funnel |
+| api | `api.png` | API (`api`) | `RlIXjuTUrwoX` | fluency | https://img.icons8.com/?id=RlIXjuTUrwoX&format=png&size=256 | Blue rounded square with the white letters API |
+| chat | `chat.png` | Chat (`chat--v3`) | `GzN4ltD52jcA` | fluency | https://img.icons8.com/?id=GzN4ltD52jcA&format=png&size=256 | Two overlapping speech bubbles, light blue over dark blue |
+| code_edit | `code_edit.png` | Code (`code`) | `keI1M862UTP2` | fluency | https://img.icons8.com/?id=keI1M862UTP2&format=png&size=256 | Grey editor window with a title bar and white `</>` brackets |
+| contract | `contract.png` | Security Shield (`security-shield-green`) | `FbRY9JkBrjiX` | fluency | https://img.icons8.com/?id=FbRY9JkBrjiX&format=png&size=256 | Green shield holding a green padlock, drawn for the validity check |
+| database | `database.png` | Database (`database--v2`) | `NFQusZJ4neki` | fluency | https://img.icons8.com/?id=NFQusZJ4neki&format=png&size=256 | Blue cylinder of three stacked discs |
+| diagnosis | `diagnosis.png` | System Diagnostic (`system-diagnostic`) | `NZX0btBOVRd6` | fluency | https://img.icons8.com/?id=NZX0btBOVRd6&format=png&size=256 | Cyan square holding a blue stethoscope |
+| document | `document.png` | Document (`document`) | `Ygov9LJC2LzE` | fluency | https://img.icons8.com/?id=Ygov9LJC2LzE&format=png&size=256 | Cyan page with a folded corner and text lines, the same icon as nl_interface |
+| judge | `judge.png` | Law (`law`) | `Njg6Q8UV6MHS` | fluency | https://img.icons8.com/?id=Njg6Q8UV6MHS&format=png&size=256 | Brown gavel above its sound block |
+| judge_person | `judge_person.png` | Judge (`court-judge`) | `dBOIp5kr34Bn` | fluency | https://img.icons8.com/?id=dBOIp5kr34Bn&format=png&size=256 | Judge in a white curled wig and a grey robe |
+| lock | `lock.png` | Lock (`lock`) | `EHyUO6ZGSRkX` | fluency | https://img.icons8.com/?id=EHyUO6ZGSRkX&format=png&size=256 | Gold padlock with a grey shackle and a keyhole |
+| log | `log.png` | Logbook (`logbook`) | `4brDa8Wu96MT` | fluency | https://img.icons8.com/?id=4brDa8Wu96MT&format=png&size=256 | Blue open book whose pages are a grid of grey cells |
+| piece_evidence | `piece_evidence.png` | Piece Of Evidence (`piece-of-evidence`) | `qTUv38Pw3E8m` | fluency | https://img.icons8.com/?id=qTUv38Pw3E8m&format=png&size=256 | Magnifying glass over a blue fingerprint |
+| plugin | `plugin.png` | Plugin (`plugin`) | `LV1toaPaA7ia` | fluency | https://img.icons8.com/?id=LV1toaPaA7ia&format=png&size=256 | Indigo building brick with two studs |
+| run | `run.png` | Circled Play Button (`circled-play`) | `KQ5qZwOlaNdR` | fluency | https://img.icons8.com/?id=KQ5qZwOlaNdR&format=png&size=256 | Blue circle with a white play triangle |
+| stop | `stop.png` | Stop Sign (`stop-sign`) | `Zrc20nIaPRtZ` | fluency | https://img.icons8.com/?id=Zrc20nIaPRtZ&format=png&size=256 | Red octagon with the white word STOP |
+| write_pen | `write_pen.png` | Edit Pencil (`edit--v2`) | `D7WUsUhXDMGW` | fluency | https://img.icons8.com/?id=D7WUsUhXDMGW&format=png&size=256 | Yellow pencil with a pink eraser, pointing down to the left |
+| latent_interface, recoloured | `latent_purple.png` | Thumbnails (`thumbnails`), recoloured | `IzaAjUZfZt1E` | fluency | - | latent_interface.png moved to the latent purple #7B5EA7 with alpha and luminance kept; no URL, because a refetch gives the blue original |
 
 ## Alternates considered (same family)
 

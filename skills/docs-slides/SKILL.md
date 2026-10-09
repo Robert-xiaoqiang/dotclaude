@@ -520,7 +520,8 @@ title long enough to wrap, an uncited number, and the timing estimate against th
 ## Companions
 `drawing-figure` (what a figure may contain and which pipeline draws it, plus the connector, arrowhead
 and spacing geometry a slide figure has to survive, where this skill says how a figure reaches a slide
-and how much of it to show) · `writing-style` (the punctuation and prose rules the slide text and the
+and how much of it to show) · `drawing-icons` (icons on a slide, as Lucide TikZ macros in a LaTeX
+deck) · `writing-style` (the punctuation and prose rules the slide text and the
 speaker notes obey) · `writing-style-zh` (the same for a Chinese deck, including the declarative-title
 and no-invented-takeaway rules the slide titles obey) · `docs-weekly` (the other spoken-argument deliverable,
 which carries an argument rather than a log) · `naming-descriptive` (naming the talk directory and its

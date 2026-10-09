@@ -573,6 +573,7 @@ A figure is regenerated whenever a run updates, so the generator is an artifact,
 report references a figure and what a placeholder spec contains) · `docs-slides` (how a figure reaches
 a slide: cropping a published one to the panel that carries the argument, rather than redrawing it) · `dataviz` (palette and mark detail for
 richer or interactive charts, whose default is a standalone dashboard, so strip its title and caption) ·
+`drawing-icons` (icons inside a figure: one family, fetched and recorded in a manifest) ·
 `writing-caption` (the caption's wording and shape, and how panels are named) ·
 `docs-table` (the same question for a grid of numbers, and the shared generator) ·
 `layout-workspace` (where generators live) · `writing-style-zh` (the prose rules a Chinese figure's
