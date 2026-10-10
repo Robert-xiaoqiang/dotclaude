@@ -23,7 +23,10 @@ margin is the same on every image whatever the source geometry was.
     crop_paper.py figure <figure.pdf> <out.png>
     crop_paper.py batch  <spec.json>
 
-A batch spec is a list of {"kind", "src", "out", "caption"?, "dpi"?, "pad"?, "region"?}
+A batch spec is a list of {"kind", "src", "out", "caption"?, "dpi"?, "pad"?, "region"?,
+"content_region"?}. region is a fraction of the page box (float) or page (figure);
+content_region is a fraction of the trimmed image, applied after trimming;
+mask is a list of such rectangles painted white, for a stray panel letter.
 objects, with src and out relative to the spec file's directory.
 """
 import argparse
@@ -52,6 +55,29 @@ def trim(img, margin=TRIM_MARGIN_PX):
     l, t = max(0, l - margin), max(0, t - margin)
     r, b = min(rgb.width, r + margin), min(rgb.height, b + margin)
     return rgb.crop((l, t, r, b))
+
+
+def sub_crop(img, frac):
+    """Crop a trimmed image by fractions of what is visible. Use this
+    (content_region) rather than region when the float's page box is wider
+    than the drawing, as when a figure is narrower than the text block: then
+    "the left third of the box" is margin and the crop comes back blank."""
+    x0, y0, x1, y1 = frac
+    w, h = img.size
+    return trim(img.crop((int(x0 * w), int(y0 * h), int(x1 * w), int(y1 * h))))
+
+
+def apply_mask(img, rects):
+    """Paint white over fractional rectangles of the trimmed image, to drop a
+    panel letter that shares its row or column with content (a "(b)" level
+    with the top tick label cannot be cropped away). Only for labels; never
+    mask data."""
+    from PIL import ImageDraw
+    w, h = img.size
+    d = ImageDraw.Draw(img)
+    for x0, y0, x1, y1 in rects:
+        d.rectangle([int(x0 * w), int(y0 * h), int(x1 * w), int(y1 * h)], fill=(255, 255, 255))
+    return trim(img)
 
 
 def render(page, rect, dpi):
@@ -117,7 +143,7 @@ def ink_boxes(page):
             if not kind.endswith("text") and pymupdf.Rect(r).width > 0.5]
 
 
-def crop_float(pdf, out, caption, dpi=DPI, pad=PAD_PT, region=None):
+def crop_float(pdf, out, caption, dpi=DPI, pad=PAD_PT, region=None, content_region=None, mask=None):
     doc = pymupdf.open(pdf)
     page, cap = find_caption(doc, caption)
     cx0, cy0, cx1, cy1 = cap[:4]
@@ -177,6 +203,10 @@ def crop_float(pdf, out, caption, dpi=DPI, pad=PAD_PT, region=None):
         rect = pymupdf.Rect(rect.x0 + x0 * rect.width, rect.y0 + y0 * rect.height,
                             rect.x0 + x1 * rect.width, rect.y0 + y1 * rect.height)
     img = trim(render(page, rect, dpi))
+    if content_region:
+        img = sub_crop(img, content_region)
+    if mask:
+        img = apply_mask(img, mask)
     img.save(out)
     return out, img.size
 
@@ -198,13 +228,13 @@ def crop_figure(pdf, out, dpi=DPI, region=None):
 
 
 # --------------------------------------------------------------------------- cli
-def run_one(kind, src, out, caption=None, dpi=DPI, pad=PAD_PT, region=None):
+def run_one(kind, src, out, caption=None, dpi=DPI, pad=PAD_PT, region=None, content_region=None, mask=None):
     if kind == "header":
         return crop_header(src, out, dpi, pad)
     if kind == "float":
         if not caption:
             raise SystemExit("kind=float needs a caption")
-        return crop_float(src, out, caption, dpi, pad, region)
+        return crop_float(src, out, caption, dpi, pad, region, content_region, mask)
     if kind == "figure":
         return crop_figure(src, out, dpi, region)
     raise SystemExit(f"unknown kind {kind!r}")
@@ -228,7 +258,8 @@ def main(argv=None):
             out = base / item["out"]
             out.parent.mkdir(parents=True, exist_ok=True)
             path, size = run_one(item["kind"], src, str(out), item.get("caption"),
-                                 item.get("dpi", a.dpi), item.get("pad", a.pad), item.get("region"))
+                                 item.get("dpi", a.dpi), item.get("pad", a.pad), item.get("region"),
+                                 item.get("content_region"), item.get("mask"))
             print(f"{item['kind']:6} {item.get('caption') or '':9} -> {item['out']}  {size[0]}x{size[1]}")
         return 0
 

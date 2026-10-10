@@ -262,6 +262,7 @@ TEX_PRE = r"""\documentclass[11pt]{article}
 \usepackage[dvipsnames]{xcolor}
 \usepackage[most]{tcolorbox}
 \usepackage[hidelinks]{hyperref}
+\usepackage{needspace}
 \setCJKmainfont{Noto Sans SC}[BoldFont={Noto Sans SC Bold}]
 \setmainfont{DejaVu Sans}
 \urlstyle{same}
@@ -325,7 +326,9 @@ def build_pdf(items, out):
             o.append(r"\begin{itemize}\raggedright\setlength{\itemsep}{0pt}\fontsize{10.5}{16}\selectfont "
                      + " ".join(r"\item " + tex_rich(l) for l in val) + r"\end{itemize}")
         elif kind == "h":
-            o.append(r"\vspace{8pt}{\linespread{1}\fontsize{15}{22}\selectfont\bfseries\color{accent}" + tex_rich(val) + r"\par}")
+            # a heading must not be stranded at the foot of a page: keep room for
+            # it and whatever comes next, which is usually a figure
+            o.append(r"\needspace{0.42\textheight}\vspace{8pt}{\linespread{1}\fontsize{15}{22}\selectfont\bfseries\color{accent}" + tex_rich(val) + r"\par}\nopagebreak")
         elif kind == "h3":
             o.append(r"\vspace{4pt}{\linespread{1}\fontsize{12.5}{18}\selectfont\bfseries " + tex_rich(val) + r"\par}")
         elif kind == "item":
