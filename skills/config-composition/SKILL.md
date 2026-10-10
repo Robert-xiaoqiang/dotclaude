@@ -1,6 +1,17 @@
-# Config anatomy
+---
+name: config-composition
+description: "How a config-driven run's configuration is put together: the canonical shape of a group config, which component owns which piece, the framework block, and how the pieces compose into the one frozen config that is the run."
+when_to_use: "Use when writing a group config, deciding whether something deserves its own group or belongs under an owner, or tracing how a value reaches the merged config. Not for what a config is called (naming-config) or where its file lives (layout-workspace)."
+---
+# Skill: config-composition
 
-Read when writing a group config or deciding whether something deserves its own group.
+## Purpose
+How a config's fields and groups are owned, composed, resolved and frozen into the merged config that
+is the run.
+
+## When to Use
+- Writing a group config, or deciding whether something deserves its own group.
+- Not for names (`naming-config`), file placement (`layout-workspace`) or run variants (`config-variants`).
 
 ## The canonical shape
 
@@ -83,3 +94,8 @@ variant is a subclass named in YAML, never a fork of the assembly code.
   `k=v`: group names plus only this run's overrides.
 - `launcher/launch.sh` — the one shared entrance: env/venv/multinode, ask the config system for the run
   dir, tee the log into it, hand every argument to the runner.
+
+## Companions
+`naming-config` (what each config is called) · `layout-workspace` (where each file lives) ·
+`config-variants` (how a run varies from its launcher) · `config-prompting` (prompt text as config
+data) · `conventions` (the family index).

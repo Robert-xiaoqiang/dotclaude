@@ -73,7 +73,7 @@ Each exists to make a class of mistake impossible.
    **An owned model is not the top-level `model` group.** Top-level `model` is the one policy the run
    optimises or evaluates. An agent's internal model, a judge, a teacher — each is a model owned by the
    thing that uses it, and lives under that owner. Two model slots in one run means one of them is
-   owned; see `references/config-anatomy.md`.
+   owned; see `config-composition`.
 2. **Selection versus specification.** The config **specifies** (every knob, complete). The launcher
    **selects** (names, plus the few overrides that define *this* run). A launcher that starts
    specifying is a config in disguise, and it will not appear in the run's frozen `config.yaml`.
@@ -144,14 +144,14 @@ also when the coupling first does damage.
 - **Hyperparameters live in `config/`, never in a launcher or a recipe script.** A wall of `key=value`
   overrides means the defaults belong in a group config and only the delta stays in the launcher. But
   a long submit line is a *symptom*, not a verdict: classify each token before moving anything, because
-  two of the four kinds are correct exactly where they are. See `references/overrides.md`.
+  two of the four kinds are correct exactly where they are. See `config-variants`.
 - **The framework's config is passed VERBATIM, never whitelisted.** A `build_config()` that hand-picks
   fields makes every field it forgot unreachable from YAML *and* CLI, and the run silently uses a
   default nobody chose. Dump the fully-resolved framework config into the run dir.
 - **A group's settings live under its group key.** No second top-level home for the same concern, so
   an override path is always predictable from the group name.
 - **A group is top-level only if it is orthogonal to every pipeline.** `model` and `dataset` are; a
-  `reward` is not. An owned group nests while keeping its short selector — see `config-anatomy.md`.
+  `reward` is not. An owned group nests while keeping its short selector — see `config-composition`.
 - **The launcher passes ONLY config names and config overrides.** No `mode=`, no `--debug`, no
   launcher-only flags. A smoke run is a named dataset, not a mode.
 - **The entrance derives the log path from the config chain.** It asks the config system for the run
@@ -222,21 +222,19 @@ question is theirs:
 
 | read | when |
 |---|---|
-| `references/config-anatomy.md` | writing a group config, or deciding if something deserves its own group |
 | `references/runner-styles.md` | starting a project: do you own the loop, or wrap a framework? |
 | `references/pipeline-kinds.md` | adding a pipeline kind, or placing a term like `lora` / `nar` / `mtp` |
 | `references/eval-launchers.md` | naming an eval launcher, or wiring a judge |
 | `references/eval-axes.md` | designing or extending an eval family: what forks a pipeline vs a scorer |
-| `references/overrides.md` | a launcher's `run:` grew a wall of `a.b.c=value` |
 
 Two components have deep-dive skills of their own; this file's statements about them stand alone,
 and the sibling carries the full contract:
-- **`naming-config-launcher`** — the launcher under `launcher/` is a frozen TEMPLATE of the full
+- **`config-variants`** — the launcher under `launcher/` is a frozen TEMPLATE of the full
   standard run; smoke/local/probe/grid variants run as named configs or CLI overlays that land in
   the frozen `config.yaml`, never as edited copies (e.g. a 90-cell checkpoint-eval grid is one
   launcher plus `--set model.init_kwargs.path=$CK` per cell, driven by the bundled
   enqueue/run/reconcile scripts). Principle 2 (selection vs specification) is the law it applies.
-- **`naming-config-prompting`** — prompt text is config-like data, not code: files loaded
+- **`config-prompting`** — prompt text is config-like data, not code: files loaded
   byte-exact, registered under `<owner>.<role>` names, content-hashed into run provenance, ablated
   through the owning component's config so a prompt change moves the run hash.
 
@@ -247,8 +245,8 @@ Never write run outputs into the project dir.
 
 ## Companions
 `naming-config` (the slot grammar for config/launcher **names** — the paired skill for the
-experiment-facing half) · `naming-config-launcher` (the template-vs-invocation contract: variants
-are named configs or CLI overlays, with the bundled grid engine) · `naming-config-prompting`
+experiment-facing half) · `config-variants` (the template-vs-invocation contract: variants
+are named configs or CLI overlays, with the bundled grid engine) · `config-prompting`
 (prompts as registered, hashed data) · `platform-run` (the flat run-control layer under `launcher/`) ·
 `layout-output` (the run-output tree, the sibling `layout-` concern) · `docs-plan` (writes
 `docs/plans/…`) · `docs-arch` (maintains `docs/ARCH.md`) · `naming-descriptive` (how to name) ·

@@ -20,35 +20,40 @@ starting or organizing a project, or when unsure which convention applies.
 | concern | question it answers | skill |
 |---|---|---|
 | **naming** | what do I call this config / file / run? | `naming-config` (model/pipeline/dataset/launcher slot-grammar) · `naming-descriptive` (the general primitive) |
-| **launcher contract** | template vs invocation: how a smoke/local/probe/grid variant runs without copying or patching the launcher | `naming-config-launcher` (deep-dive of `naming-config`: the contract + the bundled grid enqueue/run/reconcile engine) |
-| **prompting** | how is prompt text named, stored, rendered, hashed, and ablated? | `naming-config-prompting` (deep-dive of `naming-config`: prompts as registered `<owner>.<role>` files with sha8 provenance, composition bands, and output contracts) |
+| **config contents** | what does a config hold, which component owns each piece, and how do the pieces merge into the frozen config that is the run? | `config-composition` (the canonical group shape, owned components, the framework block) |
+| **run variants** | template vs invocation: how a smoke/local/probe/grid variant runs without copying or patching the launcher | `config-variants` (the launcher contract, plus the bundled grid enqueue/run/reconcile engine) |
+| **prompting** | how is prompt text named, stored, rendered, hashed, and ablated? | `config-prompting` (prompts as registered `<owner>.<role>` files with sha8 provenance, composition bands, and output contracts) |
 | **layout** | where does this doc / script / run output live? | `layout-workspace` (`docs/`, `scripts/`, reports/plans, what's committed) · `layout-output` (the run-output tree under `$OUTPUT_DIR_HOME`) |
 | **docs** | how do I write/maintain the living docs? | `docs-plan` (`docs/plans/<date>-<topic>.md`) · `docs-arch` (`docs/ARCH.md`) · `docs-weekly` (the staged Chinese+English weekly report) |
 | **platform** | how do I set up, submit to, and match the runtime of a compute platform? | `platform-env` (env.sh / cluster setup) · `platform-run` (neutral `task.yaml` → DLC/Slurm/EAI) · `platform-runtime` (driver × image × venv × storage stack) · `platform-migrate` (moving a persistent home to another mount) |
 | **code style** | may this input have a default, and when do several implementations earn one contract? | `code-no-fallbacks` (required inputs fail loudly; defaults are only for values the code legitimately owns) · `code-abstraction` (name the role by its job, type the boundary, one interface per axis, variants selected by name in config) |
 | **outputs** | how do I compare runs or reclaim their space? | `output-analysis` (latitude vs longitude) · `output-cleanup` (resume-safe reclaim) |
-| **papers** | where does the citation go, and why does this paragraph say nothing? | `writing-paper` (citation placement, themed related work, findings-first section openers) · `writing-style` and `writing-style-zh` (the punctuation and word rules it builds on, English and Chinese) · `writing-chatgpt` (route the drafting to the writer tool at `$PROJECTS_HOME/ChatGPTMCP`; the agent patches the result) |
+| **papers** | where does the citation go, and why does this paragraph say nothing? | `writing-paper` (the rules every section shares: where a citation attaches, the arc from abstract to experiments, headings and numbers, with each section's shape in its own skill below) · `writing-style` and `writing-style-zh` (the punctuation and word rules it builds on, English and Chinese) · `writing-chatgpt` (route the drafting to the writer tool at `$PROJECTS_HOME/ChatGPTMCP`; the agent patches the result) |
 | **methodology** | how is a method section ordered, and how is each new component and hard equation introduced? | `writing-methodology` (learned from the LatentHarness method rewrites: an overview from goal to components to training, the base model formulated first, our own choices argued as motivation, design and explanation, modules by inputs and outputs, intuition and a standard-design contrast around hard equations) |
 | **analysis** | how is an experiments section shaped? | `writing-analysis` (learned from System-1.5 and Mem-Pi: the setup, finding-framed or question-framed results and ablations, which evidence is a table, a figure or an appendix entry, every number traceable) |
 | **ablations** | which ablation variants exist, how are they grouped, and how is the ablation table laid out? | `writing-ablation` (learned from LatentHarness: families along design decisions, same-function substitutions beside removals, one change per row at a matched budget, short row names, the change from the full system) |
 | **literature** | how is related work shaped, and are its citations recent enough? | `writing-literature` (learned from Mem-Pi and System-1.5: direction paragraphs, lines of work with two named exemplars, a one- or two-sentence closing difference, a fifth to a quarter of citations from the last six months) |
 | **figures** | what may a figure contain, and how do I render it? | `drawing-figure` (what a figure may and may not contain; TikZ / Mermaid / HTML / matplotlib) · `drawing-workflow` (a workflow or architecture figure drawn in python-pptx) · `drawing-gemini` (generated images, never for a figure whose labels must be exact) · `drawing-icons` (one icon family per document, Lucide as TikZ or Icons8 as PNG, every file in a manifest that can fetch it back) |
 | **captions** | how is a figure or table caption worded? | `writing-caption` (a lead that names the object and the method in the paper's terms, panels by position, no protocol, legend text or finding) |
-| **tables** | what may a results table contain, and how is its winner marked? | `docs-table` (a column carries a comparison, three effective digits, bold best over underlined second best) |
+| **tables** | what may a results table contain, and how is its winner marked? | `writing-table` (a column carries a comparison, three effective digits, bold best over underlined second best) |
 | **citations** | is every `.bib` entry real and correct? | `docs-bib` (resolve and audit BibTeX against Semantic Scholar, arXiv and Crossref; accept only an exact title, author list and year) |
-| **talks** | how do I build slides that can be linted, timed and rebuilt? | `docs-slides` (one source compiled to several backends, one bibliography, cropped paper figures, notes as the spoken script; and for a `.pptx` it did not build, a geometry audit and a LibreOffice wrapper, with the package mechanics left to `anthropic-skills:pptx`) |
+| **talks** | how do I build slides that can be linted, timed and rebuilt, and how does a talk about my own works hang together? | `docs-slides` (a cc2slides source compiled to several backends or a self-contained Beamer project per talk; one storyline with each work a stop on it and the same per-work pages, summary title formula included; short and long versions and re-cuts for another audience; each figure by the crop, rebuild-from-source or redraw ladder against a measured text floor; notes as the spoken script; and for a `.pptx` it did not build, a geometry audit and a LibreOffice wrapper, with the package mechanics left to `anthropic-skills:pptx`) |
+| **resume** | how is an academic CV laid out, fitted to one or two pages, and kept in step across English and Chinese? | `docs-resume` (placeholder-only LaTeX templates for the one-page and dense two-page versions and the Chinese sibling, line fit and short last lines, linked publication tags, a bilingual bundle that keeps its links, the Overleaf git bridge, and a checker that reads the built PDF) |
 | **outreach** | how do I announce this paper to a Chinese audience? | `docs-pr-article` (the 公众号 / 小红书 PR article in the register 量子位 and 机器之心 publish in: title formulas, the two-sentence opening that replaces the AGI-vision paragraph, numbered method section, how hard a result may be sold, and the two platforms' opposite tolerance for hype; with a growing references/ of real articles) |
 | **debrief** | I left it running and came back, what do I need to know? | `claude-debrief` (verdict, blockers, live state, results, failures with verification, next) |
 | **campaign** | how do I run all of the above unattended for days, and resume after a context reset? | `claude-auto-research` (the plan-plus-ledger in `docs/plans/<date>-<topic>/`, and the autonomy boundary) |
 
 ## Families by prefix
 The prefix says what kind of thing a skill governs, so a new skill's name follows from its job.
-`writing-*` governs what a paper **says**: the prose, each section's shape, the caption.
+`writing-*` governs what a paper **says**: the prose, each section's shape, the caption, the results table.
 `drawing-*` governs a **figure**: what it may contain, and how it is drawn, whether plotted, drawn in
 python-pptx or generated, down to its icons. `docs-*` governs a **deliverable and its tooling**: a plan, the architecture
-reference, the weekly report, a deck, the bibliography, a results table. `code-*` governs **how code
+reference, the weekly report, a deck, the bibliography. `code-*` governs **how code
 is written**: which inputs may default, and when a family of implementations earns a shared base.
-`naming-*`, `layout-*`, `platform-*` and `output-*` are the project-convention concerns above, and
+`config-*` governs **the configuration of a run**: what a config holds, how its pieces compose and
+freeze, how a run varies from its launcher, and the prompt text it carries. `naming-*` says what a
+thing is called and `layout-*` where it lives, so the three never overlap on one question.
+`naming-*`, `layout-*`, `config-*`, `platform-*` and `output-*` are the project-convention concerns above, and
 `claude-*` and `git-*` are about the agent and the repository rather than the project. One skill per
 job: when a tool's mechanics belong to a skill we do not own, as `.pptx` packaging belongs to
 `anthropic-skills:pptx`, ours points at it and keeps only what was written here.
@@ -62,9 +67,9 @@ job: when a tool's mechanics belong to a skill we do not own, as `.pptx` packagi
 - **debrief** — a person returning asks what needs doing before what happened, so the report leads
   with a verdict and blockers, grounds every claim in an id or a path, and says what did not
   happen as well as what did (`claude-debrief`).
-- **papers** — a citation attaches to the concept it supports, related work is grouped by theme
-  and ends on the gap, and a section leads with its finding rather than its topic
-  (`writing-paper`).
+- **papers** — a citation attaches to the concept it supports and a section leads with its finding
+  rather than its topic (`writing-paper`), while each section's shape belongs to its own skill
+  (`writing-literature`, `writing-methodology`, `writing-analysis`, `writing-ablation`).
 - **naming** — a config's *name* uniquely identifies what runs; two ablation arms differ in
   exactly the slots that describe the change (`naming-config`).
 - **layout** — plans, reports, and re-runnable scripts persist out of the source tree
@@ -74,12 +79,13 @@ job: when a tool's mechanics belong to a skill we do not own, as `.pptx` packagi
   (`docs-plan`), and a weekly report that carries the argument rather than logging the week
   (`docs-weekly`).
 - **tables** — a column earns its place by changing how the rows rank, so epoch and delta columns
-  go to the caption, and the winner is bold above an underlined runner-up it carries its margin
-  over (`docs-table`).
+  leave the table, and the winner is bold above an underlined runner-up it carries its margin
+  over (`writing-table`).
 - **citations** — a `.bib` entry is accepted only when its title, full author list and year match a
   real record exactly, because a plausible-looking citation is the one nobody checks (`docs-bib`).
-- **talks** — a deck is compiled from a source and linted before it is shown (`docs-slides`), because
-  typesetting fails silently and the failure is only visible from the back of the room.
+- **talks** — a deck is compiled from a source and linted before it is shown, because typesetting fails
+  silently and the failure is only visible from the back of the room; and a talk about your own works
+  strings every work onto one named line rather than listing papers (`docs-slides`).
 - **platform** — working on a compute platform means setting up a persistent env on it
   (`platform-env`), submitting a platform-neutral run spec that is rendered per scheduler with
   account, quota and image IDs resolved from the cluster's shared stack (`platform-run`), and

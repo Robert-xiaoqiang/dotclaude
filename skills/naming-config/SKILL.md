@@ -649,7 +649,7 @@ The two are one paradigm split by question, and neither should restate the other
 |---|---|
 | what is this config **called**, and what does a launcher dir name mean? | **this skill** |
 | **where** does the file live, and what does the tree look like? | `layout-workspace` |
-| what goes **inside** a config, and what may a component own? | `layout-workspace/references/config-anatomy.md` |
+| what goes **inside** a config, and what may a component own? | `config-composition` |
 | where do run **outputs** land? | `layout-output` |
 
 Rule 6 below is the seam: it is a *name* (so it lives here) that determines a *path* (so
@@ -661,7 +661,7 @@ This skill stays all-in: every statement above holds on its own. Two components 
 umbrella and carry a sibling skill with the full contract; the overviews below are enough to act on,
 and the sibling is where the detail, the worked machinery, and the edge cases live.
 
-**`naming-config-launcher` — the launcher is a frozen template; variants are configs or overlays.**
+**`config-variants` — the launcher is a frozen template; variants are configs or overlays.**
 The launcher dir named by the grammar above is a TEMPLATE of the full standard run and is never
 edited for a variant. A variant runs in one of three forms, in preference order: a named config
 (`dataset_name=rubric_mix_smoke` — recurring, shared, committed), a CLI overlay
@@ -673,9 +673,9 @@ eval grid over intermediate checkpoints is ONE eval launcher per arm plus a queu
 the enqueue/run/reconcile scripts that drive exactly this. The committed-`_smoke`-launcher form
 taught above and the CLI-overlay form are reconciled there as *commit what recurs, inline what
 doesn't*. Details, the variant taxonomy (`_smoke`, `_local`, `resume`, grid cells), and the bundled
-grid engine: `naming-config-launcher`.
+grid engine: `config-variants`.
 
-**`naming-config-prompting` — prompts are registered, named, hashed data.** A prompt is a config-like
+**`config-prompting` — prompts are registered, named, hashed data.** A prompt is a config-like
 artifact: it selects behavior, so it gets a grammar-shaped name (`<owner>.<role>`, e.g.
 `rubric.update_union`, fragments `<role>:<slot>`), lives as a file loaded byte-exact (never an inline
 string literal), registers under a duplicate-is-a-hard-error registry, and carries a content hash
@@ -685,13 +685,13 @@ Example — AutoRSI's controller prompt is `templates/jitgen/controller.md` regi
 ablation of the prompt is an ordinary config override under the owning component, which changes the
 run hash like any other axis. Composition (ordered fragments with banded orders), output contracts
 (per-role `max_tokens`, minimal parse schemas), and the evolvable-vs-judge boundary:
-`naming-config-prompting`.
+`config-prompting`.
 
 ## Companions
 `layout-workspace` (where these files live — the paired skill for the experiment-facing half) ·
 `naming-descriptive` (the general naming primitive this specialises) · `layout-output` (the run tree
-rule 6 derives) · `platform-run` (the launcher's neutral spec) · `naming-config-launcher` (deep-dive:
+rule 6 derives) · `platform-run` (the launcher's neutral spec) · `config-variants` (deep-dive:
 the template-vs-invocation contract behind the `tag` slot — variants are named configs or CLI
-overlays, never copies or mode flags) · `naming-config-prompting` (deep-dive: prompts as registered,
+overlays, never copies or mode flags) · `config-prompting` (deep-dive: prompts as registered,
 named, hashed data) · `code-abstraction` (the interface a selected variant answers, and keeping
 an old `class_path` importable when a class moves) · `conventions` (the family index).

@@ -1,7 +1,7 @@
 ---
 name: writing-chatgpt
 description: "Route paper and slide prose to the writer tool at $PROJECTS_HOME/ChatGPTMCP (./writer, also the `writer` MCP server), which calls a general-purpose frontier model through ModelRouter's Responses API under the author's own writing rules and keeps a named session, so the coding agent patches files and never drafts the prose itself. Covers what to hand it (passage, request, context files, session), which task to pick, and how to patch the result back."
-when_to_use: "Use when asked to write, rewrite, polish, critique, shorten or translate an abstract, introduction, related work, method, results paragraph, reviewer response, slide text or speaker notes, in English or Chinese, or when a request says 'use the writer' or 'use ChatGPT'. Also use when prose has come back shorter but flatter, every line a conclusion with the reasoning removed, which is the premature-compression failure this skill names. Not for code, tables, grep, citation lookups or LaTeX plumbing, which the coding agent does itself, and not for chat replies."
+when_to_use: "Use when asked to write, rewrite, polish, critique, shorten or translate an abstract, introduction, related work, method, results paragraph, reviewer response, slide text or speaker notes, CV and research-statement prose, in English or Chinese, or when a request says 'use the writer' or 'use ChatGPT'. Also use when prose has come back shorter but flatter, every line a conclusion with the reasoning removed, which is the premature-compression failure this skill names. Not for code, tables, grep, citation lookups or LaTeX plumbing, which the coding agent does itself, and not for chat replies."
 ---
 # Skill: writing-chatgpt
 
@@ -224,5 +224,7 @@ diff.
 judge a reply, not to redo the writing) · `writing-paper` (the argument-level layer the writer
 applies to a paper) · `docs-slides` (the register the `slide` task writes in, and the gates the deck
 must still pass) · `docs-weekly` (the weekly report, which may hand its prose stage to the writer) ·
-`naming-config-prompting` (how the writer's prompts are stored and hashed, for anyone editing them)
+`docs-resume` (a CV's prose: the brief names the reader, freezes every fact and gives a length
+budget, and replies are screened against the author's own wording) ·
+`config-prompting` (how the writer's prompts are stored and hashed, for anyone editing them)
 · `conventions` (the map).

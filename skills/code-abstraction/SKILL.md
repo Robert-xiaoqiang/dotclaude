@@ -286,5 +286,5 @@ Found in AutoRSI at `53d19e9`, recorded as symptoms to fix, not patterns to copy
 `code-no-fallbacks` (the loud-failure rule for inputs, which rules 11 and 12 apply to variants) ·
 `layout-workspace` (where the contract module and each implementation live, and `class_path` as the
 only seam) · `naming-config` (how a config names and selects a variant, and why an interface lives
-with its consumer) · `naming-config-launcher` (the launcher selects, the config specifies) ·
+with its consumer) · `config-variants` (the launcher selects, the config specifies) ·
 `docs-arch` (where a project records its roles and their contracts) · `conventions` (the family index).

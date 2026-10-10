@@ -33,7 +33,7 @@ ROOT = os.path.abspath(ROOT)
 
 SKIP_DIRS = {"synced"}                       # Claude Code's own download, not ours
 EXTERNAL = re.compile(r"^(anthropic-skills:[a-z0-9-]+|icons8(:[a-z0-9-]+)?)$")
-FAMILY = re.compile(r"^(docs|writing|naming|layout|platform|output|claude|git|code|drawing)-[a-z0-9-]+$")
+FAMILY = re.compile(r"^(docs|writing|naming|layout|config|platform|output|claude|git|code|drawing)-[a-z0-9-]+$")
 NON_FAMILY = {"git-commit", "git-push", "claude-migrate", "claude-skill-authoring", "conventions"}
 
 skills = sorted(d for d in os.listdir(ROOT)

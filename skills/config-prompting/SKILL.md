@@ -1,9 +1,9 @@
 ---
-name: naming-config-prompting
+name: config-prompting
 description: "Treat prompt text as config-like data: each prompt is a file loaded byte-exact, registered under a <owner>.<role> name (duplicate = hard error), rendered by exact-match placeholder substitution, and content-hashed (sha8) into run provenance so two runs under different prompt text are never indistinguishable. Composition is ordered fragments with banded orders; ablation is an ordinary config override under the owning component."
 when_to_use: "Use when adding, moving, or rewording a prompt in a config-driven repo, when building or auditing a prompt registry, when composing role prompts from fragments or defining variants, or when a prompt must be ablated or evolved. Symptoms that should send you here: prompt strings inlined in pipeline code, a run whose behavior changed with no config diff, chained str.replace rendering, a parse schema that grew fields nobody consumes, or an evolver that can rewrite its own judge."
 ---
-# Skill: naming-config-prompting
+# Skill: config-prompting
 
 ## Purpose
 A prompt selects behavior the way a config value does, but it is prose, so repos treat it as code —
@@ -150,7 +150,7 @@ A prompt experiment is an ordinary arm. The owning component's config carries th
 like any other axis, so the two arms differ in exactly one slot (`naming-config` symmetry) and the
 run dirs are distinct. What ablation is NOT: editing the registered file in place (both arms then
 claim one name and the manifest lies), or a `prompt_mode=` flag (the mode-flag anti-pattern of
-`naming-config-launcher`, verbatim).
+`config-variants`, verbatim).
 
 ## Rules
 1. **Every prompt has a registered `<owner>.<role>` name**; no prompt string reaches a model call
@@ -189,7 +189,7 @@ claim one name and the manifest lies), or a `prompt_mode=` flag (the mode-flag a
 
 ## Companions
 `naming-config` (the umbrella: naming philosophy, slot grammar, arm symmetry — this file is its
-prompting deep-dive) · `naming-config-launcher` (the sibling deep-dive: the same
+prompting deep-dive) · `config-variants` (the sibling deep-dive: the same
 frozen-template-plus-overlay doctrine applied to launchers) · `layout-workspace` (where
 `prompting/` and `templates/` live in the package tree) · `code-no-fallbacks` (missing prompt,
 missing key, and parse failure all fail loudly, never default) · `conventions` (the family index).
