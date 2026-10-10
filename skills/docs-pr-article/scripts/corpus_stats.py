@@ -196,7 +196,9 @@ def main(argv=None):
 
     by_source = {}
     for f in sorted(root.glob("*/*.txt")):
-        if f.name.endswith(".INCOMPLETE") or f.parent.name == "titles":
+        # titles/ is the title corpus; a leading underscore marks articles kept
+        # locally but outside the reference set (corpus/_unused/)
+        if f.name.endswith(".INCOMPLETE") or f.parent.name == "titles" or f.parent.name.startswith("_"):
             continue
         head, body = read_article(f)
         by_source.setdefault(f.parent.name, []).append(measure(head, body))

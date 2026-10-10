@@ -10,7 +10,7 @@ Source format, one directive or paragraph per line, blank lines ignored:
   @title     主标题
   @subtitle  副标题                     rendered as a "——副标题" line
   @intro     本文作者……                 the author bio, printed bold as 机器之心 AIxiv does
-  @image     assets/x.png | 图注 | 0.8  path | optional caption | optional width
+  @image     assets/x.png | 图注 | 0.8 | 0.9   path | caption | PDF width | .docx width
                                         as a fraction of the text width
   @paper     论文题目：……                consecutive @paper lines form one bulleted block
   ## 小节标题
@@ -101,7 +101,11 @@ def parse(src):
                 raise SystemExit(f"image not found: {parts[0]}")
             cap = parts[1] if len(parts) > 1 else ""
             width = float(parts[2]) if len(parts) > 2 and parts[2] else 1.0
-            items.append(("image", (str(path), cap, width)))
+            # optional 4th field: a separate width for the .docx. The PDF is a
+            # paged preview and may need an image smaller to fit a page; the
+            # .docx goes into the WeChat editor, which has no pages.
+            dwidth = float(parts[3]) if len(parts) > 3 and parts[3] else width
+            items.append(("image", (str(path), cap, width, dwidth)))
         elif line == "@end":
             items.append(("end", None))
         elif line.startswith("### "):
@@ -213,9 +217,9 @@ def build_docx(items, out):
             p = para(before=2, after=12, spacing=1.6)
             rich(p, "**" + val.replace("**", "") + "**", size=10.5)
         elif kind == "image":
-            path, cap, width = val
+            path, cap, _, dwidth = val
             p = para(before=6, after=2 if cap else 10, align=WD_ALIGN_PARAGRAPH.CENTER, spacing=1.0)
-            p.add_run().add_picture(path, width=int(text_w * width))
+            p.add_run().add_picture(path, width=int(text_w * dwidth))
             if cap:
                 run(para(after=12, align=WD_ALIGN_PARAGRAPH.CENTER, spacing=1.3), cap, size=9.5, color=GREY)
         elif kind == "paper":
@@ -308,13 +312,17 @@ def build_pdf(items, out):
         elif kind == "intro":
             o.append(r"{\fontsize{10.5}{17}\selectfont\bfseries " + tex_rich(val.replace("**", "")) + r"\par}\vspace{4pt}")
         elif kind == "image":
-            path, cap, width = val
-            o.append(r"\begin{center}\includegraphics[width=" + f"{width:.2f}" + r"\linewidth,height=0.42\textheight,keepaspectratio]{" + path + "}")
+            path, cap, width, _ = val
+            # image and caption in one minipage so a page break cannot split them
+            o.append(r"\begin{center}\begin{minipage}{\linewidth}\centering\includegraphics[width=" + f"{width:.2f}"
+                     + r"\linewidth,height=0.34\textheight,keepaspectratio]{" + path + "}")
             if cap:
                 o.append(r"\\[4pt]{\linespread{1}\fontsize{9.5}{13}\selectfont\color{muted}" + tex_rich(cap) + "}")
-            o.append(r"\end{center}")
+            o.append(r"\end{minipage}\end{center}")
         elif kind == "paper":
-            o.append(r"\begin{itemize}\setlength{\itemsep}{0pt}\fontsize{10.5}{16}\selectfont "
+            # ragged right: an unbreakable English paper title otherwise forces the justifier
+            # to letter-space the Chinese label ("论 文 题 目")
+            o.append(r"\begin{itemize}\raggedright\setlength{\itemsep}{0pt}\fontsize{10.5}{16}\selectfont "
                      + " ".join(r"\item " + tex_rich(l) for l in val) + r"\end{itemize}")
         elif kind == "h":
             o.append(r"\vspace{8pt}{\linespread{1}\fontsize{15}{22}\selectfont\bfseries\color{accent}" + tex_rich(val) + r"\par}")

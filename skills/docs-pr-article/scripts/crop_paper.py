@@ -69,11 +69,22 @@ def is_page_number(b):
     return re.fullmatch(r"\d{1,3}", b[4]) is not None
 
 
+def is_furniture(b):
+    """Page furniture that is not part of any float or header: page numbers,
+    and the vertical side stamp arXiv prints on every PDF it serves
+    ("arXiv:2609.24657v1 [quant-ph] 21 Sep 2026"). The stamp is a tall,
+    narrow block, and if it is kept its bottom edge drags a header crop down
+    through the abstract."""
+    w, h = b[2] - b[0], b[3] - b[1]
+    return (is_page_number(b) or re.match(r"^arXiv:\d{4}\.\d{4,5}", b[4]) is not None
+            or (h > 4 * w and w < 40))
+
+
 # --------------------------------------------------------------------------- header
 def crop_header(pdf, out, dpi=DPI, pad=PAD_PT):
     doc = pymupdf.open(pdf)
     page = doc[0]
-    bs = [b for b in blocks(page) if not is_page_number(b)]
+    bs = [b for b in blocks(page) if not is_furniture(b)]
     stop = next((i for i, b in enumerate(bs)
                  if re.match(r"^(Abstract|ABSTRACT|摘要)\b", b[4])), None)
     if stop is None or stop == 0:
@@ -106,12 +117,12 @@ def ink_boxes(page):
             if not kind.endswith("text") and pymupdf.Rect(r).width > 0.5]
 
 
-def crop_float(pdf, out, caption, dpi=DPI, pad=PAD_PT):
+def crop_float(pdf, out, caption, dpi=DPI, pad=PAD_PT, region=None):
     doc = pymupdf.open(pdf)
     page, cap = find_caption(doc, caption)
     cx0, cy0, cx1, cy1 = cap[:4]
     is_table = caption.lower().startswith("tab")
-    text = [b for b in blocks(page) if not is_page_number(b)]
+    text = [b for b in blocks(page) if not is_furniture(b)]
     width_x0 = min(cx0, min(b[0] for b in text))
     width_x1 = max(cx1, max(b[2] for b in text))
 
@@ -160,6 +171,11 @@ def crop_float(pdf, out, caption, dpi=DPI, pad=PAD_PT):
         x1 = max([width_x1] + [r.x1 for r in content]) + pad
         rect = pymupdf.Rect(x0, max(top, floor), x1, cy0 - 1)
 
+    if region:
+        # one panel of a multi-panel float: fractions of the float's own box
+        x0, y0, x1, y1 = region
+        rect = pymupdf.Rect(rect.x0 + x0 * rect.width, rect.y0 + y0 * rect.height,
+                            rect.x0 + x1 * rect.width, rect.y0 + y1 * rect.height)
     img = trim(render(page, rect, dpi))
     img.save(out)
     return out, img.size
@@ -188,7 +204,7 @@ def run_one(kind, src, out, caption=None, dpi=DPI, pad=PAD_PT, region=None):
     if kind == "float":
         if not caption:
             raise SystemExit("kind=float needs a caption")
-        return crop_float(src, out, caption, dpi, pad)
+        return crop_float(src, out, caption, dpi, pad, region)
     if kind == "figure":
         return crop_figure(src, out, dpi, region)
     raise SystemExit(f"unknown kind {kind!r}")
