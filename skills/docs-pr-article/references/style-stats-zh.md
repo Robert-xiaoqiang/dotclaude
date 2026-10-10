@@ -36,3 +36,45 @@ Medians, except the yes/no rows, which are the share of articles (mean). Drafts 
 | AI-isms per 10k chars | 6.0 | 2.6 | 6.0 | 4.2 | 12.6 | 8.2 | 0.0 | 0.0 | 0.0 | 0.0 |
 | connectives per 1k chars | 2.85 | 2.24 | 2.97 | 2.86 | 4.02 | 2.79 | 6.71 | 0.00 | 1.39 | 2.10 |
 | opening before 1st figure (chars) | 0 | 0 | 0 | 197 | 263 | 0 | 121 | 121 | 121 | 121 |
+
+## Title corpus: 108 titles, 94 with a real popularity signal
+
+- length: median 34, quartiles 29 to 38
+- with ！ 41%, with ？ 11%, with a number 52%, naming an institution 38%, with a hype word 45%
+- 当X遇上Y 2%, 进入…时代 9%, 首个/首次 21%
+
+Most-read titles, ranked within each account (cross-account counts are not comparable):
+
+**量子位** (32 with counts)
+- 5,318  让大模型“瘦身”90%！清华&哈工大提出极限压缩方案：1bit量化，能力同时保留83%
+- 4,530  打破56年数学铁律！谷歌AlphaEvolve自我进化实现算法效率狂飙
+- 4,342  开源大模型重击OpenAI！小扎放出LLaMA2炸裂科技圈，联手微软高通冲击市场格局
+- 4,185  突破Agent长程推理效率瓶颈！MIT&NUS联合推出强化学习新训练方法
+- 4,104  AI玩手机越玩越6！西湖大学发布新智能体：会自我进化的AppAgentX
+
+**机器之心** (27 with counts)
+- 2,193  开创全新通用3D大模型，VAST将3D生成带入「秒级」时代
+- 2,169  首个AI软件工程师Devin完整技术报告出炉，还有人用GPT做出了「复刻版」
+- 1,988  小红书开源「InstantID」效果炸裂，被Yann LeCun点赞，迅速蹿上Github热榜
+- 1,795  YOLO已经悄悄来到v12，首个以Attention为核心的YOLO框架问世
+- 1,764  当开源创新遇上推理革命：SGLang如何炼就DeepSeek最强开源推理引擎？
+
+**新智元** (23 with counts)
+- 205,118  刚刚，Claude首次证明费马大定理！清华姚班大神出手了
+- 157,547  代码定位太慢？蚂蚁ACL2026新作：让模型自己学会「该搜多少」
+- 111,555  诺奖得主用AI凭空造出基因剪刀，比进化几十亿年的那把还准
+- 21,079  突破扩散LLM瓶颈，英伟达港大提全新Fast-dLLM，推理加速27.6倍！
+- 14,999  Hinton错了！中国AI登顶Science，全球首个专家级通用影像AI来了
+
+**DeepTech深科技** (8 with counts)
+- 11,306  科学家阐释纯量子AI算法理论，对同类算法具有普遍指导意义，或极大提升生化及图文领域模型性能
+- 7,233  量子计算机太贵，科学家用普通电脑训练了一个“替身”
+- 6,666  量子计算机越来越复杂，科学家如何用AI学会与它对话?
+- 6,243  量子机器学习首次用于半导体制造：科学家攻克欧姆接触建模难题，验证量子机器学习小样本学习优势
+- 4,804  科学家研发量子压缩方法，能在传感器本地处理数据，推动量子机器学习的应用落地
+
+Titles on a published year-end most-read list (position only, no count):
+
+- Nature：大脑中的多时间尺度强化学习  (集智俱乐部)
+- Nature子刊: 人机社会学——一种融合人类与机器的全新社会学框架  (集智俱乐部)
+

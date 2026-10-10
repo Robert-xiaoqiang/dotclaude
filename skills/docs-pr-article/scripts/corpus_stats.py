@@ -174,13 +174,15 @@ def agg(ms, key):
 
 
 def title_rows(tsv):
-    rows = []
+    rows, seen = [], set()
     with tsv.open(encoding="utf-8", errors="ignore") as fh:
         for r in csv.DictReader(fh, delimiter="\t"):
             t = (r.get("title") or "").strip()
-            if t:
+            if t and t not in seen:      # collectors can record one title twice
+                seen.add(t)
                 rows.append({"title": t, "subtitle": (r.get("subtitle") or "").strip(),
-                             "popularity": (r.get("popularity") or "").strip()})
+                             "popularity": (r.get("popularity") or "").strip(),
+                             "account": (r.get("account") or "").strip()})
     return rows
 
 
@@ -227,8 +229,32 @@ def main(argv=None):
                 f"- 当X遇上Y {share(lambda t: '当' in t and '遇上' in t):.0%}, 进入…时代 {share(lambda t: '进入' in t and '时代' in t):.0%}, "
                 f"首个/首次 {share(lambda t: '首个' in t or '首次' in t):.0%}"]
         if pop:
-            out += ["", "Titles with a popularity signal:", ""]
-            out += [f"- {r['title']}  ({r['popularity']})" for r in pop[:25]]
+            # Counts come from different mirrors whose scales differ by orders of
+            # magnitude (Sohu reads for 新智元 reach six figures, qbitai site views
+            # stay in the thousands), so rank only within one account.
+            def count(r):
+                pop = r["popularity"]
+                # A year-end list position is a different kind of signal: it has
+                # no count, and its text carries a year that a number regex grabs.
+                if "no raw count" in pop or pop.lower().startswith("ranking"):
+                    return -1
+                m = re.search(r"(?:reads?|views?|look_num[^0-9]*|浏览量?)\D{0,40}?([\d,]{2,})", pop, re.I)
+                return int(m.group(1).replace(",", "")) if m else -1
+            by_acc = {}
+            for r in trs:
+                if count(r) >= 0:
+                    by_acc.setdefault(r.get("account") or "?", []).append(r)
+            out += ["", "Most-read titles, ranked within each account (cross-account counts are not comparable):", ""]
+            for acc, rs in sorted(by_acc.items(), key=lambda kv: -len(kv[1])):
+                rs.sort(key=count, reverse=True)
+                out.append(f"**{acc}** ({len(rs)} with counts)")
+                out += [f"- {count(r):,}  {r['title']}" for r in rs[:5]]
+                out.append("")
+            ranked = [r for r in trs if "no raw count" in r["popularity"] or r["popularity"].lower().startswith("ranking")]
+            if ranked:
+                out += ["Titles on a published year-end most-read list (position only, no count):", ""]
+                out += [f"- {r['title']}  ({r['account']})" for r in ranked]
+                out.append("")
 
     report = "\n".join(l for l in out if l is not None) + "\n"
     if a.out:
