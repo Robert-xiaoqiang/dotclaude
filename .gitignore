@@ -48,3 +48,10 @@ __pycache__/
 /skills/synced/
 # Strategy: IGNORE EVERYTHING by default, then allow-list only the
 #   telemetry/  statsig/  cache/  shell-snapshots/
+
+# docs-pr-article: full texts of published Chinese media articles, kept as local
+# style references only. This repo is public and those articles are copyrighted
+# (量子位 prints "版权所有，未经授权不得以任何形式转载及使用"), so the texts never
+# get committed. What is committed is derived: statistics, structure records,
+# titles, openings and URLs.
+skills/docs-pr-article/references/corpus/
