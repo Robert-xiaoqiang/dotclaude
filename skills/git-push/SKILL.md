@@ -18,6 +18,26 @@ Push local commits to the correct remote repository and branch, using an SSH pri
 - Invoke git with `GIT_SSH_COMMAND="ssh -i <key_path> -o IdentitiesOnly=yes"` so the correct key is used regardless of ssh-agent state.
 - If multiple keys exist, list them and confirm which to use unless the user has already specified.
 - If exactly one key is found, use it automatically without asking.
+- **A bare `ssh -T git@github.com` proves nothing about which account you will push as**, because it
+  uses the default `id_rsa` rather than the key you intend. Observed: that test returned a different
+  GitHub user, the push failed with `Could not read from remote repository`, and the cause looked
+  like a network or repo-existence problem rather than the wrong identity. Test with
+  `ssh -i <key> -o IdentitiesOnly=yes -T git@github.com` and read the username it greets you by.
+
+### Token remotes (Overleaf), not SSH keys
+- An Overleaf remote authenticates with a token, so the key discovery above does not apply to it.
+- The token is `OVERLEAF_TOKEN` in `$CPFS_HOME/.secret`. **Read it from there.** Never paste a token
+  into a command, a commit message, a script that gets committed, or a transcript, and never echo it.
+- Use the bundled `overleaf-push.sh` (`skills/git-push/overleaf-push.sh`), which sources the file,
+  passes the token through a one-shot credential helper, filters it out of every line of output,
+  deletes the helper via an EXIT trap, rebases first because a co-author edits the project
+  concurrently, and then re-fetches to confirm what actually landed.
+- **An Overleaf push that reports `remote rejected ... Request timed out` may still have been
+  applied.** Observed: a push timed out after 360 s, Overleaf had committed it under its own
+  "Update on Overleaf." message, and the retry then failed with `fetch first`. So a failure is not
+  evidence that nothing landed. Always re-fetch and compare before retrying or re-committing.
+- `$CPFS_HOME/.secret` may hold a different, newer token than one quoted earlier in a conversation.
+  The file is the source of truth, not the chat history.
 
 ### Verify remote state before pushing
 - ALWAYS run `git fetch <remote>` first, then compare local HEAD vs remote with `git status -sb` or `git log --oneline <remote>/<branch>..HEAD` and `git log --oneline HEAD..<remote>/<branch>`.
