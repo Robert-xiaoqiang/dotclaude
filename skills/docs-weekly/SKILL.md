@@ -703,7 +703,7 @@ the title with nothing to be about.
 
 ## The mechanism-ladder section
 
-**The word `ladder`, the word `rung`, and 阶梯 never appear in the report.** `writing-style` rule 15
+**The word `ladder`, the word `rung`, and 阶梯 never appear in the report.** The `ladder` and `rung` entry in `writing-style`'s Words to avoid
 bans them as metaphors, and a row labelled `rung 2` is that metaphor wearing a table header. The
 recipe below is how you *build* the comparison; what ships is a table whose first column names the
 thing that actually varies down it — who produces the component, or what data each level sees. Refer

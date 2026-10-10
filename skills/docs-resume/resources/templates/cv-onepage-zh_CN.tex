@@ -1,0 +1,207 @@
+% !TeX program = lualatex
+% !TeX encoding = UTF-8 Unicode
+%---------------------------------------------------------------------------
+% 一页学术简历，中文版。docs-resume skill 的模板；下面的人名、机构、日期、题名与
+% 链接全是占位符。
+%
+% 与英文版 cv-onepage.tex 同一结构，按 CJK 重新调过：extarticle 9pt，左右页边距
+% 1.3 cm（与英文版相同），上下 0.9 cm；行距 1.24，因为中文正文比英文短，省下的
+% 空间放回行距。汉字正文 Noto Serif CJK，加粗与标题用 Noto Sans CJK；
+% 西文与数字用 Libertinus Serif。9pt 的 extarticle 里 \footnotesize 是 7pt，汉字太小，
+% 所以灰色标签、论著表与荣誉、服务两栏一律不低于 \small（8pt）。
+%
+% 中英边界：人名在两个版本里都写拉丁字母；论著表整条保留英文（作者、题名、出处）；
+% 奖项与学位只用中文；论文里命名过的概念与方法名保留英文。
+%
+% 字体：Overleaf 装有 Noto CJK。本机的 luaotfload 可能索引不到系统里的 Noto，
+% 会静默退回 Fandol（字宽相同，样子不同）。要在本机看到 Overleaf 上的样子，
+% 先把 Noto 的 OTF 放进一个目录，export OSFONTDIR=<该目录> 和一个临时的
+% TEXMFVAR，再跑 lualatex。
+%
+% 构建：lualatex。Overleaf：Menu > Compiler = LuaLaTeX。
+%---------------------------------------------------------------------------
+\documentclass[a4paper,9pt]{extarticle}
+
+\usepackage[UTF8, scheme=plain, fontset=none, punct=quanjiao]{ctex}
+
+% ---- 汉字：正文宋体，加粗与标题用黑体；没有 Noto 时退回 Fandol
+\IfFontExistsTF{Noto Serif CJK SC}
+  {\setCJKmainfont{Noto Serif CJK SC}[BoldFont=Noto Sans CJK SC Bold,ItalicFont=Noto Serif CJK SC]}
+  {\setCJKmainfont{FandolSong-Regular.otf}[BoldFont=FandolHei-Bold.otf,ItalicFont=FandolKai-Regular.otf]}
+\IfFontExistsTF{Noto Sans CJK SC}
+  {\newCJKfontfamily\hei{Noto Sans CJK SC}[BoldFont=Noto Sans CJK SC Bold,ItalicFont=Noto Sans CJK SC]}
+  {\newCJKfontfamily\hei{FandolHei-Regular.otf}[BoldFont=FandolHei-Bold.otf,ItalicFont=FandolHei-Regular.otf]}
+
+% ---- 西文：Libertinus Serif，与英文版同一字族
+\setmainfont{LibertinusSerif-Regular.otf}[
+  BoldFont=LibertinusSerif-Bold.otf,ItalicFont=LibertinusSerif-Italic.otf,
+  BoldItalicFont=LibertinusSerif-BoldItalic.otf,Numbers=Proportional]
+\newfontfamily\headface{LibertinusSerif-Regular.otf}[
+  BoldFont=LibertinusSerif-Bold.otf,Letters=SmallCaps,LetterSpace=8]
+\usepackage{unicode-math}
+\setmathfont{LibertinusMath-Regular.otf}
+
+\usepackage[verbose=silent]{microtype}
+\usepackage[left=1.3cm,right=1.3cm,top=0.9cm,bottom=0.9cm]{geometry}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{xurl}
+\usepackage[hidelinks]{hyperref}
+
+\definecolor{ink}{HTML}{1A1A1A}
+\definecolor{grey}{HTML}{6B6B6B}
+\definecolor{hair}{HTML}{BDBDBD}
+\definecolor{link}{HTML}{1F3A5F}
+\hypersetup{colorlinks=true,urlcolor=link,linkcolor=link,pdfborder={0 0 0},
+  pdftitle={张三 简历},pdfauthor={张三}}
+\urlstyle{same}
+\pagestyle{empty}
+\color{ink}
+\raggedright
+\linespread{1.24}
+\setlength{\parindent}{0pt}
+\setlength{\tabcolsep}{0pt}
+\setlength{\emergencystretch}{1.5em}
+% 英文词不在中文行里断开；\exhyphenpenalty 保持默认，带连字符的复合词仍可在连字符处断行。
+% 两个都设成 10000 时，一个带连字符的名字整体不可断，有一行溢出 24pt。
+\hyphenpenalty=10000
+
+% CJK 字号下限：灰色标签、论著表、两栏都用 \small（8pt），不用 \footnotesize（7pt）。
+\newcommand{\tagsize}{\small}
+
+% 节标题：黑体加字距，细线在基线下约 3pt
+\titleformat{\section}
+  {\hei\bfseries\normalsize\ziju{0.08}}{}{0pt}{}
+  [\vspace{-1.0pt}{\color{hair}\titlerule[0.4pt]}]
+\titlespacing*{\section}{0pt}{7.5pt plus 1pt minus 1pt}{3pt}
+
+% 一行内左右分栏：日期与地点靠右，不用破折号
+\newcommand{\headline}[2]{\par\noindent\hbox to \linewidth{#1\hfil #2}\par}
+
+% 单位条目，两行。#1 单位（带链接） #2 地点 #3 起讫 #4 说明行（学位、导师 / 身份、导师）
+\newcommand{\entry}[4]{\addvspace{3.5pt}%
+  \headline{{\hei\bfseries #1}}{{\tagsize\color{grey}#2\hspace{1.1em}#3}}%
+  \nopagebreak{\normalsize\color{ink}#4}\par\addvspace{1pt}}
+\newcommand{\sidesize}{\small}
+
+% 研究条目：黑体小标题，灰色标签，跳到论文的编号，一段正文
+\setlist[itemize]{leftmargin=1.0em,label={\color{grey}\textbullet},
+  topsep=1.5pt,itemsep=4pt,parsep=0pt,partopsep=0pt}
+% #1 论文编号（可省） #2 小标题 #3 标签 #4 正文
+\newcommand{\result}[4][]{\item
+  {\hei\bfseries #2}%
+  \if\relax\detokenize{#3}\relax\else\ {\tagsize\color{grey}[#3]}\fi%
+  \if\relax\detokenize{#1}\relax\else\ {\tagsize\color{grey}\hyperlink{pub:#1}{[#1]}}\fi
+  \ #4}
+\newcommand{\pubref}[2]{\hyperlink{pub:#1}{#2}}
+
+% 论著表：每条一个悬挂段落，整条英文。不要在这里用 \looseness=-1：\raggedright 下
+% 缩不回去的段落会落到最后一趟排版，首行只剩作者名。
+% #1 链接后的徽标（可省） #2 编号 #3 题名 #4 出处 #5 作者 #6 链接
+\newlist{publist}{itemize}{1}
+\setlist[publist]{leftmargin=2.0em,labelwidth=1.65em,labelsep=0.35em,align=left,label={},
+  topsep=2pt,itemsep=2pt,parsep=0pt,partopsep=0pt}
+\newcommand{\pub}[6][]{%
+  \item[{\color{grey}\hypertarget{pub:#2}{[#2]}}]#5.
+  \if\relax\detokenize{#6}\relax #3\else\href{#6}{\textcolor{ink}{#3}}\fi.
+  \mbox{\bfseries\color{grey}#4}.%
+  \if\relax\detokenize{#6}\relax\else\nolinebreak\ \href{#6}{[link]}\fi
+  \if\relax\detokenize{#1}\relax\else\nolinebreak\ \mbox{#1}\fi}
+
+% 单行条目右端系年；标签与内容，标签栏宽按最宽的标签量
+\newcommand{\row}[2]{\headline{#1}{{\tagsize\color{grey}#2}}\addvspace{1.5pt}}
+\newlength{\kvlab}
+\newcommand{\kv}[2]{\noindent
+  \makebox[\kvlab][l]{\hei\bfseries #1}%
+  \begin{minipage}[t]{\dimexpr\linewidth-\kvlab\relax}\raggedright\strut #2\end{minipage}\par\addvspace{1.5pt}}
+
+\begin{document}
+\settowidth{\kvlab}{\hei\bfseries 工程技能}\addtolength{\kvlab}{1.0em}
+
+%---- 抬头：中文名与拉丁拼写并排，一行联系方式，一条细线
+\headline{{\hei\bfseries\fontsize{19}{21}\selectfont\ziju{0.10}张三}\hspace{0.5em}%
+  {\headface\fontsize{11}{13}\selectfont\color{grey}San Zhang}}%
+  {{\tagsize\color{grey}甲大学博士生\quad|\quad YYYY 年 M 月起可入职}}
+\vspace{1pt}
+{\tagsize\color{grey}
+\href{mailto:san.zhang@example.org}{san.zhang@example.org}\quad|\quad
+\href{https://example.org/scholar}{Google Scholar}\quad|\quad
+(+86) 555-0100\quad|\quad 城市\par}
+\vspace{3pt}
+{\color{hair}\hrule height 0.4pt}
+\vspace{4pt}
+
+%---- 研究方向：黑体引导词，一段
+{\hei\bfseries 研究方向}\quad
+我的研究让模型类 Y 在条件 X 下保持可靠，分两条线推进。在数据一侧，我研究模型从哪些数据中学习，覆盖能力一 [\pubref{5}{MethodA}] 与能力二 [\pubref{9}{MethodC}]，让每条标注数据发挥更大作用，也让未标注的音频能用于训练。在模型一侧，我设计训练目标 [\pubref{8}{MethodB}]，让预测在录音条件变化时保持稳定，一个模型即可服务所有设备。我的研究愿景是愿景 V（沿用领域内已有的说法），两条线分别从数据与模型两端逼近这一目标。
+
+%---- 教育背景：每个学位两行
+\section{教育背景}
+\entry{\href{https://example.org/university-a}{\textcolor{ink}{甲大学}}}{城市，国家}{YYYY.MM -- YYYY.MM}
+  {计算机科学博士在读，预计 YYYY 年 M 月毕业，导师 \href{https://example.org/advisor-one}{\mbox{Prof. Advisor One}}；其间在 \href{https://example.org/company-b}{Company B} 与 \href{https://example.org/company-c}{Company C} 研究实习}
+\entry{\href{https://example.org/university-b}{\textcolor{ink}{乙大学}}}{城市，国家}{YYYY.MM -- YYYY.MM}
+  {电子工程理学学士，本科科研导师 \href{https://example.org/advisor-two}{\mbox{Prof. Advisor Two}}}
+
+%---- 研究与实习经历
+\section{研究与实习经历}
+\entry{\href{https://example.org/company-b}{\textcolor{ink}{Company B 某实验室（现 New Lab Name），某团队}}}{城市，国家}{YYYY.MM -- 至今}
+  {研究实习生，导师 \href{https://example.org/mentor-one}{\mbox{Dr. Mentor One}}、\href{https://example.org/mentor-two}{\mbox{Dr. Mentor Two}}}
+\begin{itemize}
+  \result[9]{低资源语音识别的标注效率}{MethodC，Venue YYYY 投稿}{提出 MethodC，按两个解码器对每条伪标签的一致程度为其加权，应对低资源语言自训练中标签噪声的瓶颈。一致性分数逐条过滤语音，阈值随模型变强逐步提高。八种语言、两个模型规模上，MethodC 的词错误率比最强基线相对降低约 12\%，所需标注时长少 40\%。}
+  \result{音视频扩展}{BenchmarkC}{将 MethodC 扩展到音视频输入，考察唇动是否在音频最嘈杂处帮助最大，以及一致性分数能否迁移到视频。}
+\end{itemize}
+
+\entry{\href{https://example.org/company-c}{\textcolor{ink}{Company C 研究组}}}{城市，国家}{YYYY.MM -- YYYY.MM}
+  {研究实习生，导师 \href{https://example.org/mentor-three}{\mbox{Dr. Mentor Three}}、\href{https://example.org/mentor-four}{\mbox{Dr. Mentor Four}}、\href{https://example.org/mentor-five}{\mbox{Prof. Mentor Five}}}
+\begin{itemize}
+  \result[8]{稳健的音频分类}{MethodB，ICML 2025 Spotlight}{提出 MethodB 训练目标，让分类器在模拟的不同录音条件下给出一致的预测，使录音棚数据上训练的模型在手机与远场录音上依然可用。录音条件从学到的房间与设备模型中采样，而非固定的增广列表。三个分布偏移测试集上 MethodB 领先全部基线，在 BenchmarkA 与 BenchmarkB 上分别高 5.3 与 3.1 个百分点，推理开销不变。}
+  \result[7]{音频语料的数据估值}{arXiv 2025}{参与提出一种估计方法，按每条训练片段对验证损失的影响打分，并删去有害片段。影响由少数已保存 checkpoint 的梯度近似，为一百万条片段打分只需一个 GPU 日。在一个公开语料上，多数标错的片段落在得分最低的一成里，删去这一成后准确率比用全量语料训练高 2.0 个百分点。}
+\end{itemize}
+
+\entry{\href{https://example.org/company-d}{\textcolor{ink}{Company D 应用研究组}}}{城市，国家}{YYYY.MM -- YYYY.MM}
+  {研究实习生，导师 \href{https://example.org/mentor-six}{\mbox{Dr. Mentor Six}}}
+\begin{itemize}
+  \result[4]{端侧关键词检测}{arXiv 2023}{提出一种关键词检测器，所有关键词共用一个小编码器，新关键词经简短注册即可加入，取代每个关键词一个模型的做法。编码器用度量学习目标一次训练完成，注册只需三条语音样本。模型内存不到 1 MB，准确率与十倍规模的模型相差不到 1 个百分点。}
+  \result[2]{噪声下的说话人验证}{Interspeech 2022}{提出一种噪声感知的说话人嵌入，对小型检测器判为受损的帧降权，而不是先对音频去噪。检测器在合成损伤上训练，不需要干净的参考音频。在两个评测的含噪试验上，等错误率相对降低 15\%，干净试验上没有损失。}
+\end{itemize}
+
+%---- 论文发表：整条英文
+\section{论文发表}
+{\tagsize\color{grey}9 篇论文，其中第一作者 5 篇（3 篇已录用：ICML、Interspeech $\times$2）。负责构建 Benchmark Title 的语音部分。}
+
+{\tagsize
+\begin{publist}
+\pub{9}{MethodC: Paper Title Nine, a Placeholder under Review}{arXiv 2026}{\textbf{S. Zhang}, C. Coauthor, D. Coauthor, E. Coauthor, G. Coauthor, A. Advisor}{https://example.org/scholar}
+\pub{8}{MethodB: Paper Title Eight, a Placeholder for a Robust Classification Paper}{ICML 2025 Spotlight}{\textbf{S. Zhang}, H. Coauthor, A. Advisor}{https://example.org/paper-8}
+\pub[\href{https://example.org/ranking}{[Top-5 of the Week]}]{7}{Paper Title Seven, a Placeholder for a Collaboration}{arXiv 2025}{G. Coauthor, D. Coauthor, \textbf{S. Zhang}, A. Advisor}{https://example.org/paper-7}
+\pub{6}{Benchmark Title: A Placeholder Benchmark with Dozens of Authors}{TACL 2024}{{\bfseries\color{ink}Built the speech track.} K. Author et al.\ (24 authors)}{https://example.org/paper-6}
+\pub{5}{MethodA: Paper Title Five, a Placeholder for Data Selection}{Interspeech 2023}{\textbf{S. Zhang}, I. Coauthor, A. Advisor}{https://example.org/paper-5}
+\pub{4}{Paper Title Four, a Placeholder for a Short Study}{arXiv 2023}{\textbf{S. Zhang}, J. Coauthor, B. Advisor}{https://example.org/paper-4}
+\pub{3}{Paper Title Three, a Placeholder for a Collaboration in a Second Field}{CVPR 2023}{L. Coauthor, M. Coauthor, N. Coauthor, \textbf{S. Zhang}, B. Advisor}{https://example.org/paper-3}
+\pub{2}{Paper Title Two, a Placeholder for an Early First-Author Paper}{Interspeech 2022}{\textbf{S. Zhang}, O. Coauthor, B. Advisor}{https://example.org/paper-2}
+\pub{1}{Paper Title One, a Placeholder for the Earliest Preprint}{arXiv 2021}{P. Coauthor, \textbf{S. Zhang}}{https://example.org/paper-1}
+\end{publist}
+}
+
+%---- 荣誉与获奖，旁边是学术服务与技能
+\vspace{4pt}
+\noindent\begin{minipage}[t]{0.52\linewidth}
+\section{荣誉与获奖}
+\sidesize
+\row{\textbf{某奖学金甲}（20,000 某币），甲大学}{YYYY}
+\row{\textbf{最佳论文奖}，某会议某研讨会}{YYYY}
+\row{\textbf{某奖学金乙}（前 5\%），乙大学}{YYYY--YYYY}
+\row{\textbf{会议差旅资助}，某会议}{YYYY}
+\row{\textbf{院长嘉许名单}，乙大学}{YYYY}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.45\linewidth}
+\section{学术服务与技能}
+\sidesize
+\kv{教学}{\href{https://example.org/course}{COURSE 101：课程名}助教（YYYY、YYYY）}
+\kv{审稿}{ICML（YYYY、YYYY）、ICASSP（YYYY）}
+\kv{工程技能}{Python、C++、PyTorch、JAX、torchaudio、Slurm}
+\kv{语言}{中文（母语）、英文（工作语言）}
+\end{minipage}
+
+\end{document}

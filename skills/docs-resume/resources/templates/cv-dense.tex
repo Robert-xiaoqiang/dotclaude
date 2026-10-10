@@ -1,0 +1,208 @@
+% !TeX program = lualatex
+% !TeX encoding = UTF-8 Unicode
+%---------------------------------------------------------------------------
+% Dense academic CV, English, two pages. Template from the docs-resume skill;
+% every name, place, date, title and URL below is a placeholder.
+%
+% The dense variant is the full record: every fact of cv-onepage.tex, word for
+% word, plus every lab and internship entry, earlier degrees included, two or
+% three bullets each, and each publication as a title line with the venue
+% right-aligned over its author line.
+% Section order: research focus, Education, Publications, Research Experience,
+% Honors, then Teaching, Service and Skills. Keep the same order in the Chinese
+% sibling.
+%
+% The three-item direction list sits in its own column beside the research
+% focus, which keeps its bold run-in label as in the one-page variant, with the
+% gutter as the separator. Placed above the paragraph in the
+% paragraph's colour and indent it reads as debris hanging off the name.
+%
+% Every page runs to the foot. Space left over goes back into line spread or
+% detail, never into white space at the bottom.
+%
+% Build: lualatex (fontspec). Overleaf: Menu > Compiler = LuaLaTeX.
+%---------------------------------------------------------------------------
+\documentclass[a4paper,10pt]{article}
+
+\usepackage{fontspec}
+\setmainfont{LibertinusSerif-Regular.otf}[
+  BoldFont=LibertinusSerif-Bold.otf,ItalicFont=LibertinusSerif-Italic.otf,
+  BoldItalicFont=LibertinusSerif-BoldItalic.otf,Numbers=Proportional]
+\newfontfamily\headface{LibertinusSerif-Regular.otf}[
+  BoldFont=LibertinusSerif-Bold.otf,Letters=SmallCaps,LetterSpace=8]
+\usepackage{unicode-math}
+\setmathfont{LibertinusMath-Regular.otf}
+\usepackage[verbose=silent]{microtype}
+\usepackage[left=1.4cm,right=1.4cm,top=1.2cm,bottom=1.2cm]{geometry}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{xurl}
+\usepackage[hidelinks]{hyperref}
+
+\definecolor{ink}{HTML}{1A1A1A}
+\definecolor{grey}{HTML}{6B6B6B}
+\definecolor{hair}{HTML}{BDBDBD}
+\definecolor{link}{HTML}{1F3A5F}
+\hypersetup{colorlinks=true,urlcolor=link,linkcolor=link,pdfborder={0 0 0},
+  pdftitle={Firstname Lastname, Curriculum Vitae},pdfauthor={Firstname Lastname}}
+\urlstyle{same}
+\pagestyle{empty}
+\color{ink}
+\raggedright
+\linespread{1.16}
+\setlength{\parindent}{0pt}
+\setlength{\tabcolsep}{0pt}
+\setlength{\emergencystretch}{1.5em}
+
+\titleformat{\section}
+  {\headface\bfseries\large}{}{0pt}{}
+  [\vspace{-1.0pt}{\color{hair}\titlerule[0.4pt]}]
+\titlespacing*{\section}{0pt}{9pt plus 1pt minus 1pt}{3.5pt}
+
+\newcommand{\headline}[2]{\par\noindent\hbox to \linewidth{#1\hfil #2}\par}
+
+% #1 name (linked)  #2 place  #3 dates  #4 detail line
+\newcommand{\entry}[4]{\addvspace{4pt}%
+  \headline{{\bfseries #1}}{{\small\color{grey}#2\hspace{1.1em}#3}}%
+  \nopagebreak{\normalsize\color{ink}#4}\par\addvspace{1pt}}
+
+\setlist[itemize]{leftmargin=1.1em,label={\color{grey}\textbullet},
+  topsep=1.5pt,itemsep=2pt,parsep=0pt,partopsep=0pt}
+% #1 publication number (optional)  #2 heading  #3 tag  #4 body
+\newcommand{\result}[4][]{\item
+  {\bfseries #2}%
+  \if\relax\detokenize{#3}\relax\else\ {\small\color{grey}[#3]}\fi%
+  \if\relax\detokenize{#1}\relax\else\ {\small\color{grey}\hyperlink{pub:#1}{[#1]}}\fi
+  \ #4}
+\newcommand{\pubref}[2]{\hyperlink{pub:#1}{#2}}
+
+% Publications: a title line with the venue at the right, the author line beneath.
+% #1 badge (optional)  #2 number  #3 title  #4 venue  #5 authors  #6 url
+\newlist{publist}{itemize}{1}
+\setlist[publist]{leftmargin=2.4em,labelwidth=2.0em,labelsep=0.4em,align=left,label={},
+  topsep=2pt,itemsep=2.5pt,parsep=0pt,partopsep=0pt}
+\newcommand{\pub}[6][]{\item[{\color{grey}\hypertarget{pub:#2}{[#2]}}]%
+  \parbox[t]{0.80\linewidth}{\raggedright
+    \if\relax\detokenize{#6}\relax #3\else\href{#6}{\textcolor{ink}{#3}}\fi}\hfill
+  \makebox[0.19\linewidth][r]{\small\bfseries\color{grey}#4}\\[0.5pt]
+  {\small #5%
+    \if\relax\detokenize{#6}\relax\else\nolinebreak\ \href{#6}{[link]}\fi
+    \if\relax\detokenize{#1}\relax\else\nolinebreak\ \mbox{#1}\fi}}
+
+\newcommand{\row}[2]{\headline{#1}{{\small\color{grey}#2}}\addvspace{2pt}}
+\newlength{\kvlab}
+\newcommand{\kv}[2]{\noindent
+  \makebox[\kvlab][l]{\bfseries #1}%
+  \begin{minipage}[t]{\dimexpr\linewidth-\kvlab\relax}\raggedright\strut #2\end{minipage}\par\addvspace{2pt}}
+
+\begin{document}
+\settowidth{\kvlab}{\bfseries Languages}\addtolength{\kvlab}{1.0em}
+
+%---- Name, status, one contact line, one hairline
+\headline{{\fontsize{22}{24}\selectfont\bfseries Firstname Lastname}}%
+  {{\color{grey}Ph.D. candidate, University A\quad|\quad Available from Month YYYY}}
+\vspace{2pt}
+{\color{grey}
+\href{mailto:firstname.lastname@example.org}{firstname.lastname@example.org}\quad|\quad
+\href{https://example.org/scholar}{Google Scholar}\quad|\quad
+(+1) 555-0100\quad|\quad City, Country\par}
+\vspace{4pt}
+{\color{hair}\hrule height 0.4pt}
+\vspace{6pt}
+
+%---- Direction list in its own column, the research focus beside it with its
+%     bold run-in label, as in the one-page variant
+\noindent
+\begin{minipage}[t]{0.22\linewidth}
+  \vspace{0pt}
+  \begin{itemize}[leftmargin=1.0em,topsep=0pt,itemsep=3pt]
+    \item {\bfseries Direction One}
+    \item {\bfseries Direction Two}
+    \item {\bfseries Direction Three}
+  \end{itemize}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.75\linewidth}
+  \vspace{0pt}
+  {\bfseries Research focus}\quad
+  My research makes Model Class Y reliable under Condition X, along two lines of work. On the data side, I develop methods that decide what a model learns from, for Capability One [\pubref{5}{MethodA}] and Capability Two [\pubref{9}{MethodC}], so that every labelled example goes further and unlabelled audio becomes usable for training. On the model side, I build training objectives [\pubref{8}{MethodB}] that keep predictions stable when the recording conditions change, so one model serves every device. My broader vision is Vision V, stated in a phrase the field already uses, which the two lines approach from opposite ends.
+\end{minipage}
+
+%---- Education
+\section{Education}
+\entry{\href{https://example.org/university-a}{\textcolor{ink}{University A}}}{City, Country}{YYYY.MM -- YYYY.MM}
+  {Ph.D. in Computer Science, expected Month YYYY, advised by \href{https://example.org/advisor-one}{Prof.\ Advisor One}. Internships at \href{https://example.org/company-b}{Company B} and \href{https://example.org/company-c}{Company C}}
+\entry{\href{https://example.org/university-b}{\textcolor{ink}{University B}}}{City, Country}{YYYY.MM -- YYYY.MM}
+  {B.Sc. in Electrical Engineering, research advised by \href{https://example.org/advisor-two}{Prof.\ Advisor Two}}
+
+%---- Publications, newest highest
+\section{Publications}
+{\small\color{grey}9 publications, 5 first-author, 3 of them accepted (ICML, Interspeech $\times$2). Built the speech track of the Benchmark Title.}
+\begin{publist}
+\pub{9}{MethodC: Paper Title Nine, a Placeholder under Review}{arXiv 2026}{\textbf{F. Lastname}, C. Coauthor, D. Coauthor, E. Coauthor, G. Coauthor, A. Advisor}{https://example.org/scholar}
+\pub{8}{MethodB: Paper Title Eight, a Placeholder for a Robust Classification Paper}{ICML 2025 Spotlight}{\textbf{F. Lastname}, H. Coauthor, A. Advisor}{https://example.org/paper-8}
+\pub[\href{https://example.org/ranking}{[Top-5 of the Week]}]{7}{Paper Title Seven, a Placeholder for a Collaboration}{arXiv 2025}{G. Coauthor, D. Coauthor, \textbf{F. Lastname}, A. Advisor}{https://example.org/paper-7}
+\pub{6}{Benchmark Title: A Placeholder Benchmark with Dozens of Authors}{TACL 2024}{{\bfseries\color{ink}Built the speech track.} K. Author et al.\ (24 authors)}{https://example.org/paper-6}
+\pub{5}{MethodA: Paper Title Five, a Placeholder for Data Selection}{Interspeech 2023}{\textbf{F. Lastname}, I. Coauthor, A. Advisor}{https://example.org/paper-5}
+\pub{4}{Paper Title Four, a Placeholder for a Short Study}{arXiv 2023}{\textbf{F. Lastname}, J. Coauthor, B. Advisor}{https://example.org/paper-4}
+\pub{3}{Paper Title Three, a Placeholder for a Collaboration in a Second Field}{CVPR 2023}{L. Coauthor, M. Coauthor, N. Coauthor, \textbf{F. Lastname}, B. Advisor}{https://example.org/paper-3}
+\pub{2}{Paper Title Two, a Placeholder for an Early First-Author Paper}{Interspeech 2022}{\textbf{F. Lastname}, O. Coauthor, B. Advisor}{https://example.org/paper-2}
+\pub{1}{Paper Title One, a Placeholder for the Earliest Preprint}{arXiv 2021}{P. Coauthor, \textbf{F. Lastname}}{https://example.org/paper-1}
+\end{publist}
+
+%---- Research experience: every lab and internship entry
+\section{Research Experience}
+\entry{\href{https://example.org/company-b}{\textcolor{ink}{Team Name, Lab Name, Company B (now New Lab Name)}}}{City, Country}{YYYY.MM -- present}
+  {Research Intern, mentored by \href{https://example.org/mentor-one}{Dr.\ Mentor One} and \href{https://example.org/mentor-two}{Dr.\ Mentor Two}}
+\begin{itemize}
+  \result[9]{Label-efficient speech recognition}{MethodC, Venue YYYY submission}{Proposed MethodC, in which each pseudo-label is weighted by how often two decoders agree on it, addressing the label noise that limits self-training in low-resource languages. An agreement score filters every utterance, and a schedule raises the threshold as the model improves. Across eight languages at two model scales, MethodC cut word error rate by about 12\% relative to the strongest baseline with 40\% fewer labelled hours.}
+  \result{Multilingual evaluation suite}{}{Built the team's evaluation suite for thirty languages, which replaced per-language scripts with one configuration file per language and cut a full evaluation run from a day to two hours.}
+  \result{Audio-visual extension}{BenchmarkC}{Extended MethodC to audio-visual input, studying whether lip movements help most where the audio is noisiest and whether the agreement score carries over to video.}
+\end{itemize}
+
+\entry{\href{https://example.org/company-c}{\textcolor{ink}{Research Group, Company C}}}{City, Country}{YYYY.MM -- YYYY.MM}
+  {Research Intern, mentored by \href{https://example.org/mentor-three}{Dr.\ Mentor Three}, \href{https://example.org/mentor-four}{Dr.\ Mentor Four}, and \href{https://example.org/mentor-five}{Prof.\ Mentor Five}}
+\begin{itemize}
+  \result[8]{Robust audio classification}{MethodB, ICML 2025 Spotlight}{Introduced MethodB, a training objective that matches a classifier's predictions across simulated recording conditions, so a model trained on studio audio holds up on phone and far-field recordings. The conditions are sampled from a learned room and device model rather than a fixed augmentation list. MethodB led all baselines on three shifted test sets, +5.3/+3.1 on BenchmarkA/BenchmarkB, at no extra inference cost.}
+  \result[7]{Data valuation for audio corpora}{arXiv 2025}{Co-developed an estimator that scores each training clip by its effect on validation loss and removes the clips that hurt. The effect is approximated from the gradients of a few saved checkpoints, so scoring a million clips takes one GPU-day. On one public corpus it ranked most mislabelled clips in its lowest tenth, and dropping that tenth raised accuracy by 2.0 points over training on the full corpus.}
+  \result{Streaming deployment of MethodB}{}{Ported MethodB to the group's streaming classifier, which needed the consistency objective to work on two-second windows instead of whole clips. The streaming model shipped to an internal product team and kept its accuracy on far-field audio within one point of the offline model.}
+\end{itemize}
+
+\entry{\href{https://example.org/company-d}{\textcolor{ink}{Applied Research Team, Company D}}}{City, Country}{YYYY.MM -- YYYY.MM}
+  {Research Intern, mentored by \href{https://example.org/mentor-six}{Dr.\ Mentor Six}}
+\begin{itemize}
+  \result[4]{On-device keyword spotting}{arXiv 2023}{Proposed a keyword spotter that shares one small encoder across all keywords and adds a new keyword through a short enrolment step, in place of one model per keyword. The encoder is trained once with a metric-learning objective, and enrolment needs three spoken examples. It ran in under 1 MB of memory and stayed within one point of a model ten times its size.}
+  \result[2]{Speaker verification under noise}{Interspeech 2022}{Introduced a noise-aware speaker embedding that down-weights the frames a small detector marks as corrupted, in place of denoising the audio first. The detector is trained on synthetic corruptions and needs no clean reference. It lowered the equal error rate by 15\% relative on the noisy trials of two benchmarks, with no loss on clean trials.}
+\end{itemize}
+
+\entry{\href{https://example.org/university-a-lab}{\textcolor{ink}{Lab Name, University A}}}{City, Country}{YYYY.MM -- present}
+  {Doctoral research, advised by \href{https://example.org/advisor-one}{Prof.\ Advisor One}}
+\begin{itemize}
+  \result[5]{Data selection for speech pre-training}{MethodA, Interspeech 2023}{Proposed MethodA, which selects pre-training audio by its similarity to the target domain, measured in the feature space of a small proxy model, in place of pre-training on everything available. Pre-training on the selected fifth of the corpus matched pre-training on all of it, at a fifth of the compute.}
+  \result[6]{Speech track of a multitask benchmark}{TACL 2024}{Built the speech track of the Benchmark Title: chose the twelve tasks, wrote the scoring scripts, and ran the baselines. The track exposed a gap of more than 20 points between speech and text versions of the same tasks.}
+  \result{Open-source training toolkit}{}{Maintained the lab's speech training toolkit, used by four groups: moved it to distributed data loading and added recipes for the lab's five main datasets, which cut a standard training run from three days to one.}
+\end{itemize}
+
+\entry{\href{https://example.org/university-b-lab}{\textcolor{ink}{Lab Name, University B}}}{City, Country}{YYYY.MM -- YYYY.MM}
+  {Undergraduate research, advised by \href{https://example.org/advisor-two}{Prof.\ Advisor Two}}
+\begin{itemize}
+  \result[3]{Audio-visual sound localisation}{CVPR 2023}{Contributed the audio encoder to a model that finds the sounding object in a video frame, trained without boxes from the agreement between sound and image. The model located the source in 70\% of test clips, +6 points over the previous best.}
+  \result[1]{Music auto-tagging}{arXiv 2021}{Helped build a tagger that predicts genre and mood tags from raw audio with a convolutional front end trained on short crops, and ran its evaluation on two public collections. The tagger matched the best published ROC-AUC on the larger collection with a third of the parameters.}
+\end{itemize}
+
+%---- Honors
+\section{Honors and Awards}
+\row{\textbf{Fellowship A} (CUR 20,000), University A}{YYYY}
+\row{\textbf{Best Paper Award}, Workshop Name at Venue}{YYYY}
+\row{\textbf{Scholarship B} (top 5\%), University B}{YYYY--YYYY}
+\row{\textbf{Travel Grant}, Conference Name}{YYYY}
+\row{\textbf{Dean's List}, University B}{YYYY}
+
+%---- Teaching, service and skills
+\section{Teaching, Service and Skills}
+\kv{Teaching}{TA, \href{https://example.org/course}{COURSE 101: Course Title}, YYYY and YYYY}
+\kv{Service}{Reviewer for ICML (YYYY, YYYY), ICASSP (YYYY)}
+\kv{Skills}{Python, C++, PyTorch, JAX, torchaudio, Slurm}
+\kv{Languages}{Chinese (native), English (professional)}
+
+\end{document}

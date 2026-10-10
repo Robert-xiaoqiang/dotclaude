@@ -1,0 +1,49 @@
+% !TeX program = lualatex
+%---------------------------------------------------------------------------
+% Bilingual bundle of the one-page CV: English first, then Chinese. Template
+% from the docs-resume skill.
+%
+% It typesets nothing itself. It imports the two built PDFs from pdf/ page by
+% page and lays their links back on top.
+%
+%   English : cv-onepage.tex        (lualatex)
+%   Chinese : cv-onepage-zh_CN.tex  (lualatex)
+%
+% TWO THINGS TO KNOW.
+%
+% 1. pdfpages imports each page as a form XObject and DISCARDS its link
+%    annotations, so a plain \includepdf bundle has no working hyperlinks.
+%    pdf/cv-onepage-bilingual-links.tex puts them back. It is generated from
+%    the two halves by build-bilingual.py and holds every link rectangle of
+%    every page. \includelinkedhalf imports one page at a time and draws an
+%    invisible clickable box over each rectangle: \href for web and mail links,
+%    \hyperlink for the [n] cross-references, each landing on a \hypertarget in
+%    its own language half.
+%
+% 2. pdf/ holds SNAPSHOTS of the two halves, and the links file is read from
+%    those snapshots. Edit either source and the snapshot must be refreshed, or
+%    this bundle silently ships the old half. Run
+%        python3 scripts/build-bilingual.py --family cv-onepage --refresh
+%    which compiles both halves, copies them into pdf/ and rewrites the links
+%    file. The links file records each half's MD5, and this bundle stops with
+%    an error when a half no longer matches, rather than placing the links over
+%    the wrong text.
+%
+% Overleaf: set this file as the main document (Menu > Main document) and the
+% compiler to LuaLaTeX. pdfLaTeX also compiles this file, but the two halves
+% need LuaLaTeX and Overleaf has one compiler per project, so keeping every
+% root on LuaLaTeX means switching the main document never needs a compiler
+% switch. Keep pdf/ tracked in git; it is what this file reads.
+% To lead with Chinese, swap the two \includelinkedhalf lines.
+%---------------------------------------------------------------------------
+\documentclass[a4paper]{article}
+\usepackage{pdfpages}
+\usepackage[hidelinks]{hyperref}
+\hypersetup{pdftitle={Firstname Lastname, Curriculum Vitae (English and Chinese)},
+            pdfauthor={Firstname Lastname}}
+% Defines \includelinkedhalf{en} and \includelinkedhalf{zh}.
+\input{pdf/cv-onepage-bilingual-links.tex}
+\begin{document}
+\includelinkedhalf{en}
+\includelinkedhalf{zh}
+\end{document}
