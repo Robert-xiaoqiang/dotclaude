@@ -1,7 +1,7 @@
 ---
 name: writing-ablation
 description: "Design a paper's ablation set and its table: group variants into families along the method's design dimensions, build each variant by removal, same-function substitution, extreme setting or oracle, change one component per row at a matched budget, name rows by what they are, and lay the table out compactly with the change from the full system, learned from LatentHarness and a rejected MemCodex table."
-when_to_use: "Use when designing or revising an ablation study or ablation table, when every row reads 'w/o X (long explanation)', when a reviewer asks whether a component matters or merely adds capacity, or when an ablation table is too long or too flat to read."
+when_to_use: "Use when designing or revising an ablation study or ablation table, when every row reads 'w/o X (long explanation)', when a reviewer asks whether a component matters or merely adds capacity, when an ablation table is too long or too flat to read, or when arms vary along two axes at once."
 ---
 # Skill: writing-ablation
 
@@ -11,8 +11,8 @@ alternative a reader would try instead is worse*. A list of `w/o X` rows answers
 it shows a part helps, not that this form of the part is the right one. This skill designs the
 ablation set as families of alternatives along the method's design dimensions, and fixes how the table
 and its prose present them. `writing-analysis` owns how an ablation is framed in the results prose,
-`docs-table` owns number format and marks, and this skill owns which variants exist and how they are
-grouped.
+`writing-table` owns number format and the marks on every other results table, and this skill owns
+which variants exist, how they are grouped, and the ablation table's columns, row names and marks.
 
 ## Contents
 - [When to Use](#when-to-use)
@@ -20,6 +20,7 @@ grouped.
 - [Four ways to build a variant](#four-ways-to-build-a-variant)
 - [Naming rows](#naming-rows)
 - [The table](#the-table)
+- [Two-dimensional ablations](#two-dimensional-ablations)
 - [The prose](#the-prose)
 - [Worked example: LatentHarness](#worked-example-latentharness)
 - [Worked example: the rejected MemCodex table](#worked-example-the-rejected-memcodex-table)
@@ -32,8 +33,10 @@ grouped.
 - Revising an ablation table whose rows are all removals, or whose names are sentences.
 - A reviewer asks whether a component matters or only adds capacity, compute or context.
 - Compressing a long ablation table that no longer fits.
+- Laying out an ablation whose arms vary along two axes at once, such as which interface may move
+  and which modules are present.
 
-Not for: the main results table (`docs-table`), the order and shape of the results section
+Not for: the main results table (`writing-table`), the order and shape of the results section
 (`writing-analysis`), or sweeps over one hyperparameter (a figure, `drawing-figure`).
 
 ## Families along design dimensions
@@ -63,8 +66,10 @@ removals is a sign the dimension was not thought through.
 
 Keep the budget matched and say so. LatentHarness: "Every variant retrains from the same
 initialization with the same data, training steps, and compute budget, while changing one
-component." Where a variant costs more (VinePPO branches at 3.6x compute), report that cost in the
-caption. Otherwise a variant that loses on accuracy but wins on cost looks like a plain loss.
+component." Where a variant costs more (VinePPO branches at 3.6x compute), state that cost where the
+ablation is introduced, beside the matched-budget sentence. Otherwise a variant that loses on accuracy
+but wins on cost looks like a plain loss. It is stated there once and not again in the caption,
+because a budget is protocol (`writing-caption` rule 4) and the second copy is the one that goes stale.
 
 ## Naming rows
 Name a row by **what the variant is**, in two to four words, never by a parenthetical explanation.
@@ -72,6 +77,12 @@ Name a row by **what the variant is**, in two to four words, never by a parenthe
 is a definition, and it belongs in the construction paragraph. Use `w/o X` only for a genuine
 removal, and prefer the positive name of what remains. "Raw layer only" says more than "w/o derived
 layers". The full system is the first row, tinted, with the paper's macro.
+
+Never `$-$C $-$M` as a name. A math minus in a name typesets as an operator, the letters mean nothing
+to a reader who has not memorised the key, and the same string set by LaTeX and by matplotlib's
+mathtext comes out in two different faces, so the table and its figure disagree on what the arm is
+called. A subscript is fine for a restriction that has a symbol, `\ourmethod{}$_g$` for the method
+held to one interface, because it is the paper's own notation and not an abbreviation.
 
 ## The table
 - **Family rows.** An italic row spanning the variant columns (`\famrow{4}{Action credit}`) opens
@@ -81,15 +92,28 @@ layers". The full system is the first row, tinted, with the paper's macro.
   than a vertical rule. Fourteen rows print as seven, which is how an ablation fits beside the main
   table.
 - **Few columns.** Show the family averages and one cost column (LatentHarness: Gen., Long, FLOPs).
+  The columns are the deployment metric the paper is judged on. Training-side readouts, such as
+  end-of-training signal-class shares, go to a figure or the appendix.
   Per-benchmark columns go to the appendix. An ablation table compares variants, not benchmarks.
+  It does not inherit the main table's benchmark or per-domain columns, even when the main table is
+  built around them.
 - **The change from the full system** goes in small type after each value,
   `55.4\,\drop{$-0.4$}` or `56.1\,\rise{$+0.3$}`, with red for a loss and green for a gain. This is the
-  one exception to `docs-table`'s "absolute values, not differences": an ablation's point is the
+  one exception to `writing-table`'s "absolute values, not differences": an ablation's point is the
   change, and the absolute value stays beside it. Do not bold-and-underline an ablation table as well.
-  The change marks carry the ranking.
-- **The caption** names the ablation axes and declares the marks (`writing-caption`). That one component
-  changes per row, what the columns hold and any budget difference are stated where the ablation is
-  introduced.
+  The change marks carry the ranking. These marks are owned here, and `writing-table`'s bold and
+  underline apply to every other results table, never to this one.
+- **The caption** names the ablation axes and declares the change marks (`writing-caption`), never a
+  bold and an underline the table does not carry. That one component changes per row, what the columns
+  hold and any budget difference are stated where the ablation is introduced.
+
+## Two-dimensional ablations
+Families keep each design decision on its own dimension. Some claims cross two, such as which
+interface may move against which modules are present, and a table holding every combination reads as
+a grid nobody can rank. Give the table the axis whose arms mirror published methods, ordered so each
+restricted arm sits beside the method it mirrors. Give the other axis a figure (`drawing-figure`), a
+slope per setting from the weakest arm to the full one, with the published counterpart as a reference
+tick. Each number then appears once, the table holding one dimension and the figure the other.
 
 ## The prose
 **One construction paragraph** in the setup says how each family's variants are built, in the order
@@ -102,6 +126,8 @@ counterfactual branches match completed branches at much lower training cost." "
 both forms of memory content are necessary on long inputs." The numbers follow, then the reason
 ("because just 14% of visited states belong to a group containing at least two states"). A finding
 that only restates a drop has not explained the family.
+
+In `writing-analysis`'s question-driven form each family is one RQ, and its bold finding answers it.
 
 ## Worked example: LatentHarness
 `LatentHarness/overleaf-git/main.tex`, Table `tab:ablation`: five families, eleven variants, two
@@ -138,17 +164,19 @@ whole-program rewrites against single-method edits, and it moved per-benchmark n
 2. **Every family has at least one substitution or extreme.** A family of removals alone is not
    finished.
 3. **One component changes per row, at a matched budget**, and any budget difference is stated
-   where the ablation is introduced.
+   once, where the ablation is introduced, and not in the caption.
 4. **Rows are named by what they are, in two to four words.** Definitions go in the construction
-   paragraph.
+   paragraph. A name never joins letters with a math minus.
 5. **Family rows group the table**, with no rules between families, and a long set is split into two
    halves.
 6. **Cells hold the value and its change from the full system**, in small red or green, and nothing
-   else marks rank.
+   else marks rank. No bold and no underline.
 7. **Few columns**: family averages and one cost, per-benchmark results in the appendix.
-8. **One construction paragraph, then one bold finding per family** that names the mechanism.
-9. **Every number traces to the results ledger**, and a changed row updates every sentence that
-   quotes it.
+8. **A two-dimensional ablation is a table along one axis and a figure along the other**, never one
+   Cartesian table.
+9. **One construction paragraph, then one bold finding per family** that names the mechanism.
+10. **Every number traces to the results ledger**, and a changed row updates every sentence that
+    quotes it.
 
 ## Anti-patterns
 - **The w/o list.** Every row removes a part. It shows parts help and never that this form of a part is
@@ -158,12 +186,17 @@ whole-program rewrites against single-method edits, and it moved per-benchmark n
 - **The noise row.** A variant that differs by less than the seed spread, left in without comment. Either
   it is a finding ("adds nothing here, at no cost") or it is removed.
 - **Two changes in one row.** A variant that swaps the organization and the read rule together cannot
-  be attributed to either.
+  be attributed to either. A cumulative removal row, `w/o critic \& memory` under `w/o critic`, is the
+  same failure.
+- **The Cartesian table.** Every combination of two axes in one grid. No row can be ranked against its
+  neighbours, and the arm that mirrors a published method is lost among the rest.
 - **The benchmark table in disguise.** Six benchmark columns per variant. The comparison is between
   variants, so averages carry it.
 
 ## Companions
-`writing-analysis` (framing ablations in the results prose, RQ numbering) · `docs-table` (number
-format, marks, captions, and the rule this skill makes one exception to) · `writing-paper` (the
-finding-first paragraph) · `writing-chatgpt` (the construction paragraph and findings go through
+`writing-analysis` (framing ablations in the results prose, RQ numbering, the finding-first
+paragraph) · `writing-table` (number format, the marks on every other results table, and the rule
+this skill makes one exception to) · `writing-caption` (the ablation caption's lead and how it
+declares the change marks) · `drawing-figure` (the figure that carries the second axis of a
+two-dimensional ablation) · `writing-chatgpt` (the construction paragraph and findings go through
 the writer) · `conventions` (the family index).

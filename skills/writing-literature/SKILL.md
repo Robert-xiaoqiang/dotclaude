@@ -6,8 +6,11 @@ when_to_use: "Use when drafting or revising related work, when a related-work pa
 # Skill: writing-literature
 
 ## Purpose
-Related work places the paper among its neighbours after the reader has the method and the results.
-It fails in four ways, all seen on real drafts: one paragraph per paper, a middle that says what each
+Related work sits after Experiments and before the Conclusion, where Mem-Pi and System-1.5 put it,
+and places the paper among its neighbours once the reader has the method and the results. It places
+the work and does not motivate it. A sentence on why the problem matters or why the paper was needed
+has drifted from the introduction and goes back there.
+The section fails in four ways, all seen on real drafts: one paragraph per paper, a middle that says what each
 cited method does not do, a closing that restates the method at length, and a citation list whose
 newest entry is a year old. This skill fixes the shape, taken from the two papers the author holds up
 as the model, Mem-Pi and System-1.5, and adds a recency rule. `writing-paper` owns where a citation
@@ -32,6 +35,16 @@ Two or three paragraphs, each one research direction under a noun-phrase run-in 
 \noindent \textbf{Efficient reasoning models.}\            % System-1.5
 \noindent \textbf{Conditional computation.}\               % System-1.5
 ```
+
+The head names the direction the cited work belongs to, never a claim and never a process:
+
+```latex
+\noindent \textbf{Long context is the baseline to beat.}\        % wrong: a claim
+\noindent \textbf{Evolving the system rather than the store.}\   % wrong: a process
+```
+
+A claim head argues before the paragraph has cited anything, and a gerund head names an action,
+usually the paper's own, where the reader expects the family.
 
 Inside each paragraph the order is fixed:
 
@@ -75,9 +88,15 @@ context-conditional guidelines, and ReasoningBank~\citep{ouyang2025reasoningbank
 strategies from both successes and failures.
 ```
 
+The cap is stricter than either model paper. System-1.5's latent-reasoning line names eight systems
+in three sentences, and it reads as the list that [What to cut](#what-to-cut) removes.
+
 Each exemplar clause says what the method does, in its own terms. System-1.5 orders recent work
 last with *More recently*, which also shows the reader the field is current. Mem-Pi names the
-closest prior work explicitly once: "SEAM~\citep{li2026beyond}, the closest to our setting".
+closest prior work explicitly once: "SEAM~\citep{li2026beyond}, the closest to our setting". The
+two named are the ones the argument needs, such as the closest prior work, a baseline the
+experiments compare against, or the method the paper builds on, and every other paper in the line
+stays in the bracket.
 
 ## The closing states the difference
 One or two sentences, after the `%%` line, and nowhere else does the paragraph evaluate the cited
@@ -94,6 +113,12 @@ What unites them is the constraint we remove: however well when and how to acces
 optimized, the content is fixed at write time. \ourmethod{} constructs guidance for the current
 context instead.
 ```
+
+Whichever form, the closing says what the direction leaves open, because a paragraph that ends on
+its last citation has told the reader what exists and not why the paper was written. The
+shared-constraint form states it as a property every cited line has in common, and build and extend
+states it as the axis the paper adds (*further optimizes efficiency by adaptively allocating
+computation*). Neither aims it at one cited paper.
 
 The closing names the paper's position in one clause and, when needed, one clause of mechanism. A
 closing that re-derives the method, lists its actions, or states results is the method section
@@ -126,14 +151,18 @@ Learned from revising a draft that read as verbose:
   method's own contrast with VinePPO-style completed branches adds length and no new placement.
 - **Evaluation and cost studies as their own sentences.** They go in a bracket or not at all.
 - **An inherited-components paragraph.** What the paper takes unchanged belongs in the method.
+- **Reader address and author narration.** No sentence speaks to the reader, recounts what the
+  authors chose or tried, or reports what the paper found. Every sentence is about the cited work
+  except the closing, which says where the paper stands against it.
 
 ## Rules
-1. Two or three direction paragraphs, each under a noun-phrase run-in head.
+1. Two or three direction paragraphs, each under a noun-phrase run-in head that names the
+   direction, never a claim or a process.
 2. Opening sentence: the family's aim or trajectory, with a grouped citation that includes a survey.
 3. Lines of work are one sentence with a grouped bracket each. At most two named exemplars per line.
 4. Exemplar clauses describe what the method does, never what it lacks.
-5. The closing is one or two sentences after a `%%` line and is the only place the paper's
-   difference is stated.
+5. The closing is one or two sentences after a `%%` line, says what the direction leaves open and
+   where the paper stands, and is the only place the paper's difference is stated.
 6. At least a fifth to a quarter of unique citations are from the last six months, and at least half
    from the last eighteen months. Count them.
 7. Every added citation is verified against its source page before it enters the bib.

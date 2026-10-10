@@ -1,7 +1,7 @@
 ---
 name: writing-methodology
 description: "Write a paper's method section: an overview that goes from the design goal to the components and their training, then the whole workflow at one glance (the method as a modeled object, the pipeline figure, end-to-end inputs and outputs with their symbols, each core module's role and the objective) before any module is designed, the inherited base model formulated before anything is added, each new component told as motivation, design and explanation ('we model X as Y because Z'), modules defined by their inputs and outputs in causal order, intuition and a standard-design contrast around every hard equation, and one hierarchy of claims from abstract to introduction to method, learned from the LatentHarness method rewrites."
-when_to_use: "Use when drafting or revising a Method section, its opening overview or workflow formulation, when a reader cannot tell the method's overall inputs and outputs, or a paragraph that introduces a new component or a hard equation, and when an author or reviewer says the method 'rushes to state facts', opens abruptly, uses an object before defining it, or has an equation nobody can follow."
+when_to_use: "Use when drafting or revising a Method section, its opening overview or workflow formulation, when a reader cannot tell the method's overall inputs and outputs, or a paragraph that introduces a new component or a hard equation, and when an author or reviewer says the method 'rushes to state facts', opens abruptly, opens with notation, reads as a derivation with no choices in it, carries caveats about what was not run, uses an object before defining it, or has an equation nobody can follow."
 ---
 # Skill: writing-methodology
 
@@ -28,6 +28,8 @@ surround a hard equation. `writing-paper` owns the sentence, `writing-analysis` 
 - [Hard equations](#hard-equations)
 - [Formal blocks: prose first, then Formally](#formal-blocks-prose-first-then-formally)
 - [One hierarchy from abstract to method](#one-hierarchy-from-abstract-to-method)
+- [Register: a design, not an audit](#register-a-design-not-an-audit)
+- [Drafting a method section](#drafting-a-method-section)
 - [Checking a method section](#checking-a-method-section)
 - [Worked example: LatentHarness](#worked-example-latentharness)
 - [Rules](#rules)
@@ -59,6 +61,11 @@ never stated bare. It comes with the problem that forces it and the reason this 
 
 The test, applied to each sentence that describes the method: *did the paper choose this?* If yes,
 the sentence before it gives the reason, or the sentence itself does ("we model X as Y because Z").
+
+A small choice can carry its reason in a trailing purpose clause, as in "We initialize the two
+decision-token embeddings symmetrically so that both decisions have comparable initial probabilities
+and can be explored at the beginning of training." Without the clause a reviewer cannot tell a
+considered choice from an arbitrary one, and assumes the second.
 
 ## Adapt the depth
 The full argument (motivation, design, explanation) is for the paper's central and non-obvious
@@ -125,6 +132,22 @@ reads as one more component, hides the workflow the other paragraphs depend on, 
 setting without the modules that act on it. The order is always from the higher level to the lower: the
 workflow and its objects, then each module's motivation and design, then its details, then the appendix.
 
+Symbols never come first. A section or a workflow formulation whose first sentence begins `Let` has
+formalized before anything was chosen, so nothing in it is defended and the inherited background reads
+exactly like the contribution. The modeled object comes first (move 1), then the symbols it needs
+(move 2).
+```latex
+% WEAK: formalism from the first word. Nothing here is a choice, so nothing is defended,
+% and standard background is indistinguishable from the contribution.
+Let $x_0 = (w^1, \ldots, w^L)$ be a clean token sequence over a vocabulary that includes a
+dedicated mask symbol. The forward process draws a masking level $t \sim \mathcal{U}(0,1]$ and
+independently replaces each token ...
+% STRONG (Mem-Pi): the modeled object, then the formalism it needs.
+We model adaptive memory as a generative policy \mempolicy{} parameterized by $\theta$, separate
+from the downstream agent. Let $\mathcal{E}$ denote an offline bank of context-guidance pairs
+$(x,m)$, where each context $x=(q,o)$ consists of a task specification $q$ and an observation $o$.
+```
+
 ## Order: base model first, then causal order
 - **Formulate the inherited base model before adding anything.** Write it in the form its own papers
   use, for a looped model the composition $h^{(R)}=F_\theta\circ\cdots\circ F_\theta(h^{(0)})$ with
@@ -155,6 +178,13 @@ Say *why here* as well as *why this form*: what about this model makes the compo
 what about the component makes it fit this model. When the paper cannot support a specific constant
 or restriction (a cap, a scale, a linear head), state it as a design setting and put the value in the
 appendix. Never invent a rationale to fill the slot.
+
+Every subsection that adds something opens the same way, with the limitation it fixes before any of
+its own definitions. Mem-Pi opens its second training stage with "While experience distillation
+provides a strong initialization, the supervised policy cannot determine \emph{when} generation is
+useful or potentially harmful", and that sentence earns the subsection that follows. A subsection that
+opens by defining its own title has to be read to the end before the reader learns why it exists. The
+training subsection in Architecture before credit is one case of this.
 
 ## Modules by inputs and outputs
 A module (a router, a policy, a gate, a reader) is defined by what it reads, what it outputs, and what
@@ -229,9 +259,16 @@ the what, and neither repeats the other.
 
 ## One hierarchy from abstract to method
 The abstract states the idea, the introduction motivates it and names its parts, the method
-formalizes them. The same claim appears at each level in the same terms, at increasing depth.
+formalizes them. The same claim appears at each level in the same terms, at increasing depth. The
+experiments then measure each part the method defines, which is the fourth level of the arc
+`writing-paper` states across all four sections.
 - The introduction names the method's run-in heads (for LatentHarness, *state-level action credit* and
-  *gain-credited memory writing*), so the reader meets them again in the method.
+  *gain-credited memory writing*), so the reader meets them again in the method. It names them in the
+  order the method defines them, so when causal order moves a component, the introduction's list moves
+  with it. Each head is a concept noun the paper then owns (`Depth shortcut.`, `Support-linked memory
+  hierarchy.`), so the reader can carry it into the results table. A head that describes a step (`The
+  store and the leaf-support relation.`, `The descent policy.`, `The two channels as arms.`) names a
+  process, and there is nothing to carry.
 - A term defined only in the method (an admissible set, a masked action) stays out of the abstract and
   introduction. Use the plain word ("allowed actions").
 - Distinguish quantities the method keeps apart: a stop-gradient action gain trains the policy, a
@@ -239,6 +276,26 @@ formalizes them. The same claim appears at each level in the same terms, at incr
   contradicts the method.
 - Name the same thing the same way everywhere (one verb for the paper's own operation, for example
   "recall" throughout, keeping "retrieval" for external search methods).
+
+## Register: a design, not an audit
+A method section presents the system as designed, in the vocabulary of its figure, naming the
+interface verbs, the seed programs, the loop and the gate as the figure draws them. It carries no
+sentence about what is unexercised, pre-registered or not run. The results sections carry the evidence
+and the limitations section the caveats. A head that ends on what no run exercised is a results caveat
+in the wrong section, and a section full of them stops describing a design and reads as a confession.
+
+## Drafting a method section
+The loop that works for a whole section runs in five steps.
+1. Write the skeleton by hand in the paper's macros, with the run-in heads fixed and the key equations
+   derived.
+2. One writer `rewrite` for voice. The rewrite leaves every display exactly as the skeleton wrote it,
+   so the prose pass carries no unchecked math.
+3. Writer `critique` and a `claude -p` review in parallel, each run as Checking a method section
+   describes, with a brief limited to the math and the three lenses, no hedges and no numbers.
+4. Merge their points by hand into one numbered edit list, pasting the LaTeX of any changed display
+   into the list.
+5. One writer turn applies the list, then one final turn takes an explicit change list. Re-check that
+   no qualification was dropped.
 
 ## Checking a method section
 Before accepting a rewritten method paragraph that carries math or a claim:
@@ -252,6 +309,13 @@ Before accepting a rewritten method paragraph that carries math or a claim:
    the reviewer was not given), and say so.
 5. Polish the prose with the writer after the math is settled, then re-check that no qualification
    was dropped.
+
+Beyond the math, the brief names three lenses. *Motivation* asks whether each element follows from
+the stated problem. *Missing design details* asks whether a strong reader could reimplement the
+method, and which detail belongs in the section and which in an appendix. *Clarity and novelty* asks
+for one sentence that settles the distinction from each foil. Never give a method reviewer the
+evidence-fit lens that checks the prose against the code or the runs. It belongs to the results audit,
+and a writer given it produces the confession (Anti-patterns).
 
 ## Worked example: LatentHarness
 The draft opened with the premise stated as fact and defined its memory inside the training
@@ -281,7 +345,7 @@ The author's skeleton, which this skill generalizes:
 ## Rules
 1. **Prior work is stated, our choices are argued.** Every design choice has its reason next to it.
 2. **The overview goes from goal to components to training**, one level below the introduction, and
-   carries the workflow formulation (Rule 14).
+   carries the workflow formulation (Rule 15).
 3. **The inherited base model is formulated first**, in its own papers' form.
 4. **Causal order, no forward references**: nothing is used before it is defined.
 5. **A new component is motivation, design ("we model X as Y because Z"), explanation**, with why here.
@@ -289,7 +353,8 @@ The author's skeleton, which this skill generalizes:
 7. **Architecture and credit live in separate subsections.**
 8. **A hard equation has intuition before, named factors, exact edge cases after, and a contrast.**
 9. **Short derivations go inline with the appendix holding the steps. No trivial theorems.**
-10. **One hierarchy of terms and claims from abstract to introduction to method.**
+10. **One hierarchy of terms and claims from abstract to introduction to method**, with each run-in
+    head a concept noun the paper owns.
 11. **Math is accepted only after two independent reviewers accept it.**
 12. **No invented rationale.** An unsupported constant is a setting with its value in the appendix.
 13. **Prose first, then Formally.** Motivation and design in prose, then one formal block whose
@@ -300,10 +365,23 @@ The author's skeleton, which this skill generalizes:
 15. **The workflow comes before the modules.** The section opens with the method as a modeled object, the
     pipeline figure, the end-to-end input and output with their symbols, each core module's role in the
     workflow and the objective. No "Problem Formulation" run-in sits between the overview and the modules.
+16. **A subsection that adds something opens with the limitation it fixes.** The subsection that
+    formulates the inherited base model fixes nothing, so it opens with the base process (Rule 3), and
+    every later subsection opens with its limitation.
+17. **A design, not an audit.** The method describes the system as designed, in its figure's
+    vocabulary. Evidence goes to the results and caveats to the limitations.
 
 ## Anti-patterns
 - **The premise as opening.** "A looped reasoner must decide ..." as the first sentence.
+- **The formalism-first opening.** `Let $x_0 = \ldots$` as the first sentence of the section or of its
+  workflow formulation. It defines the problem without saying what the paper decided to do about it.
+- **The mechanical opener.** "We treat X as a variant of Y in which Z is optimized by gradients." True,
+  and it restates the section title as a definition without saying what the choice buys. Lead with the
+  goal clause of the overview's first move ("so that a latent state can reuse stored evidence and
+  results instead of recomputing them"), then define.
 - **The fact-statement component.** "The memory is a fast-weight matrix." for a choice the paper made.
+  A reviewer reads an arbitrary choice where a considered one was intended. A constant the paper cannot
+  justify is not this anti-pattern. It is a design setting with its value in the appendix (Rule 12).
 - **The over-explained background.** Three sentences on the delta rule, none on why this paper uses it.
 - **The over-argued standard component.** A full motivation, design and explanation paragraph for a
   fast-weight memory, as if it were the contribution. One clause of why is enough.
@@ -316,6 +394,10 @@ The author's skeleton, which this skill generalizes:
 - **The summary that contradicts the method.** "The gains train the gate" when the gains are held
   under stop-gradient.
 - **The undefined symbol.** $\mathcal{A}(s)$ used in a loss before any sentence defines it.
+- **The process head.** `The descent policy.` or `The store and the leaf-support relation.` as a run-in
+  head. It names a step where a concept noun the paper owns belongs.
+- **The confession.** Every head ending on what was not run ("operator bodies are fixed", "no measured
+  arm fires this"), so a two-page design grows into six pages of caveats.
 - **The formulation run-in.** A bold "Problem Formulation." paragraph after the overview that states the
   setting but never the workflow, so the reader meets the modules without knowing what flows between
   them. The MemCodex author (2026-09-25): "the reader cannot get the overall workflow input and output".

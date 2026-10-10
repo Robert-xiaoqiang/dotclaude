@@ -241,6 +241,6 @@ See `writing-caption`.
 - Subscripts by baseline shift, text boxes narrower than their text, edge labels smaller than body.
 
 ## Companions
-`drawing-figure` (what a figure may contain; the chart idiom) · `docs-table` · `docs-slides` (deck
+`drawing-figure` (what a figure may contain; the chart idiom) · `writing-table` · `docs-slides` (deck
 building, and the geometry audit and LibreOffice wrapper for any .pptx) · `drawing-gemini` (generated emblems) · `writing-caption` (captions) · `drawing-icons` (fetching,
 copying and recording icons, and the Icons8 MCP) · `conventions` (the family index).

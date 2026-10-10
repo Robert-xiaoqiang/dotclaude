@@ -8,8 +8,10 @@ when_to_use: "Use when writing, revising or reviewing any figure or table captio
 ## Purpose
 A caption names what the float shows in the paper's own terms and says nothing the float or the setup
 already says. This skill owns the caption's wording and shape for every figure and table in a paper.
-`drawing-figure` owns what the image contains and `docs-table` owns the grid, its number format and its
-marks, and both defer here for the caption.
+`drawing-figure` owns what the image contains and `writing-table` owns the grid, its number format and its
+marks, and both defer here for the caption. Which marks a table prints is decided by `writing-table`
+for a results table and by `writing-ablation` for an ablation table. How the caption declares them,
+and where an abbreviation is expanded, is decided here ([rule 7](#rules)).
 
 The failure it guards against is a caption that is long and still unhelpful: a generic subject
 ("Results at two scales"), then a row of `Label: value.` fragments that restate the legend, define the
@@ -38,8 +40,8 @@ a vague cut or a negation: exactness is the goal, and brevity follows from it on
 
 Not for:
 - what the image may contain, its labels, legend and panel titles (`drawing-figure`),
-- the table's columns, number format, and where bold, underline and margins go (`docs-table`),
-- which ablation rows exist (`writing-ablation`),
+- the table's columns, number format, and where bold, underline and margins go (`writing-table`),
+- which ablation rows exist and the change marks they print (`writing-ablation`),
 - the prose paragraph that cites the float (`writing-paper`, `writing-analysis`),
 - the polishing pass itself, which every caption goes through (`writing-chatgpt`, rule 15).
 
@@ -73,7 +75,7 @@ one of them is edited.
    right panels show X and Y, respectively.` Letters appear only when the figure draws them. A caption
    carries at most one colon, which appears only before a joined list.
 4. **The marks that encode something invisible otherwise, as a sentence with each mark typeset in
-   itself.** `\textbf{Bold}, \underline{underline}, and {\color{gaingreen}green} mark the best, the
+   itself.** `\textbf{Bold}, \underline{underline}, and {\color{oursfg}red} mark the best, the
    second best, and the margin over the second best, respectively.` In a figure, a symbol drawn without
    definition (`judge scores $S$ and oracle ranking $Q$`), or `The dashed arrow points from
    the strongest baseline to ours.` Never the colon key (`Bold: best. Underline: second.`). The author
@@ -165,7 +167,7 @@ after:  Domain composition of \corpus{}: training and held-out sizes per domain,
 The before is shorthand only its writer can read ("GPQA-D. whole"), and it spends a fragment
 explaining the `$\mathcal{D}_0$` column, a calibration split that is setup detail. The author removed
 the column, which is the general lesson: a column that needs a caption note to be understood is a
-column to question under `docs-table`'s one rule. The after says what the table is for.
+column to question under `writing-table`'s one rule. The after says what the table is for.
 
 **Figure 3, three panels of one quantity, one per failure class.**
 
@@ -192,16 +194,18 @@ before: Ablations of \ourmethod{} at Qwen3.5-4B: out-of-distribution scores at e
         checkpoint. Subscript $g$ or $c$: single-interface harness. Indentation: removed modules.
         \textbf{Bold}: best. \underline{Underline}: second.
 after:  Ablations of \ourmethod{} on evolver components and control interfaces.
-        \textbf{Bold} and \underline{underline} mark the best and second-best results.
+        {\color{lossred}Red} and {\color{gaingreen}green} mark a drop and a rise from the full system.
 ```
 
 The lead now names the two axes the ablation varies, which is what a reader scanning for "does the
-critic matter" needs. The author's rewrite gave only the lead; the two marks stay by
-[rule 7](#rules), since the grid bolds and underlines and nothing in it says what that means, and
-they are declared in one sentence with each mark typeset in itself. The
-checkpoint rule is protocol. The subscript and the indentation are notation the setup's Baselines
-paragraph defines ("a subscript restricts the harness to one interface"), and the column headers
-repeat the main table's, so none of them need a caption line.
+critic matter" needs. The author's rewrite gave only the lead. HarnessRL ranked its ablation rows
+with bold and underline, as its main table did. An ablation table built under `writing-ablation`
+prints each row's change from the full system in red or green and no rank marks, and
+[rule 7](#rules) declares whatever the grid prints, so the marks sentence above declares the change
+marks. The checkpoint rule is protocol. The subscript and the
+indentation are notation the setup's Baselines paragraph defines ("a subscript restricts the
+harness to one interface"), and the column headers repeat the main table's, so none of them need a
+caption line.
 
 **Figure 4, three panels over training.**
 
@@ -278,7 +282,7 @@ float already opens with it ("At Qwen3.5-4B, ...").
 | **Overview or pipeline figure** | the method as subject of a sentence (`\ourmethod{} runs ...`) | one or two sentences of flow, each part named as drawn, with its symbol | `Module: contents` fragments, acceptance rules, equations |
 | **Method-comparison diagram** (a prior loop, the same loop under another objective, then ours) | `Comparison of` | one sentence in the drawing's order, each system named with its citation and one clause on what distinguishes it | position labels or letters, since the systems' names are drawn and the sentence gives the order |
 | **Main results table** | `Quantitative results of \ourmethod{} on <corpus> with <models>` | the marks | metric definitions, benchmark lists the setup gives, the finding |
-| **Ablation table** | `Ablations of \ourmethod{} on <the axes varied>` | the marks | the notation key the setup defines, checkpoint selection |
+| **Ablation table** | `Ablations of \ourmethod{} on <the axes varied>` | the red and green change marks (`writing-ablation`) | the notation key the setup defines, checkpoint selection, a bold and underline key |
 | **Dataset table** | `<What the table decomposes> of <corpus>` | what the columns hold, in one clause | size conventions, calibration splits, shorthand |
 | **Training-curve figure** | `Training dynamics of \ourmethod{}`, or the quantity by what it is split on | the panels' contents, if more than one | line styles the legend shows, definitions the text gives |
 | **Efficiency figure** | `Training efficiency of \ourmethod{} measured by <the unit>` | the panels' contents, joined, a decomposition named by its conceptual groups (`RL loop and harness evolver overhead`) | hatch or colour keys the legend shows, the legend's fine stage list, a bare `by stage` |
@@ -323,7 +327,8 @@ Run on every caption, in order, and delete what fails.
 6. Does any `Label: value.` key declare a mark, a panel or an abbreviation? Delete it if the reader
    can decode the mark without it, and otherwise declare it in a plain sentence with the mark typeset
    in itself (`\textbf{Bold} and \underline{underline} mark the best and second best,
-   respectively.`). Keep bold, underline, parentheses and any symbol drawn without definition.
+   respectively.`). Keep bold, underline, a coloured margin or change mark, and any symbol drawn
+   without definition.
 7. Does any clause state the finding? Move it to the results paragraph.
 8. Does each noun match the word the axis, the legend and the text use for the same object (proportion
    rather than ratio, 100 rather than hundred, reversed updates rather than a paraphrase)?
@@ -364,13 +369,21 @@ Run on every caption, in order, and delete what fails.
 6. **One-word panel identities go inside the panel**, at the upper middle, and the caption names only
    what the panels share.
 7. **Keep only the marks that encode something the reader cannot see otherwise**: bold, underline
-   and the margin's parentheses in a table, and a symbol drawn without its definition. The shaded
+   and the coloured margin in a results table, the red and green change marks in an ablation table
+   (`writing-ablation`), and a symbol drawn without its definition. The shaded
    row of the paper's method needs no key. Every mark, panel name and abbreviation is declared in a
    plain sentence with the mark typeset in itself (`\textbf{Bold}, \underline{underline}, and
-   {\color{gaingreen}green} mark ..., respectively`), never as a `Label: value.` colon key, which reads
+   {\color{oursfg}red} mark ..., respectively`), never as a `Label: value.` colon key, which reads
    as a legend pasted under the float. A mark is named by what the reader sees: a coloured margin
    such as `(+3.0)` in red is declared as `{\color{oursfg}red}`, the colour word in its own colour,
-   not as `(parentheses)`, which names the typography instead of the signal.
+   not as `(parentheses)`, which names the typography instead of the signal. The margin's colour is
+   the paper's accent, which `writing-table` sets, and the caption names whatever colour that is.
+   An abbreviation the float prints, such as a benchmark or metric shortened to fit a column header
+   (`2WQA`, `Acc.`), is expanded in the caption of the first float that prints it, where the reader
+   meets it. System-1.5's main caption expands `Acc.` and `FLOPs r.` this way. What the quantity
+   measures and how it is computed stay in the setup or the appendix. A notation the paper defines,
+   such as a subscript that holds the harness to one interface, is not an abbreviation and stays in
+   the setup (rule 4).
 8. **One object, one name, across caption, axis, legend and text, and the name the field uses.**
    Proportion (part of a whole, the usual term in LLM-judge and reward-model papers, with the axis
    written `Pairs (%)` or `Tasks (%)`), never ratio (part to part). When the
@@ -424,7 +437,7 @@ Run on every caption, in order, and delete what fails.
 - **Shorthand only the writer reads.** `GPQA-D.\ whole.`
 - **The long caption.** Eighty words, of which the object's name is five. Every extra clause is one
   of the above.
-- **A caption note that explains a column.** Usually the column fails `docs-table`'s one rule
+- **A caption note that explains a column.** Usually the column fails `writing-table`'s one rule
   (`$\mathcal{D}_0$` in the dataset table).
 - **The vague cut or the negation.** `decomposed by stage`, `scored with and without the rubric`.
   Tempting because it is short. It names neither the groups nor the other scoring source.
@@ -439,9 +452,9 @@ Run on every caption, in order, and delete what fails.
 
 ## Companions
 `drawing-figure` (what the image contains, including the in-panel labels a caption must not repeat and
-when panel letters are drawn) · `docs-table` (the grid, number format, and the bold, underline and
+when panel letters are drawn) · `writing-table` (the grid, number format, and the bold, underline and
 margin marks the caption declares) · `writing-ablation` (which ablation rows exist, whose axes the
-ablation caption's lead names) · `drawing-workflow` (drawing the overview figure whose flow the caption
-tells) · `writing-analysis` and `writing-paper` (the setup that owns the protocol, and the results
-paragraph that owns the finding) · `writing-chatgpt` (polishing a drafted caption's sentences) ·
-`conventions` (family index).
+ablation caption's lead names, and the red and green change marks its caption declares) ·
+`drawing-workflow` (drawing the overview figure whose flow the caption tells) · `writing-analysis`
+and `writing-paper` (the setup that owns the protocol, and the results paragraph that owns the
+finding) · `writing-chatgpt` (polishing a drafted caption's sentences) · `conventions` (family index).

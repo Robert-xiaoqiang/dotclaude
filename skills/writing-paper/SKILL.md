@@ -1,7 +1,7 @@
 ---
 name: writing-paper
-description: "Write or revise a research paper in LaTeX: where a citation attaches, how related work is grouped by theme rather than listed paper by paper, and how the method and experiments sections are built. A method opens with the modeling choice and each subsection with the limitation it fixes; a results paragraph takes a finding as its subject, never a table. Load alongside writing-style, which is the word- and token-level layer this sits on top of, or writing-style-zh for a Chinese paper."
-when_to_use: "Use when drafting or editing any section of a paper, when placing citations, when a method section reads as a derivation with no choices in it, when a results paragraph opens with Table 1 shows, when related work is a list of summaries, or when a reviewer says the contribution is hard to locate."
+description: "Write or revise a research paper in LaTeX by the rules every section shares: where a citation attaches and how citations group by claim, a leading sentence that states a claim, one argument carried from the abstract through the method to the experiments, headings that name concepts, families that are counted and named, claim boxes, and signed numbers. Each section's own shape has a section skill, writing-literature for related work, writing-methodology for the method, writing-analysis and writing-ablation for the experiments, and writing-caption and writing-table for captions and tables. Load alongside writing-style, which is the word- and token-level layer this sits on top of, or writing-style-zh for a Chinese paper."
+when_to_use: "Use when drafting or editing any part of a paper alongside the section skill that owns it, when writing the abstract or the introduction, when placing or grouping citations, when a paragraph opens by announcing its topic or what the section will do, when the abstract, introduction, method and experiments disagree about the contribution, when a heading names a process or asks a question, or when a reviewer says the contribution is hard to locate. The shape of related work, the method and the experiments goes to writing-literature, writing-methodology and writing-analysis."
 ---
 # Skill: writing-paper
 
@@ -16,8 +16,11 @@ the other, and a draft that satisfies only one of them still fails: prose can be
 and still open every paragraph by announcing its own title, and prose can lead with a finding in
 every paragraph and still be unreadable for punctuation.
 
-On top of that layer, this skill adds: citations that attach to the concept they support, related work grouped by theme rather
-than recited paper by paper, and paragraphs that open with a claim instead of a topic announcement.
+On top of that layer, this skill holds the rules every section shares: citations that attach to the
+concept they support, paragraphs that open with a claim instead of a topic announcement, and one
+argument carried from the abstract to the experiments. Each section's own shape belongs to a section
+skill, `writing-literature` for related work, `writing-methodology` for the method, and
+`writing-analysis` with `writing-ablation` for the experiments.
 
 The failure this guards against is prose that is fluent, grammatical, and carries no information in
 the position a reader looks first. A section that begins "We treat per-token circuit design as a
@@ -26,25 +29,26 @@ section that begins "Existing memory-augmented agents collect fragments into a b
 entries at inference time" has spent it setting up the gap the paper fills.
 
 ## When to Use
-- Drafting or revising any section of a paper: abstract, introduction, method, experiments, related work.
-- Placing citations, or fixing a draft where citations sit at the ends of sentences.
-- A related-work section has become one paragraph per paper.
+- Drafting or revising any part of a paper, alongside the section skill that owns that part. The
+  abstract and the introduction have no skill of their own, and their recipe is the arc below.
+- Placing or grouping citations, or fixing a draft where citations sit at the ends of sentences.
+- A paragraph opens by announcing its topic, or a heading names a process or asks a question.
+- The abstract, introduction, method and experiments disagree about what the paper contributes.
 - A reviewer says the writing is vague, or that the contribution is hard to locate.
+- Not for the shape of a section. Related work is `writing-literature`'s, the method
+  `writing-methodology`'s, the experiments `writing-analysis`'s, the ablation set `writing-ablation`'s,
+  captions `writing-caption`'s and table grids `writing-table`'s.
 
 ## Contents
 - [What this adds to writing-style](#what-this-adds-to-writing-style)
 - [Where a citation attaches](#where-a-citation-attaches)
 - [The tilde, and the one case that drops it](#the-tilde-and-the-one-case-that-drops-it)
 - [One line of work, one citation](#one-line-of-work-one-citation)
-- [Related work is organized by theme](#related-work-is-organized-by-theme)
-- [The leading sentence carries the finding](#the-leading-sentence-carries-the-finding)
+- [The leading sentence carries the claim](#the-leading-sentence-carries-the-claim)
 - [The arc: each section expands the last](#the-arc-each-section-expands-the-last)
-- [The method section](#the-method-section)
-- [The experiments section](#the-experiments-section)
-- [Headings name concepts, never processes or questions](#headings-name-concepts-never-processes-or-questions)
+- [The section skills](#the-section-skills)
+- [Headings name concepts, never processes or unnumbered questions](#headings-name-concepts-never-processes-or-unnumbered-questions)
 - [Families are enumerated, not described by a split](#families-are-enumerated-not-described-by-a-split)
-- [Related work: direction heads, second to last](#related-work-direction-heads-second-to-last)
-- [Captions](#captions)
 - [Numbers](#numbers)
 - [Rules](#rules)
 - [Anti-patterns](#anti-patterns)
@@ -150,62 +154,20 @@ Name a paper individually only when it carries a detail the argument needs: it i
 work, it is the baseline being compared against, or its specific mechanism is what the next sentence
 contrasts with. Everything else belongs inside a grouped bracket.
 
-## Related work is organized by theme
-Each paragraph covers one theme and ends by saying what the theme leaves open. The shape is fixed:
+## The leading sentence carries the claim
+The first sentence of a section, subsection or paragraph is the most-read sentence in it. Spend it on
+a claim, never on a topic announcement or on what the section will do. Each section has its own form
+of the claim. The method overview opens with what the method builds on and what it adds
+(`writing-methodology`), and each component opens with the problem that forces it. A results
+paragraph opens with its finding in bold (`writing-analysis`). A related-work paragraph opens with
+the family's aim or trajectory (`writing-literature`). The experiments setup opens with what is
+measured and on which tasks, which describes the evaluation and does not announce the section.
 
-1. **A bolded theme header**, run in with `\noindent \textbf{Learning-based agent memory.}\`
-2. **The trajectory of the field as a claim**, with grouped citations on each stage. "Agent memory has
-   evolved from static pipelines~\citep{...} toward learned memory operations~\citep{...}."
-3. **Each sub-direction in one sentence** with its own grouped citation, opened by "One line of work"
-   and "Another line of work".
-4. **Named exemplars**, only the two or three whose mechanism the argument needs.
-5. **The gap**, stated as a property shared by everything above. "Despite these advances, all remain
-   retrieval-centric: they improve when and how to access stored entries, but the memory content
-   itself is fixed at write time."
-6. **Our position**, one sentence, naming what changes. "Ours departs from this paradigm by modeling
-   memory as a generative policy."
-
-Steps 5 and 6 are what make the section an argument instead of a bibliography. A related-work paragraph
-that ends on its last citation has told the reader what exists and not why the paper was written.
-
-Steps 5 and 6 belong only at the end of the paragraph, in one or two sentences. A middle sentence
-that says what one cited method fails to do ("X ... but does not place retrieval within its action
-set") is the gap stated early and aimed at one paper, and it reads as an attack. Name at most two
-exemplars per line of work and let the grouped bracket carry the rest. The citation list must also
-be current: a fifth to a quarter of the section's citations from the last six months. The full
-section recipe, learned from Mem-Pi and System-1.5, with the recency count, is `writing-literature`.
-
-## The leading sentence carries the finding
-The first sentence of a section, subsection, or paragraph is the most-read sentence in it. Spend it on
-a claim, never on a topic announcement.
-
-In **results**, lead with the finding in bold, then give the evidence:
-
-```latex
-\textbf{Experience distillation alone already matches or surpasses RL-based baselines.}
-Stage~1 achieves 35.0\% on \textsc{WebArena}, comparable to Memory-R1 (33.2\%) and MemRL (34.0\%)
-without any RL training.
-```
-
-In **ablations**, lead with the research question, describe the variants, then state the answer in
-bold and attribute it:
-
-```latex
-\noindent\textbf{RQ1: Are both training stages necessary?}\
-We compare against two single-stage variants. \textit{(i)} ... \textit{(ii)} ...
-Results show that \textbf{both stages are essential, with unified training suffering the largest
-drop.} Removing Stage~1 degrades \textsc{WebArena} by 5.2\,pp, suggesting that without a
-well-initialized memory distribution, online RL struggles to converge.
-```
-
-The order is research question, then main finding, then detailed depiction. A reader who stops after
-the bold sentence has the result. A reader who continues gets the numbers and the attribution. Never
-invert it by walking through numbers first and concluding at the end of the paragraph.
-
-An **interpretation** sentence earns its place when it says why, not that. "We attribute this to a
-mismatch between the two rewards: the similarity reward encourages imitation of references, whereas
-the task reward rewards memories that improve success." That is a mechanism. "This demonstrates the
-effectiveness of our approach" is not.
+The test is mechanical. Look at the grammatical subject of each paragraph's first sentence. If it is
+an artifact of the paper, a table, a figure, or a section, the sentence is wasted. If it is a claim
+about the world, it is doing work. The one exception is a sentence whose claim is about the display
+itself, such as what its measurement leaves out, as in Mem-Pi's
+`Figure~\ref{fig:efficiency} counts tokens inserted into the agent and so omits the memory model's own prefill`.
 
 ## The arc: each section expands the last
 The paper says the same thing four times at increasing resolution, and each pass must be consistent
@@ -221,164 +183,53 @@ or from concurrent work, and why the obvious version of it is not sufficient. Th
 advantages, each a consequence of one design choice. How it is trained. What was measured and the
 headline result.
 
-**Method.** Each mechanism named in the introduction gets its own subsection, in the same order, with
-the definition, the objective, and the reason for each choice.
+**Method.** Each mechanism named in the introduction gets its own run-in head, in the causal order
+`writing-methodology` fixes, and the introduction names them in that order.
 
 **Experiments.** Each claim made in the introduction gets an experiment that could have refuted it.
 
+Related work comes after the experiments and before the conclusion, where Mem-Pi and System-1.5 put
+it. By then the reader has the method and the numbers, so the section places the paper among its
+neighbours and does not motivate it again, because the introduction's lines of work have already
+stated the gap.
+
 The consistency requirement is strict: a mechanism named in the abstract must appear in the
 introduction, be defined in the method, and be measured in the experiments. A reader who finds a
-contribution in the abstract and cannot find its experiment stops trusting the paper.
+contribution in the abstract and cannot find its experiment stops trusting the paper. The writer's
+`narrative` task (`writing-chatgpt`) checks this chain across sections. Each kind of content also
+has one home. Evidence belongs to the results, and caveats about what was not run belong to the
+limitations.
 
-## The method section
-A method section fails in a specific way: it derives correctly and never says what was chosen or why.
-The reader finishes it able to reimplement the equations and unable to name the contribution.
+## The section skills
+Each section's own shape lives in one skill, and this file keeps only what crosses sections. Related
+work is two or three direction paragraphs, each closing on the paper's difference, with recent
+citations, and `writing-literature` owns it. The method section, from the overview and the inherited
+base model to each motivated component and every hard equation, is `writing-methodology`'s.
+`writing-analysis` owns the experiments section, its setup, the shape of a results paragraph,
+ablation framing and where each piece of evidence goes, and `writing-ablation` owns which ablation
+variants exist and how the ablation table is grouped. Every figure and table caption is
+`writing-caption`'s. The grid of a results table, its number format and its marks are
+`writing-table`'s.
 
-**Open with the modeling choice, not with notation.** The first sentence states what the paper decides
-to treat the problem as. Notation follows in the next sentence, once the reader knows what is being
-formalized.
-
-```latex
-% WEAK: formalism from the first word. Nothing here is a choice, so nothing is defended,
-% and standard background is indistinguishable from the contribution.
-Let $x_0 = (w^1, \ldots, w^L)$ be a clean token sequence over a vocabulary that includes a
-dedicated mask symbol. The forward process draws a masking level $t \sim \mathcal{U}(0,1]$ and
-independently replaces each token ...
-
-% STRONG: the choice, then the formalism it needs.
-We model adaptive memory as a generative policy \mempolicy{} parameterized by $\theta$, separate
-from the downstream agent. Let $\mathcal{E}$ denote an offline bank of context-guidance pairs
-$(x,m)$, where each context $x=(q,o)$ consists of a task specification $q$ and an observation $o$.
-```
-
-**Each subsection opens with the limitation that motivates it.** A method is a sequence of decisions,
-and a decision is only legible against the thing it fixes. "While experience distillation provides a
-strong initialization, the supervised policy cannot determine \emph{when} generation is useful or
-potentially harmful" earns the subsection that follows. A subsection that opens by defining its own
-title has to be read to the end before the reader learns why it exists.
-
-**Every design choice carries its reason, usually as a "so that" clause.** "We initialize the two
-decision-token embeddings symmetrically so that both decisions have comparable initial probabilities
-and can be explored at the beginning of training." Without the clause a reviewer cannot tell a
-considered choice from an arbitrary one, and will assume the second.
-
-**Mark background as background.** Standard machinery the paper inherits gets compressed and cited,
-not re-derived at length. A full derivation of a known objective, presented in the same voice and at
-the same length as the contribution, hides which part is new. Give the inherited objective, cite it,
-and spend the space on what the paper changes.
-
-**Define every symbol immediately after its equation**, in a "where" clause. An equation whose symbols
-are defined three paragraphs later, or not at all, is decoration.
-
-### Register: a design, not an audit
-
-A method section presents the system as designed, in the vocabulary of its figure: the interface
-verbs by name, the seed programs, the loop, the gate. It carries no sentence about what is
-unexercised, pre-registered or not run; the results sections carry the evidence and the
-limitations section the caveats. A reviewer lens that checks the prose against the code
-("evidence fit") belongs to the results audit and must never drive the method text: given that
-lens, a writer turns a two-page design into a six-page confession (six operators, "operator bodies
-are fixed", every head ending "no measured arm fires this"). The lenses that improve a method
-section are three: motivation (does each element follow from the stated problem), missing design
-details (could a strong reader reimplement it; which detail belongs in the section, which in an
-appendix), and clarity and novelty (one sentence that settles the distinction from each foil).
-
-The loop that works: a hand-written skeleton in the paper's macros with the heads fixed; one writer
-`rewrite` for voice; writer `critique` and a `claude -p` review in parallel, both restricted to
-the three lenses, no hedges, no numbers; the merge into one numbered edit list done by hand, with
-the LaTeX of any changed display pasted into the list; one writer turn to apply it; one final turn
-with an explicit change list. Prompts, rules and LLM reflections go in the paper's `promptbox`
-idiom, with `\role{system}` markers and `\phead{Section}` heads, never in verbatim blocks.
-
-## The experiments section
-The test is mechanical. **Look at the grammatical subject of each paragraph's first sentence. If it is
-an artifact of the paper, a table, a figure, or a section, the sentence is wasted. If it is a claim
-about the world, it is doing work.**
-
-```latex
-% WEAK: the subject is the table. The reader learns what the table contains, which the caption
-% already said, and must hunt the paragraph for the result.
-Table~\ref{tab:main} positions our method against classical baselines of matched scale.
-Table~\ref{tab:ablation} ablates the sub-layer, and Table~\ref{tab:ensemble} reports ensembling.
-
-% STRONG: the subject is the finding. The table is cited as evidence for it.
-\textbf{Our method achieves state-of-the-art performance across all benchmarks and sub-domains.}
-As summarized in Table~\ref{tab:main-results}, it leads every sub-domain, with the largest gains
-in Reddit ($+$23.8\,pp) and CMS ($+$28.2\,pp), where structured navigation patterns benefit most
-from memorized experience.
-```
-
-The strong form also places the number **immediately after the claim it supports**, not several
-sentences later behind a digression. A result that appears mid-paragraph, after an explanation of why
-prior work is hard to compare against, will be missed by every reader who skims.
-
-**Every results paragraph has one shape: finding, two or three numbers, one reason.** The bold
-head *is* the finding, a short claim of the form "X beats Y on Z" or "X drives Y", so a reader who
-reads only the heads has the results in order. The body then gives two or three representative
-numbers, a comparison or a trend, each right after the claim it supports, and stops: the table or
-figure carries every other cell and is cited for it. The paragraph closes with one or two sentences
-of plausible explanation that tie the finding back to the paper's motivation and design, the
-mechanism the method was built around. A paragraph that walks through every suite, every scale and
-every variant says the same thing six times, buries the one comparison that mattered, and never
-says why.
-
-`writing-analysis` gives worked examples of this shape from System-1.5 and Mem-Pi, and owns the rest
-of the experiments section: setup, ablation framing, and where each piece of evidence goes.
-
-**Structure the section as questions, not as tables.** Ablations and analyses are numbered research
-questions carried in run-in bold, answered before the numbers arrive:
-
-```latex
-\noindent\textbf{RQ1: Are both training stages necessary?}\
-We compare against two single-stage variants. \textit{(i) w/o Stage~1 init} skips experience
-distillation. \textit{(ii) Unified single-stage} collapses both stages into one RL phase.
-Results show that \textbf{both stages are essential, with unified training suffering the largest
-drop.} Removing Stage~1 degrades \textsc{WebArena} by 5.2\,pp, suggesting that without a
-well-initialized memory distribution, online RL struggles to converge.
-```
-
-Number the questions across the whole section, so RQ1 and RQ2 in the ablation continue into RQ4 in the
-analysis. A reader can then locate the claim a table supports without reading the table.
-When the paper leads every paragraph with its finding instead, the question is folded into the
-head's claim ("Credit, not the price, carries the accuracy.") and no RQ label is added. Pick one
-convention per paper and hold it across the whole section.
-
-**The setup is a reproducibility contract.** Benchmarks and baselines go under run-in bold headers.
-Each benchmark carries its citation on its name, its size, and, where a split is inherited rather than
-chosen, the prior work the split follows: "Following WebAgent-R1~\citep{wei-etal-2025-webagent} and
-WebRL~\citep{qi2024webrl}, we use a 647/165 train/test split." Naming the source of a split is what
-makes a comparison against those papers legitimate, and choosing a split freely without saying so is
-the most common way a results table stops being comparable.
-
-**Group baselines by paradigm, not alphabetically**, using the same inline enumeration as everywhere
-else: `\emph{(i)~Workflow-based memory}` then `\emph{(ii)~Learning-based memory}`. The grouping is
-itself an argument, because it says which family the paper competes with.
-
-**When a comparison is impossible, say so and say why.** If no prior system reports the suite, state
-it plainly, state what each reports instead, and state what the paper adds. That is a finding about
-the field. Burying it inside a paragraph about tables turns a legitimate contribution into an excuse.
-
-## Headings name concepts, never processes or questions
+## Headings name concepts, never processes or unnumbered questions
 
 A heading is the one line a skimming reviewer reads, so it has to carry something they can take
-away. Two forms, and the section decides which.
-
-**In the method, a heading is a concept noun the paper then owns.** `Depth shortcut.`
-`Confidence-gated ladder descent.` `Support-linked memory hierarchy.` The reader can carry the
-noun into the next section and into the results table. A heading that describes the process
-instead — `The store and the leaf-support relation.`, `The descent policy.`, `The two channels as
-arms.` — names a step rather than a thing, and there is nothing to carry.
+away. The section decides its form. In the method a run-in head is a concept noun the paper then
+owns (`writing-methodology`), in related work a direction noun phrase (`writing-literature`), and in
+the setup the things the paragraph fixes (`Datasets.`, `Baselines.`). A head that names a step
+leaves the reader nothing to carry into the next section.
 
 **In the results, a heading is a complete claim with its number.** `Routing gains $+8.18$ points
 over the verbatim-only floor on LoCoMo-10.` Not `LoCoMo-10.`, which is a label, and not `The
 census.`, which is a topic. A reader who reads only the bold run-in heads of the results section
 should come away with the paper's findings in order.
 
-**A heading that opens with What, How, or Why is always wrong.** `What would refute each law.` is a
-question put to the reader, and the reader came to be told. It is also a process description
-wearing a question mark: the thing itself is the falsification condition, so the heading is
-`Falsification conditions.` The same applies to `What this says about the field.`, which should be
-the thing it says.
+**A heading that opens with What, How, or Why is always wrong**, except a numbered RQ head in a
+question-framed experiments section, which a bold finding answers before any number arrives
+(`writing-analysis`). `What would refute each law.` is a question put to the reader, and the reader
+came to be told. It is also a process description wearing a question mark: the thing itself is the
+falsification condition, so the heading is `Falsification conditions.` The same applies to
+`What this says about the field.`, which should be the thing it says.
 
 **Counted-article headings are process headings in disguise.** `The two-channel model.`, `The two
 channels.`, `The three laws.`, `The self-rewriting store.`, `The ceiling clause.` name how many
@@ -386,18 +237,26 @@ things there are or point at "the" thing instead of naming a concept a reader ca
 concept in Title Case, the way Mem-Pi, System-1.5 and HarnessRL do (`Adaptation Distillation`,
 `Dynamic Shortcut Architecture`, `Harness Evolver`): `Channel Model of Derived Memory`, `Content
 Channel and Routing Channel`, `Laws of Derived Memory`, `Certified Self-Rewriting`, `Conversion
-Ceiling: Once Routing Saturates, the Reader Binds`.
+Ceiling: Once Routing Saturates, the Reader Binds`. Title Case is for `\section` and `\subsection`
+titles. A counted-article run-in head becomes a sentence-case concept noun (`The two channels.`
+becomes `Content channel and routing channel.`).
 
-**Strong claims get one visual register, and only strong claims do.** A law, a results takeaway and
-the design rule the model implies go in claim boxes (a thin coloured left rule on a light tint,
-numbered `Law N` / `Finding N`, one colour per kind), each holding the claim in one sentence and its
-headline evidence in at most two more. A headline claim inside running prose may take one accent
-span (`\keyclaim{}`), at most once per paragraph and a handful of times per paper. Nothing else is
+**Strong claims get one visual register, and only strong claims do.** An observation, a results
+takeaway and the design principle the model implies go in claim boxes. A claim box is a light tinted
+panel with no frame and no edge rule, numbered `Observation N` or `Finding N` (the principle is
+unnumbered), with one colour per kind. Each box holds the claim in one sentence and its headline
+evidence in at most two more. A headline claim inside running prose may take one accent span
+(`\keyclaim{}`), at most once per paragraph and a handful of times per paper. Nothing else is
 coloured or boxed, so the eye learns that colour means "this is a claim the paper stands on".
 
 **Run-in heads, not `\paragraph`.** Use `\noindent\textbf{Concept.}` followed by the text on the
 same line. `\paragraph` adds vertical space that breaks the density of a conference page, and its
 output drifts between classes.
+
+**Prompts are typeset, never dumped.** Prompts, rules and LLM reflections go in the paper's
+`promptbox` idiom, with `\role{system}` markers and `\phead{Section}` heads, never in verbatim
+blocks, wherever they appear, whether the method, a case study or the appendix. The box's caption is
+`writing-caption`'s.
 
 ## Families are enumerated, not described by a split
 
@@ -407,55 +266,26 @@ procedure that produced it.
 ```
 wrong:  Splitting those questions by where the gold session lands isolates the effect.
 wrong:  We use a two-family rule.
-right:  Runs fall into two families: 1) Family A, cross-system comparisons, including the
-        seven-system arena at fixed reader and judge, and 2) Family B, paired within-system
-        comparisons, including the content and routing arms at fixed writer, reader and judge.
+right:  Runs fall into two families, \emph{(i)~cross-system comparisons}, including the
+        seven-system arena at fixed reader and judge, and \emph{(ii)~paired within-system
+        comparisons}, including the content and routing arms at fixed writer, reader and judge.
 ```
 
-The form is: *these fall into N families, 1) NAME, including X and Y, 2) NAME, including Z.* It
-applies to benchmarks, baselines, layers, ablation arms and error categories alike. A sentence that
+The form is
+`these fall into N families, \emph{(i)~NAME}, including X and Y, and \emph{(ii)~NAME}, including Z.`
+It applies to benchmarks, baselines, layers, ablation arms and error categories alike. A sentence that
 describes the splitting operation — "by where the memory lives", "by which tier is varied" — leaves
 the reader to reconstruct the families, and they will reconstruct them differently from you.
-
-Setup headings take the same treatment. `Benchmarks, readers and judges.` names the three things
-the paragraph fixes. `Benchmarks and grading.` names one thing and a gerund.
-
-## Related work: direction heads, second to last
-
-Related work sits second to last, after the results and before the limitations, where Mem-Pi and
-System-1.5 put it. By then the reader has the method and the numbers, so the section places the
-work; it does not motivate it. Motivation that has drifted here belongs in the introduction.
-
-Three or four paragraphs, and each is one research direction. The run-in head names the direction
-as a noun phrase, never as a claim or a sentence:
-
-```
-right:  \noindent\textbf{Retrieval-centric agent memory.}
-right:  \noindent\textbf{Efficient reasoning models.}
-wrong:  \noindent\textbf{Long context is the baseline to beat.}     a claim
-wrong:  \noindent\textbf{Evolving the system rather than the store.} a process
-```
-
-Inside a paragraph the shape is fixed. The first sentence summarises what the direction does in
-one line. The body enumerates the lines within it, *one line of work does X, a second line does Y*,
-with citations attached to the named systems rather than trailing the sentence. The last sentence
-places this paper against the direction in one clause: Mem-Pi closes on *the constraint we
-remove*, System-1.5 on *builds upon X but further Y*. No sentence addresses the reader, narrates
-the authors' own choices, or reads *what we found*.
-
-## Captions
-
-Captions are owned by `writing-caption`. In short: the lead is a noun phrase that names the float's
-object and the method in the paper's own terms; an overview figure gets one or two sentences telling
-its flow; panels are named by position or by their joined contents, and by letters only when the
-figure draws them; protocol, legend text and findings stay out; a table caption declares only the
-marks (bold, underline, parentheses).
 
 ## Numbers
 Report a difference with an explicit sign and a unit, and bind the unit with a thin space:
 `($+$23.8\,pp)`. Percentage points and percent are different quantities, so a change from 42.0\% to
 50.3\% is `$+$8.3\,pp`, never `$+$8.3\%`. Give absolute values alongside relative ones when a relative
 gain sits on a small base, because "50\% relative improvement" on a base of 4\% is two points.
+
+A number follows the claim it supports immediately, in the abstract and the introduction as much as
+in the results, and never after a digression. A table cell states its unit once in the column header
+(`writing-table`).
 
 ## Rules
 1. **A citation attaches to its concept, not to the sentence.** Move it to sit immediately after the
@@ -470,69 +300,38 @@ gain sits on a small base, because "50\% relative improvement" on a base of 4\% 
    sentence per paper.
 6. **Name a paper individually only when its mechanism carries the argument**, such as the closest
    prior work or the baseline being compared against.
-7. **Every related-work paragraph ends with the gap and the position.** Not on its last citation.
-8. **The leading sentence states the claim.** Never the topic, never what the section will do.
-9. **Results lead with the finding in bold, ablations with the research question.** Evidence follows,
-   attribution last.
-10. **No sentence exists only to introduce the next one.** Delete it and promote the next.
-11. **A method subsection opens with the limitation it fixes**, and every design choice carries a
-    reason, usually as a "so that" clause.
-12. **Background is compressed and cited, never re-derived** at the length of the contribution.
-13. **The subject of a results paragraph is a finding, never a table.** "Table 1 positions ..." is
-    always the wrong opener.
-14. **The number follows the claim immediately.** Not after a digression.
-15. **Ablations and analyses are numbered research questions**, answered in bold before the evidence.
-16. **An inherited split names the work it follows.** A freely chosen split that does not say so is
-    not comparable to anything.
-17. **Signed differences carry a unit and a thin space**, and percentage points are not percent.
-18. **Every mechanism in the abstract appears in the method and is measured in the experiments.**
+7. **The leading sentence states the claim.** Never the topic, never what the section will do. Its
+   subject is never a table, a figure or a section unless the claim is about the display itself.
+8. **No sentence exists only to introduce the next one.** Delete it and promote the next.
+9. **The number follows the claim immediately.** Not after a digression.
+10. **Signed differences carry a unit and a thin space**, and percentage points are not percent.
+11. **Every mechanism in the abstract appears in the method and is measured in the experiments.**
 
 ## Anti-patterns
-- **The enumerating results paragraph.** Every suite, scale and variant restated in prose, the
-  same comparison six times, and no sentence saying why the method behaves that way.
-- **A topic label as the head of a results paragraph** (`Ablations.`, `Case study.`), where
-  the head should be the finding itself.
 - **The trailing citation.** `... is a left-to-right generative model~\citep{x}.` The citation now
   supports the paper's own description rather than the published concept.
-- **The bibliography paragraph.** One paper per sentence, each a summary, no claim connecting them and
-  no gap at the end. It is a reading list wearing the shape of an argument.
 - **The topic-announcing lead.** "In this section we describe our architecture search." The heading
   already said it. Say what the search does that a fixed design cannot.
-- **The mechanical method opener.** "We treat X as a variant of Y in which Z is optimized by
-  gradients." True, and it defines rather than claims. Lead with what the choice buys, then define.
-- **Conclusion-last results.** A paragraph that walks through every number and states the finding in
-  its final sentence. A reader who skims gets nothing.
-- **Effectiveness claims as interpretation.** "This demonstrates the effectiveness of our approach"
-  restates that the number was good. Give the mechanism that produced it.
-- **The table-of-contents paragraph.** "Table 1 positions X. Table 2 ablates Y. Table 3 reports Z."
-  Three sentences that restate three captions and state no result.
-- **The formalism-first method.** A method section that opens `Let $x_0 = \ldots$` has defined the
-  problem without saying what the paper decided to do about it.
-- **Background at contribution length.** A known objective re-derived over a page, in the same voice
-  as the new part, so a reviewer cannot see the boundary.
-- **The undefended constant.** A design choice with no "so that". A reviewer reads an arbitrary choice
-  where a considered one was intended.
-- **The buried headline.** The main result arriving in the middle of a paragraph, after an
-  explanation of why comparison is difficult.
-- **The freely chosen split.** A train/test division with no cited source, which quietly makes every
-  number in the table incomparable with the work it is placed beside.
-- **Percent where percentage points belong.** It inflates every reported gain and a reviewer will
-  notice.
 - **The question heading.** `What would refute each law.` `How does the router decide?` The reader
-  came to be told, not asked. Name the thing: `Falsification conditions.`
+  came to be told, not asked. Name the thing: `Falsification conditions.` A numbered RQ head in a
+  question-framed experiments section is the one exception, because a bold finding answers it.
 - **The process heading.** `The two-family rule.` `The descent policy.` `The store and the
   leaf-support relation.` Each names a step or a mechanism-in-motion where a concept noun belongs.
 - **The label heading in a results section.** `LoCoMo-10.` `The census.` `Cost against accuracy.`
   A results run-in head that is not a claim with a number wastes the one line a skimmer reads.
 - **The split described instead of the families named.** "by where the memory lives", "splitting
-  those questions by where the gold session lands". Enumerate: 1) NAME, including X, 2) NAME,
-  including Y.
+  those questions by where the gold session lands". Name and count them instead,
+  `\emph{(i)~NAME}, including X, and \emph{(ii)~NAME}, including Y`.
 - **`\paragraph` for a run-in head.** Use `\noindent\textbf{...}`.
-- **A contribution in the abstract with no experiment.** The fastest way to lose a reviewer.
 
 ## Companions
-`writing-literature` (the related-work section: shape, closing, recency) · `writing-style` (the punctuation, word, and sentence-structure rules this inherits, load it alongside) · `writing-style-zh` (the same layer for a Chinese-language paper) · `drawing-figure`
-(what a figure may contain and how to render it) · `naming-descriptive` (naming a method or an arm so
-the name states what it is) · `output-analysis` (producing the tables and curves the experiments
-section reports) · `writing-chatgpt` (hand the drafting to the writer tool, which applies this layer
-and the style layer; the agent patches the result) · `writing-methodology` (the method section: overview, base model first, motivated components, hard equations) · `writing-analysis` (the experiments and analysis section: setup, results paragraphs, ablations, evidence placement) · `conventions` (the map).
+`writing-style` (the punctuation, word, and sentence-structure rules this inherits, load it alongside) ·
+`writing-style-zh` (the same layer for a Chinese-language paper) · `writing-literature` (the
+related-work section: shape, closing, recency) · `writing-methodology` (the method section: overview,
+base model first, motivated components, hard equations) · `writing-analysis` (the experiments and
+analysis section: setup, results paragraphs, ablations, evidence placement) · `writing-ablation`
+(which ablation variants exist and how the ablation table is grouped) · `writing-caption` (every
+figure and table caption) · `writing-table` (the grid, number format and marks of a results table) ·
+`naming-descriptive` (naming a method or an arm so the name states what it is) · `writing-chatgpt`
+(hand the drafting to the writer tool, which applies this layer and the style layer; the agent
+patches the result) · `conventions` (the map).

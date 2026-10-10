@@ -409,9 +409,8 @@ own level, turns every baseline movement into apparent movement of every arm, an
 reconstruct what the table already reports. Plot a difference only when the reader asked for one, and
 then label the axis with the difference's name.
 
-**Trajectories are figures, endpoints are tables.** A per-epoch or per-step trajectory belongs in a
-line plot. A table with one column per epoch prints the same curve less legibly, and should be
-deleted once the curve exists. The table keeps the endpoint comparison.
+**Trajectories are figures, endpoints are tables.** `writing-analysis` decides whether a result is a
+table, a figure or an appendix entry.
 
 **Panels.** Panels in a row share the y-axis (`sharey="row"`) when they measure the same quantity on
 comparable scales, so a small gain looks small. Panels that measure different quantities do not.
@@ -419,13 +418,13 @@ comparable scales, so a small gain looks small. Panels that measure different qu
 
 ### What a results figure plots, and what it does not
 
-**Scores are `xx.y` on the axis and in the labels, never `0.xxx` with a "$\times 100$" note.** The
-number a reader compares is the one in the table, in the same form.
+**Scores on the axis and in the labels are in the table's form** (`xx.y`, as `writing-table` sets it),
+so the number a reader compares is the one in the table.
 
 **Plot the metric the paper is judged on, and say so on the axis.** A results curve shows the
 deployment score, the out-of-distribution average when that is what the claims rest on, with
 the y-axis labelled as that score. In-domain numbers and every other training-side quantity
-stay in the table. The one exception is a figure whose claim is about the training signal
+go to an appendix table, never into the results figure or the ablation table. The one exception is a figure whose claim is about the training signal
 itself, such as the share of response pairs in each failure class over training. That is a
 training-set statistic, it is labelled as one, and it is the only kind of figure that shows one.
 
@@ -460,12 +459,8 @@ the convergence claim: the method that repairs its signal reaches its best at ha
 one that does not. Every figure in the document shares this axis, so a share of pairs, a guidance
 strength and a score all read against the same abscissa.
 
-**A two-dimensional ablation is not one Cartesian table.** When arms vary along two axes, such as
-which interface may move and which modules are present, a table holding every combination reads
-as a grid nobody can rank. Give one axis the table, ordered so each restricted arm sits beside the
-published method it mirrors, and give the other axis a figure: a slope per setting from the
-weakest arm to the full one, with the published counterpart as a reference tick. The numbers then
-appear once each, the table holding one dimension and the figure the other.
+**A two-dimensional ablation is not one Cartesian table.** `writing-ablation` says which axis the
+table holds and which the figure draws.
 
 ### Showing one case evolve
 
@@ -515,7 +510,9 @@ A figure is regenerated whenever a run updates, so the generator is an artifact,
 
 - One script or `.tex` per figure, **isolated in a figures directory beside the document**, so editing
   one cannot break another.
-- The script reads from the run tree read-only and writes only into the figures directory.
+- The script reads the paper's one data file (`arms.json` or equivalent), the file the `writing-table`
+  emitter prints its rows from, so a curve's endpoint and a table's cell cannot disagree. It opens that
+  file read-only and writes only into the figures directory.
 - Headed with what it draws, from which runs, and how to invoke it.
 - Never leave the only copy in a scratchpad (`layout-workspace`).
 
@@ -575,6 +572,7 @@ a slide: cropping a published one to the panel that carries the argument, rather
 richer or interactive charts, whose default is a standalone dashboard, so strip its title and caption) ·
 `drawing-icons` (icons inside a figure: one family, fetched and recorded in a manifest) ·
 `writing-caption` (the caption's wording and shape, and how panels are named) ·
-`docs-table` (the same question for a grid of numbers, and the shared generator) ·
+`writing-table` (the same question for a grid of numbers, and the one data file its emitter and every figure read) ·
+`writing-ablation` (which ablation arms exist, and which axis of a two-dimensional ablation the figure draws) ·
 `layout-workspace` (where generators live) · `writing-style-zh` (the prose rules a Chinese figure's
 labels obey, and where the one-name-one-object rule lives) · `writing-analysis` (the experiments and analysis section: setup, results paragraphs, ablations, evidence placement) · `conventions` (family index).
