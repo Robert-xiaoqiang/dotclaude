@@ -72,14 +72,17 @@ experiment-defining list short.
   dynamics arms carried one four-line training protocol in 26 identical `run:` blocks until
   2026-08-31, when it moved into `rl_grpo_harness_dynamics.yaml`. Every arm's merged config, and so
   its hash and run dir, came out unchanged, which kept the live checkpoints resumable across the move.
-- **An override that holds the recipe across a node count states its arithmetic.** Prompts per
-  gradient is per-device batch x world size x accumulation / generations, so a launcher that changes
-  its node count changes the recipe unless an override holds it. AutoRSI's two-node dynamics arms
-  pass `gradient_accumulation_steps=4` for this, with the arithmetic written beside `num_nodes`, and
-  the override belongs to the launcher because the shape holds for every submit. Check the product in
-  the frozen `config.yaml`, never in the base file, since a later link of the config chain can
-  override both factors. When the extra node buys nothing, drop the node and the override together.
-  A scaffold arm that needed `grad_accum: 2` on two nodes ended at one node and zero overrides.
+- **An override that holds the recipe across a world size states its arithmetic.** Prompts per
+  gradient is per-device batch x world size x accumulation / generations, where world size is the
+  spec's total, `num_nodes` x `accelerators` (`platform-run`). A launcher whose total differs from
+  its siblings' therefore changes the recipe unless an override holds it. AutoRSI's 32-rank dynamics
+  arms, beside siblings that run 16, pass `gradient_accumulation_steps=4` for this, with the
+  arithmetic written in the launcher beside the fields that set the total, and the override belongs
+  to the launcher because that total holds for every submit. Check the product in the frozen
+  `config.yaml`, never in the base file, since a later link of the config chain can override both
+  factors. When the larger world buys nothing, return to the siblings' total and drop the override
+  with it. A scaffold arm that needed `grad_accum: 2` at 16 ranks ended at its siblings' 8 and zero
+  overrides.
 - **An override that changes the method belongs in a child config.** If it makes the arm differ
   from its siblings by more than its name says, it is a recipe, and the child config is named for
   that difference.
@@ -108,8 +111,9 @@ lands in the frozen `config.yaml`. What each file is called, the `tag` slot incl
 `naming-config`'s.
 
 **A value that differs by cluster is a fact about the cluster, not a variation of the experiment.** An
-env value such as the venv name is a `by_accelerator` env map in the template, which skylaunch
-resolves at submit for DLC and local runs. `platform-run` owns the map, and the DSW gap with it. A
+env value that differs by silicon, today the venv name, is a `by_accelerator` env map in the
+template, which skylaunch resolves at submit for DLC and local runs. `platform-run` owns the map, and
+the DSW gap with it. A
 config field that differs by cluster is a named config for that cluster, a committed child like any
 other. AutoRSI once word-split an `EXTRA_CONFIG_OVERRIDES` env into the entrance's argv so a
 `by_accelerator` map could bend trainer fields per silicon. It removed that seam on 2026-08-31,
@@ -172,7 +176,7 @@ named variant and earns its file. Fewer GPUs does not.
 ## Instrumentation toggles
 
 An instrumentation or tracing toggle lives in the owning component's config with its value written
-out, off by default. A committed smoke launcher may switch it on. A full-run launcher never does,
+out. A committed smoke launcher may switch it on. A full-run launcher never does,
 because then whether an arm was traced depends on whether its launcher remembered. When the analysis
 of every arm reads what the instrument records, the config turns it on for every arm. AutoRSI's
 `trace_verdicts` is the case. It was a constructor default that five launchers switched on by hand,
@@ -227,9 +231,9 @@ project code. The wrapper calls (or mirrors) this engine; the engine never impor
 3. **A smoke is a named config in the `tag` slot**, with its own hashed run dir.
 4. **A grid is one template plus per-cell overlays**, with the cell list held outside the launcher
    (a queue, a manifest), never N near-copies of the launcher.
-5. **A value that differs by cluster belongs to the cluster.** An env value (the venv name, an
-   endpoints path) is a `by_accelerator` env map (`platform-run`), and a config field is a named
-   config for that cluster.
+5. **A value that differs by cluster belongs to the cluster.** A config field is a named config for
+   that cluster. An env value that differs by silicon is a `by_accelerator` map, which today carries
+   the venv name and which `platform-run` owns. An endpoint is a plain env and never enters the map.
 6. **Two launchers differing by one field are one launcher and one variation**, in one of the four
    forms of [How a variation is represented](#how-a-variation-is-represented).
 7. **The smoked code path is the shipped code path.** The smoke varies data and knobs via overlays;
@@ -249,10 +253,12 @@ project code. The wrapper calls (or mirrors) this engine; the engine never impor
   next submit ships the patch. Overlays die with the invocation; edits do not.
 - **The launcher that knows the sweep.** A template with a checkpoint list baked in must be edited
   every time the grid grows; the queue outside the launcher grows for free.
-- **The env that silently changes the run.** An override env the entrance splits into argv, or a
-  model identity exported before `make job`, never reaches `config.yaml` and is one forgotten export
-  away from a wrong run. An endpoint may come from the submitting shell, because skylaunch refuses a
-  `${VAR}` that expands to nothing, so a missing one stops the job instead of changing it.
+- **The env that silently changes the run.** An override env that the entrance word-splits into argv
+  is a second, invisible launcher. Neither the template nor the submit command shows the variation,
+  and a stale export in the submitting shell carries it into the next run unasked. A variation takes
+  one of the four forms of [How a variation is represented](#how-a-variation-is-represented). What
+  may come from the environment at all is `config-composition`'s env rule, under which only an
+  endpoint may.
 
 ## Companions
 `naming-config` (what a launcher, a child config and a `tag` variant are called, and why an

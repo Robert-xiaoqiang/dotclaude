@@ -167,11 +167,9 @@ Climb it in order. Each rung is a gate, and a rung never substitutes for the one
 3. **Diagnostic** — a medium run, only when isolating something a smoke run cannot reproduce.
 4. **Full** — the planned scale, the planned config.
 
-**A smoke run is a named configuration, never a flag.** `naming-config` is explicit: use the dataset
-`tag` slot (`dataset_name=healthbench_smoke`) so the run gets its own hashed run dir and its own frozen
-`config.yaml`. A `mode=smoke` that quietly rewrites fields is invisible in `config.yaml`, and it is what
-lets a toy result later be mistaken for a real one. Getting this right is what makes
-`references/evaluation-integrity.md` enforceable rather than aspirational.
+**A smoke run is a named configuration with its own hashed run dir, never a flag**, as
+`config-variants` states it, and that is what makes `references/evaluation-integrity.md` enforceable
+rather than aspirational.
 
 ## Stage transitions
 Decide explicitly, and write the decision with its evidence into `journal.md`.
@@ -245,9 +243,9 @@ the ledger in place of it.
 
 ## Companions
 `docs-plan` (the campaign directory is its directory form) · `layout-workspace` (where plans, scripts
-and configs live) · `naming-config` (config, launcher, and run-dir names, and the `tag` slot that makes
-a smoke run distinguishable) · `platform-run` (submitting the job) · `platform-runtime` (the
-driver/image/venv stack a job needs to match) · `layout-output` (what a run writes and what must
-survive) · `output-analysis` (comparing runs) · `output-cleanup` (reclaiming space, deliberately *not*
-part of this loop) · `docs-arch` (durable architecture decisions graduate here) · `git-commit` (how the
-ledger is committed) · `conventions` (the family index).
+and configs live) · `naming-config` (config, launcher, and run-dir names) · `config-variants` (how a
+smoke run is represented so it stays distinguishable) · `platform-run` (submitting the job) ·
+`platform-runtime` (the driver/image/venv stack a job needs to match) · `layout-output` (what a run
+writes and what must survive) · `output-analysis` (comparing runs) · `output-cleanup` (reclaiming
+space, deliberately *not* part of this loop) · `docs-arch` (durable architecture decisions graduate
+here) · `git-commit` (how the ledger is committed) · `conventions` (the family index).

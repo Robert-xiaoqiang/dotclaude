@@ -31,6 +31,6 @@ rules and the check that the infix is a real pipeline config.
 ## Every model in the chain is config
 
 A policy generates and a judge scores, and only the policy is the top-level `model`. The judge is
-owned by whatever scores (`pipeline.reward.judge` for RL, `pipeline.eval.judge` for eval), and its
-identity comes from config while only its endpoint may come from the environment. `config-composition`
-owns both rules.
+owned by whatever scores (`pipeline.reward.init_kwargs.judge` in an AutoRSI RL run, `pipeline.judge`
+in a MemCodex eval), and its identity comes from config while only its endpoint may come from the
+environment. `config-composition` owns both rules.

@@ -197,8 +197,9 @@ a run that outlives the shell.
   reads like a bug in the run.
 - **World size follows the cards.** `NPROC_PER_NODE` and `CUDA_VISIBLE_DEVICES` come from the cards
   taken, never from `resources`, so a 2-card run is a smaller world than the spec's total and its
-  per-gradient batch shrinks with it ([Resources](#resources-a-total-not-a-layout)). That is fine for
-  a smoke, which asks whether a path executes, not whether the recipe trains.
+  per-gradient batch shrinks with it ([Resources](#resources-a-total-not-a-layout)). A local run on
+  fewer cards than the spec's total is therefore a probe of whether the path executes, and it does
+  not clear the smoke gate, which `config-variants` owns.
 - **No snapshot.** A cluster job is frozen against edits while it queues. A local run starts now,
   against the working tree, so it tests the edit you just made.
 

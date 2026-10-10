@@ -184,14 +184,22 @@ same repo have different grammars. Writing one grammar for the whole repo is how
 welded onto every run:
 
 ```
-eval_bench__{agent}__{memory}__{bench}__{dataset}   consumer · subject = memory · scores
+eval_bench__{memory}__{dataset}__{agent}            consumer · subject = memory · scores
 build_memory__{memory}__{dataset}                   producer · subject = memory · a built store
 train_adapter__{model}__{memory}__{dataset}         producer · subject = model  · a checkpoint
 ```
 
-`agent` and `bench` appear only in the eval grammar because only an evaluation has an answerer and a
-grader. A training launcher that names a reader is describing a run that cannot exist — and if the
-grammar forces it to, the name has stopped being checkable.
+The eval row is the real MemCodex form (`eval_bench__bm25_flat__locomo10__direct_qwen2_5_7b_vllm`),
+its segments in the registry's top-level order of pipeline, memory, dataset and agent. `agent`
+appears only in the eval grammar because only an evaluation has an answerer. The grader is
+`pipeline.judge`, owned by the pipeline, so it never takes a segment. A training launcher that names a
+reader is describing a run that cannot exist, and if the grammar forces it to, the name has stopped
+being checkable.
+
+The `train_adapter` row illustrates a producer's subject and nothing more. That pipeline puts the
+adapter in its method slot and its LoRA `rank` in `pipeline.init_kwargs`, which is debt under
+`config-composition`'s adapter rule (an adapter is `model.adapter`), so it is no precedent for naming
+an adapter.
 
 **The failure this catches, stated plainly because it is easy to commit:** picking ONE grammar and
 applying it everywhere. Every run then carries the dominant family's roles, the config tree grows slots
@@ -228,9 +236,12 @@ launcher per chain.
 A pre-flight is not an exception: it is the same arm with the `tag` slot set
 (`dataset_name=healthbench_smoke`).
 
-**Run dirs are a different question from launcher names.** The run path expresses run IDENTITY, so an
-owned component DOES contribute a path segment (the arms of an ablation must sit side by side). Launcher
-name and run dir are therefore related but not identical, and only the run dir carries the component.
+**Run dirs are a different question from launcher names.** The run path expresses run identity, so an
+owned component contributes a path segment only when the group registry's `in_path` column marks it as
+saying which experiment this is, because then the arms of an ablation must sit side by side. A
+component held constant for comparability stays in the hash and out of the path. The column is
+`config-composition`'s and the derivation is Hard rule 6. Launcher name and run dir are therefore
+related but not identical, and only the run dir can carry an owned component.
 
 **(b) Slot grammar — use this when launchers name a model class and its axes directly:**
 
@@ -311,11 +322,11 @@ Three rules make it a bijection rather than a habit:
 **Instrumentation.** Measuring does not change what an arm is, so it must never appear in a name.
 An arm named `rl_grpo_trace` is the error this prevents: every arm carries the instrument, so the
 segment describes no difference between arms, and the same experiment acquires two names depending on
-whether anyone was watching. The toggle itself lives in the owning component's config, off by default.
-A committed smoke launcher may switch it on and a full-run launcher never does, as `config-variants`
-states in full. Schedule such a toggle in the unit the experiment reasons in — OPTIMIZER
-steps, not micro-batches — so changing gradient accumulation does not silently change what was
-recorded.
+whether anyone was watching. A tracing toggle lives in the owning component's config, the config turns
+it on for every arm when every arm's analysis reads it, and a full-run launcher never switches it.
+`config-variants` says where it may be switched. Schedule such a toggle in OPTIMIZER steps, the unit the
+experiment reasons in, never in micro-batches, so changing gradient accumulation does not silently
+change what was recorded.
 
 ### The same grammar, elsewhere
 
@@ -416,14 +427,16 @@ When invoked:
 3. **Code path mirrors the slot grammar**, so the `model_class` slot
    names the file that defines the class, a rename of one is a rename of
    the other, and where each file sits is `layout-workspace`'s.
-4. **Config subdirectories are `layout-workspace`'s**, and the name
-   carries the `model_class` slot whether or not a directory repeats it.
+4. **Config subdirectories are `layout-workspace`'s**, one flat
+   directory per group with a subdirectory only where the code has the
+   same one, so `config/model/` holds no per-class directory and the
+   `model_class` slot is the first segment of the name.
 5. **Backbone slot only when loading pretrained weights.** From-scratch
    runs simply omit it. Loading a backbone is a *user-visible*
    event — the name says so.
 6. **Output dir is mechanically derived.** Don't let users invent
    per-run output paths. Build it as
-   `OUTPUT_DIR / {group.name for each group present} / hash(config)[:8]`
+   `OUTPUT_DIR / {group.name for each in_path group present} / hash(config)[:8]`
    (e.g. `pipeline/model/dataset/reward/hash`). The hash makes
    CLI-overridden runs disambiguate themselves. The launcher's own log
    goes *inside* this dir — see `layout-output`.
@@ -431,10 +444,8 @@ When invoked:
    name is a hard error**, as `config-composition` states in full.
 8. **A group's settings live under that group's key, with no second
    top-level home**, as `config-composition` states in full.
-9. **The CLI/launcher overrides the YAML, at any depth.** Merge argv
-   *last* over the group configs, with no allowlist of what may be
-   overridden. If a launcher cannot set a field without a code change,
-   the config system is broken, not the launcher.
+9. **argv merges last, at any depth, with no allowlist**, as
+   `config-composition` states in full.
 
 ## Anti-patterns
 
@@ -444,10 +455,8 @@ When invoked:
   "no val" explicit).
 * Pipeline YAML duplicating an existing one byte-for-byte (delete; reuse
   via `class_path`).
-* **A branch in the pipeline that selects the arm** (`if cfg.reward_kind
-  == "judge": ...`). The arm is config, and the code should not know
-  which arm it is running. `code-abstraction` owns the rule that callers
-  never branch on a variant.
+* **A branch in the pipeline that selects the arm** (`if cfg.reward_kind == "judge": ...`) is
+  `config-composition` rule 16 for the config half and `code-abstraction` rule 10 for the code half.
 * **Ambiguous env-var names shared by two subsystems.** When a trainer
   and its judge are both vLLM, a bare `VLLM_BASE_URL` names neither;
   prefix by ROLE (`JUDGE_BASE_URL`) so a misconfiguration is a loud

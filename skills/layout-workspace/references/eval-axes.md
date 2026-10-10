@@ -24,8 +24,8 @@ Every evaluation varies along exactly these, and each belongs to a different own
 
 > A change forks the **pipeline** only if it changes **what one attempt consists of** — its control
 > flow. A change of how an attempt becomes a number is a **scorer**. A change of how many attempts is
-> **sampling**. A change of which rows is a **dataset**. A change of how tokens are produced within
-> one decoding family is a **model**. A change of decoding family is the pipeline's **method slot**.
+> **sampling**. A change of which rows is a **dataset**. A change of decoding family, or of a decoder
+> setting within one, follows `config-composition` rule 12.
 
 Applied:
 
@@ -36,16 +36,15 @@ Applied:
 | self-consistency-8 vs pass@8 | same protocol (n=8), different **reduction** |
 | single-turn vs multi-turn with an environment | **different protocol** — new pipeline |
 | pass@k with an execution sandbox | **different protocol** — new pipeline |
-| AR vs MDM decoding | the method slot (`eval_ar`, `eval_mdm`), since the generate loop differs |
-| denoising steps or block length within MDM | model |
+| decoding family, or a decoder setting within one | `config-composition` rule 12 |
 | full bench vs subsampled bench | dataset (the `tag` slot: `mini` / `smoke` / `toy`) |
 
 So the pipeline name should say the **protocol** — and it must also carry the base it derives from,
 whose method slot is the decoding family. If the scorer subfamilies are `eval_ar_choice` /
 `eval_ar_graded`, a protocol subfamily is `eval_ar_single_turn_suite`, later
-`eval_ar_multi_turn_suite` when there is an environment to talk to. Dropping the `ar` makes the one pipeline you actually run the only one whose base you cannot
-read off its name. The name must not say how much of each bench was scored — that is the corpus, and
-the corpus has a tag slot for exactly this.
+`eval_ar_multi_turn_suite` when there is an environment to talk to. Dropping the `ar` makes the one
+pipeline you actually run the only one whose base you cannot read off its name. The name must not say
+how much of each bench was scored — that is the corpus, and the corpus has a tag slot for exactly this.
 
 **Make the protocol a component group, not just a name.** Code at `<pkg>/pipeline/eval/protocol/`,
 configs mirroring at `config/pipeline/eval/protocol/`, mounted at `pipeline.eval.protocol`. Then a
@@ -57,16 +56,9 @@ be sharded (two ranks would accumulate two histories and report two measurements
 
 ## Three traps
 
-**The decoding family is the method slot, and a decoder setting is never an eval axis.** An
-autoregressive and a masked-diffusion policy need different generate loops, which is different code,
-so the family names the eval pipeline's method slot. QDiffMDM keeps `eval_ar` beside `eval_mdm`, and
-every AutoRSI eval config is an `eval_ar_*`. Within one family the loop depends on a contract,
-`policy.generate(records, **sampling) -> completions`, and never on how the decoder is tuned. Denoising
-steps, block length or an extra prediction head belong to the model and never fork an eval pipeline,
-or every retuned decoder forks the eval family for no measurement reason. The one thing that would
-justify an eval-side fork within a family is decoder-specific *instrumentation*, and that is a
-different measurement, not a different decoder. `naming-config` owns the method slot, and
-`config-composition` owns where decoder settings live.
+**The decoding family is the method slot, and a decoder setting is never an eval axis**
+(`config-composition` rule 12), so only decoder-specific *instrumentation*, which is a different
+measurement, could justify an eval-side fork within a family.
 
 **Latent internal computation is a model property too — and it is the tempting exception.** When a
 model's reasoning steps are not tokens (a looped transformer re-running a block, continuous "latent

@@ -111,6 +111,10 @@ MemCodex, whose runs are about a memory system, has no top-level `model` at all:
 | retrieval research | `retriever` | `pipeline.judge`, the corpus encoder |
 | agent-scaffold research | `agent` | `agent.model`, `agent.tool`, `pipeline.judge` |
 
+An owned judge takes one of two forms. AutoRSI writes it as an inline block in the reward's own file,
+merged at `pipeline.reward.init_kwargs.judge`, while MemCodex mounts a shared model file at
+`pipeline.judge` ([One component library, several owners](#one-component-library-several-owners)).
+
 **The subject can change with the pipeline's direction, in the same repo.** An eval run over a memory
 system optimises nothing, so `memory` is the subject and every model is an instrument. A run that
 trains an adapter over that same memory has `model` as its subject, and the memory becomes an input.
@@ -343,8 +347,8 @@ which lives at `pipeline.eval.generation`. AutoRSI follows this. Every eval conf
 `eval_ar_*`, and its siblings move owned fields within that one family, `eval_ar_graded` the scorer at
 `pipeline.eval.score` and `eval_ar_k_consistency_suite` the protocol at `pipeline.eval.protocol`. The
 slot grammar is `naming-config`'s. The fork rule for the remaining eval axes (corpus, protocol,
-reduction, scorer, state carry) is `eval-axes.md` in `layout-workspace`. Where that file lists AR versus MDM as a model property,
-read it as the settings within a family, and this paragraph as the rule for the family itself.
+reduction, scorer, state carry) is `eval-axes.md` in `layout-workspace`, which agrees with this
+paragraph. It makes AR versus MDM the method slot and keeps the decoder settings within a family on the model.
 
 **A parameter-efficient adapter is owned by the model it adapts.** LoRA, QLoRA, IA3 and every other PEFT
 method change which weights move, and SFT, DPO and GRPO all run with or without one. So an adapter is

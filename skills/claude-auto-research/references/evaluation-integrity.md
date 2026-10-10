@@ -11,11 +11,9 @@ appears: smoke-testing the eval pipeline, debugging a known failure, verifying t
 rapid diagnosis. A subset result is a **diagnostic**, never a benchmark result, and it never enters
 `report.md` as one.
 
-**The mechanism, not a promise.** `naming-config` makes this enforceable: a subset is a named dataset
-config using the `tag` slot (`dataset_name=healthbench_smoke`), so it produces its own hashed run dir
-and its own frozen `config.yaml`. A subset evaluated that way is *physically* distinguishable from the
-full bench forever after. A `--limit 50` passed at the CLI is invisible in `config.yaml`, and six hours
-later nothing on disk can tell you which of two numbers was the real one.
+**The mechanism, not a promise.** An eval subset is a named dataset config with its own hashed run
+dir, never a `--limit` flag, as `config-variants` states for every smoke, so a subset number stays
+distinguishable on disk from the full bench forever after.
 
 So the check is mechanical: **if the run dir does not record the eval scope, the eval does not count.**
 

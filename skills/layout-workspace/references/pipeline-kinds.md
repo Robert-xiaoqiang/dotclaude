@@ -107,12 +107,9 @@ derives from, or what it reuses. Put the novelty in the METHOD or VARIANT slot o
 is structural. A PROJECT name is worse: when the package, the output root and every pipeline share it,
 the prefix partitions nothing — the same redundancy the model grammar strips as a family suffix.
 
-**Eval-side's method slot is the decoding paradigm**, by the same argument that factorization forks
-the training loop: different generate loops are different code, hence different pipelines. An agentic
-eval is a different loop again, not a flag on a decoding one. Within one decoding family the decoder's
-settings belong to the model and never fork an eval pipeline. Every AutoRSI eval config is an
-`eval_ar_*`, and no decoder setting appears in any of their names (`eval-axes.md` has the fork rule
-for the remaining axes). `config-composition` owns where those settings live.
+**Eval-side's method slot is the decoding family, or the agent loop for an agentic eval**, and a
+decoder setting within a family belongs to the model (`config-composition` rule 12, with the other
+eval axes in `eval-axes.md`).
 
 ## The code tree mirrors the taxonomy, and the abstractions are load-bearing
 
@@ -299,7 +296,7 @@ one implementation and its baseline with another, making the comparison meaningl
 
 The fix was to name the axes and lift the parts:
 
-    pipeline/components/tracing.py   the instrument   (behaviour -> mixin, default OFF)
+    pipeline/components/tracing.py   the instrument   (behaviour -> mixin, toggled in its owner's config)
     pipeline/components/memory.py    the EMA memory   (behaviour -> mixin)
     pipeline/rl/reward/              rewards          (data -> selected by name)
 
@@ -316,7 +313,9 @@ class docstring rather than leaving it to MRO trivia.
 AutoRSI's tree has moved on since. The instrument now lives in `pipeline/observe/tracing.py`, where
 `TracingDualRoleTrainer(DualRoleTrainer, StateTracingGRPOTrainer)` keeps the role schedule first, and
 the two memory backends sit beside the rewards in `pipeline/rl/reward/`, which is rule 1's kind
-directory.
+directory. Its toggles are on for every RL arm, `schedule.state_matrix` in `rl_grpo` and
+`trace_verdicts` in the reward configs, because every arm's analysis reads them (`config-variants`
+owns the toggle rule).
 
 ## The test to apply
 

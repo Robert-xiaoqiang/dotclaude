@@ -12,8 +12,8 @@ Each config carries a `class_path`. A generic `<pkg>/pipeline/run.py` does
 `torchrun`.
 
 This still applies when you use a *library* trainer such as TRL's `GRPOTrainer`. You own the loop's
-assembly, so the trainer class is just another `class_path` (`pipeline.trainer_class_path`) with a
-verbatim `trainer_kwargs` block, and a novel variant is a subclass named in config.
+assembly, so the trainer and its config object are named in config by the fields `config-composition`
+gives in "The framework block".
 
 ## 2. Framework-extension — you wrap a trainer
 

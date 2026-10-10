@@ -164,19 +164,19 @@ Three consequences worth stating, because each is a rule people break:
 1. **The contract module must stay dependency-free.** If `protocol.py` imports the harness's own
    datasets or its LLM client, then implementing the interface drags in the bench, and you have the
    original coupling wearing a new import path.
-2. **A library several packages share lives in the package the others already depend on, never in a
-   new neutral package.** The usual case is an LLM client that the subject's writer and the harness's
-   judge both call. Decide by what each package must be able to do alone. A harness has to score, and
-   scoring calls a model, so a harness that cannot build a model without importing a system it
-   measures is not standalone, and the clients go in the harness. The subject reaches them across the
-   edge it already has, through `class_path` against an interface it declares itself. MemCodex is the
-   working case. Its model clients live in `memarena/model/`, with their configs opposite in
-   `memarena/config/model/`, while the `memcodex` library declares only the `LLM` interface
-   (`memcodex/llm/`), imports nothing from `memarena`, and receives a client by `class_path`. A third
-   package added to keep the library neutral buys nothing when a dependency edge already exists, and
-   it fragments a repo a reader has to hold in their head. Filing the clients under the subject
-   instead makes the harness import one of the systems it measures, the coupling this section exists
-   to remove.
+2. **A library several packages share lives in the existing package that cannot do its own job
+   without it, never in a new neutral package.** The usual case is an LLM client that the subject's
+   writer and the harness's judge both call. Decide by what each package must be able to do alone. A
+   harness has to score, and scoring calls a model, so a harness that cannot build a model without
+   importing a system it measures is not standalone, and the clients go in the harness. The subject
+   never imports them. It declares the interface it needs and receives an implementation by
+   `class_path`. MemCodex is the working case. Its model clients live in `memarena/model/`, with their
+   configs opposite in `memarena/config/model/`, while the `memcodex` library declares only the `LLM`
+   interface (`memcodex/llm/`), imports nothing from `memarena`, and receives a client by
+   `class_path`. A third package added to keep the library neutral buys nothing when an existing
+   package already has to carry it, and it fragments a repo a reader has to hold in their head. Filing
+   the clients under the subject instead makes the harness import one of the systems it measures, the
+   coupling this section exists to remove.
 3. **Prove the split with a conformance suite, not a directory listing.** The harness ships a
    parameterised test that every registered implementation must pass, and CI runs it across all of
    them. Moving files proves nothing; an implementation that only compiles against the subject's
@@ -225,8 +225,9 @@ These references carry the detail, and are worth opening only when the question 
 ## Rules
 1. **Config lives inside the package, one directory per group, mirroring the code tree.** A config
    subdirectory exists only where the code has the same one (principle 1).
-2. **Hyperparameters live in `config/`, never in a launcher's `run:` list or a recipe script.** How
-   many overrides a launcher may still carry is `config-variants`'.
+2. **Hyperparameter defaults live in `config/`, never in a launcher's `run:` list or a recipe
+   script.** A full-run launcher may still pass the few overrides that define its experiment, and
+   which ones qualify is `config-variants`'.
 3. **One shared entrance per launcher root, never one per launcher.** `launcher/launch.sh` serves
    every spec under `launcher/`. A second root such as `serving_launcher/` exists only for specs no
    runner shares and has its own single entrance. The per-launcher `task.yaml` is the only per-run
@@ -234,8 +235,8 @@ These references carry the detail, and are worth opening only when the question 
 4. **Prompt templates live inside the package under `prompting/templates/<owner>/`, beside the
    registry that loads them**, so they ship with an install as config does (`config-prompting` owns
    the contract).
-5. **A library several packages share lives in the package the others already depend on**, never in
-   a new neutral package, and an interface lives with the consumer that defines it.
+5. **A library several packages share lives in the existing package that cannot do its job without
+   it**, never in a new neutral package, and an interface lives with the consumer that defines it.
 6. **A run's log lands inside the run dir that `naming-config` rule 6 derives**, never at a `log:`
    path a launcher spec chooses.
 7. **Plans** → `docs/plans/<YYYY-MM-DD>-<topic>.md` · **reports** → `docs/reports/`, dated the same
@@ -271,9 +272,9 @@ These references carry the detail, and are worth opening only when the question 
   because it groups one class's scales together, but the config path stops predicting the import
   path, and the grouping is already in the name's first slot.
 - **A new neutral package for a shared library.** It looks impartial, but it adds a package and a
-  dependency edge where one existing edge already does the job.
-- **A whitelisting `build_config()`**, which `config-composition` forbids in its framework block.
-  (Cost of learning this: four arms × 12h, all flat.)
+  dependency edge where an existing package and its `class_path` seam already do the job.
+- **A whitelisting `build_config()`**, which `config-composition` forbids in its framework block,
+  where its cost is recorded.
 - **`_v2` / `_baseline` / `_test` names** — say what *differs* in a slot (`naming-config` Hard rule 1).
 - **An undated report of a dated finding.** `comparison_table.md`, `fixes_verification.md`,
   `00-A2C-MetaRL.md`: the first two claim permanence they never had, and the third orders by an
