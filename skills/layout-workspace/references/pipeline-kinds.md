@@ -10,10 +10,9 @@ Read when adding a pipeline kind, or when a proposed name does not obviously bel
 | **consumer** | `eval`, `serve`, `agent` | a checkpoint | scores / a service / trajectories |
 | **both** | `distill` | a TEACHER checkpoint + data | a STUDENT checkpoint |
 
-`distill` is the stress test: it needs *two* model slots. The teacher is not a second top-level `model`,
-because a run has one policy under optimisation. It is an owned component, `pipeline.teacher`, for the
-same reason a judge is: anything that is a model but is not the thing being optimised belongs to the
-pipeline that uses it.
+`distill` is the stress test: it needs *two* model slots, and the teacher is the owned
+`pipeline.teacher`, because a run has one subject and every other model belongs to whatever uses it
+(`config-composition`).
 
 ## Three axes, not one menu
 
@@ -31,9 +30,10 @@ be swapped for one another.
 class. `model_class` must name code, because the config↔code mirror rests on a config path predicting an
 import path. The category is what you REASON with; the class is what you BUILD.
 
-**PEFT is not a pipeline.** LoRA adapts a model, and you can run SFT, DPO or GRPO with or without it, so
-it is owned by `model` and the run is `sft` + `model.adapter=lora`. Giving PEFT its own pipeline forks
-the SFT loop, which then drifts.
+**PEFT is not a pipeline.** LoRA adapts a model and SFT, DPO or GRPO run with or without it, so the run
+is `sft` with `model.adapter=lora`, and no `peft` module or config exists under `pipeline/`. The rule and
+its reason are `config-composition`'s (Decoding and adapters), and the adapter's name segment is
+`naming-config`'s.
 
 **Factorization propagates into the pipeline when the loop's math depends on it.** A diffusion model's
 SFT objective is an ELBO over masked positions; an autoregressive one's is next-token cross-entropy.
@@ -61,8 +61,9 @@ score those tokens. Same family, two bases — hence `distill_offpolicy` and `di
 guided self-distillation arm is `distill_onpolicy_rubric`. Do not compress this to `opd`: the config
 name must walk to the code, and there is no `pipeline/opd/`.
 
-The same subdivision is expected of the other families as they grow — `rl/grpo/` vs `rl/ppo/`,
-`sft/full.py` vs `sft/peft.py`. A family root is a directory precisely so its methods can be siblings.
+The same subdivision is expected of the other families as they grow, `rl/grpo/` beside `rl/ppo/` for
+instance. A family root is a directory precisely so its methods can be siblings. An adapter is not
+such a method, because full fine-tuning and LoRA run the same SFT loop with a different `model.adapter`.
 
 On-policy distillation is the one people misfile. It samples on-policy like RL, so it looks
 like RL — but it has no reward, no advantage and no group; the signal is dense and per-token, coming
@@ -73,11 +74,13 @@ its data is fixed, which is the one thing on-policy means it is not.
 The discriminating question, in order: **is the data fixed or sampled from the model being trained?**
 then **does the objective consume a scalar or a distribution?**
 
-A method whose teacher is a frozen copy of the student is still `opd` — self-distillation is a
-statement about where the teacher's WEIGHTS come from, not about the loop. Put that in the method slot
-(`opd_self`) and what the teacher sees that the student does not in the variant slot
-(`opd_self_rubric`, `opd_self_memory`). Two arms that differ only in the guidance are then one slot
-apart by construction, which is exactly the asymmetric with/without diagnostic.
+A method whose teacher is a frozen copy of the student is still `distill_onpolicy`. Self-distillation
+is a statement about where the teacher's WEIGHTS come from, not about the loop, so it opens no new
+family. What the teacher sees that the student does not goes in the variant slot, as in AutoRSI's
+`distill_onpolicy_rubric` (the teacher sees the prompt's own rubric) and `distill_onpolicy_memory`
+(criteria retrieved from other questions), both run by a self-distillation trainer. Two arms that
+differ only in the guidance are then one slot apart by construction, which is exactly the asymmetric
+with/without diagnostic.
 
 ## The name encodes the TAXONOMY, not the method's title
 
@@ -89,7 +92,7 @@ apart by construction, which is exactly the asymmetric with/without diagnostic.
 |---|---|---|---|
 | **family** | which BASE INFRA runs? | `sft`, `rl`, `distill`, `pretrain` | `eval`, `serve`, `agent` |
 | **method** | which algorithm within it? | `grpo`, `dpo`, `rgsd` | the DECODING paradigm, or the agent loop |
-| **variant** | what is one slot from a sibling? | the reward, the schedule, the memory | the tool set, the decoding budget |
+| **variant** | what is one slot from a sibling? | the reward, the schedule, the memory | the protocol, the scorer, the tool set |
 
 `rl_grpo` · `rl_grpo_scaffold` · `rl_coevolve_infogain` · `distill_rgsd` · `eval_ar` · `agent_react`.
 
@@ -106,7 +109,10 @@ the prefix partitions nothing — the same redundancy the model grammar strips a
 
 **Eval-side's method slot is the decoding paradigm**, by the same argument that factorization forks
 the training loop: different generate loops are different code, hence different pipelines. An agentic
-eval is a different loop again, not a flag on a decoding one.
+eval is a different loop again, not a flag on a decoding one. Within one decoding family the decoder's
+settings belong to the model and never fork an eval pipeline. Every AutoRSI eval config is an
+`eval_ar_*`, and no decoder setting appears in any of their names (`eval-axes.md` has the fork rule
+for the remaining axes). `config-composition` owns where those settings live.
 
 ## The code tree mirrors the taxonomy, and the abstractions are load-bearing
 
@@ -143,7 +149,6 @@ Three rules keep the hierarchy real rather than decorative:
    pipeline/distill/onpolicy/__init__.py   distill_onpolicy
    pipeline/distill/onpolicy/rubric.py     distill_onpolicy_rubric
    pipeline/distill/offpolicy/__init__.py  distill_offpolicy
-   pipeline/sft/full.py                    sft_full
    ```
 
    This is why an abbreviation is not a free choice. If the code lives in `distill/offpolicy/`, the
@@ -151,16 +156,20 @@ Three rules keep the hierarchy real rather than decorative:
    that does not walk to its own implementation makes the mirror a thing you have to remember instead
    of a thing you can derive, and the first person to guess wrong finds nothing.
 
-   Config files stay FLAT in `config/pipeline/` (that glob is deliberately non-recursive so the
-   owned-component dirs are not swallowed), so the mirror runs name→path, not path→path. Say so; do not
-   leave a reader assuming `config/pipeline/rl/` exists.
+   The name walk does not depend on where the config file sits. A config subdirectory exists only
+   where the code has the same one (`layout-workspace` principle 1), so AutoRSI keeps `rl_grpo.yaml`
+   in `config/pipeline/rl/grpo/` opposite `autorsi/pipeline/rl/grpo/`, while LatentHarness keeps its
+   pipeline configs flat in `config/pipeline/`, and in both the name walks to the code. Which files
+   belong to the pipeline group is the one resolver's answer (`config-composition`), never a glob's
+   depth.
 
 4. **A segment with NO code names an owned component's selection.** Not every segment adds a module.
    `rl_grpo_dualrole_infogain` is three lines — `_base_`, `name`, `reward: rubric_infogain` — and has
    no implementation of its own, because its contribution lives in the REWARD it selects. That is
    correct, not a defect: the alternative is a fourth launcher segment for an axis the runner has no
    selector for. The rule is only that such a segment must name a real component selection (a reward, a
-   memory backend, an adapter) and must not smuggle in a second change. Read a name as:
+   memory backend) and must not smuggle in a second change. An adapter is never such a segment, since
+   it belongs to the model (`model.adapter`) and shows in the model's name. Read a name as:
    *walk the segments that have code, then read the rest as component selections.*
 
 ## Every group has its own abstraction, not just `pipeline`
@@ -170,7 +179,7 @@ family root, subclasses that add one thing, and a polymorphic seam the runner di
 
 | group | family root | subclasses add | polymorphic seam |
 |---|---|---|---|
-| **pipeline** | `rl_grpo`, `opd_self`, `eval_ar` | a schedule, a guidance, a decoding | `pipeline.class_path` -> `main(cfg)` |
+| **pipeline** | `rl_grpo`, `distill_onpolicy`, `eval_ar` | a schedule, a guidance, a protocol | `pipeline.class_path` -> `main(cfg)` |
 | **model** | the base policy | trained weights, an adapter, extra heads | `model.class_path` -> a policy object |
 | **dataset** | the corpus loader | a split, a subset, a scaffold transform | `dataset.<split>.class_path` |
 | **reward** (owned by rl) | the judge | a rubric rule, a memory backend | `reward.class_path` -> a callable |
@@ -184,13 +193,11 @@ Two rules make these real rather than decorative:
    nobody wrote down: the second one is authored by reading the first, and every shared rule (the EMA
    cold start, the eviction policy, the count-weighted merge) gets written twice and drifts. Declare
    the base, and a third backend inherits the rules instead of re-deriving them.
-2. **The seam is a `class_path`, so the code never branches on which implementation is live.** A
-   pipeline that reads a config value to decide which memory or which reward it has is the arm leaking
-   into the code (see the anti-patterns). Dispatch, do not branch.
+2. **The seam is a `class_path`, and callers never branch on which implementation is live**
+   (`code-abstraction` rule 10).
 
-The corollary for names: since every group inherits, every group's names obey the same
-name-is-the-chain rule (`naming-config`). `qwen3_4b_rl_grpo` is a trained-policy subclass of
-`qwen3_4b`; the segment says which trainer produced it.
+Every group's names obey the name-is-the-chain rule and its trained-policy form (`qwen3_4b_rl_grpo`
+from `qwen3_4b`), both `naming-config`'s.
 
 ## The litmus for any new word
 
@@ -207,16 +214,17 @@ that `model_class` predicts which code runs.
 ```
 1. Direction?   producer / consumer / both  -> is `model` an input, an output, or both
 2. Code:        <pkg>/pipeline/<kind>/__init__.py  with main(cfg)
-3. Config:      config/pipeline/<kind>.yaml        name + class_path + init_kwargs + loop knobs
+3. Config:      config/pipeline/<kind>/<name>.yaml  opposite the code's directory, holding
+                name + class_path + init_kwargs + loop knobs
 4. Owned:       anything meaningless without this pipeline nests under it
                 (reward -> RL, judge -> eval, teacher -> distill, tools -> agent)
-5. Launcher:    launcher/<kind>__<model>__<dataset>/task.yaml
+5. Launcher:    launcher/<name>/task.yaml, named by naming-config's launcher grammar
 6. Consumes a policy? Its `model` is a trained-policy config (see eval-launchers.md)
 ```
 
-A new kind is one module, one config, one launcher. If it seems to need a new top-level directory or a
-launcher-only flag, it is on the wrong axis — re-run the litmus. A high-level kind such as `agent` or
-`serve` is no exception: same three groups, with whatever is meaningless without it nested underneath.
+A new kind is one module, one config, one launcher. If it seems to need a new top-level directory, it
+is on the wrong axis — re-run the litmus. A high-level kind such as `agent` or `serve` is no
+exception: same three groups, with whatever is meaningless without it nested underneath.
 
 ---
 
@@ -230,7 +238,9 @@ strands every shared part at whatever depth first needed it.
 
 **A part becomes a COMPONENT the moment a second thing needs it.** Not when it looks reusable, not
 when it is elegant — when a second consumer exists. Before that it is an implementation detail of one
-thing and belongs inside it.
+thing and belongs inside it. Lifting on the first speculative consumer produces a shelf of parts with
+one user each, named for a use case that never came. `layout-workspace` applies the same
+second-consumer test to splitting a package.
 
 Two forces, and they pull in different directions:
 
@@ -246,14 +256,16 @@ say the same thing: this is a component wearing a location.
 
 ## The rule
 
-1. **Components live above the things that use them**, in their own directory, grouped by the axis
-   they vary (`components/reward/`, `components/memory/`, not `components/for_grpo/`).
+1. **A part with several owners sits in its kind's directory, above the owners that share it**, named
+   for the axis it varies, never for one user (AutoRSI keeps its rewards and their memory backends in
+   `pipeline/rl/reward/` and its tracing instrument in `pipeline/observe/`, never a `for_grpo/`
+   shelf). A part with one owner nests under that owner, as every owned component does
+   (`config-composition`).
 2. **A component is selected by name, never by inheritance path.** If picking a different one means
    editing a class hierarchy, it is not yet a component.
-3. **An assembly is what runs, and the assembly is what gets a name.** A component alone is not
-   runnable and takes no run name — no entry point, no config group of its own at top level.
-4. **The assembled name records its components**, in a fixed slot order, so the name and the parts
-   determine each other. See `naming-config`.
+3. **Only an assembly runs, and only an assembly is named** (`naming-config`, Assembled names).
+4. **The assembled name records its components in a fixed slot order** (`naming-config`, Assembled
+   names).
 5. **Prefer selection to subclassing; use a mixin when the part changes BEHAVIOUR rather than DATA.**
    A reward is data-shaped and swaps by name. A trainer that adds a loss term is behaviour-shaped and
    composes as a mixin. Both are components; only the mechanism differs.
@@ -301,6 +313,11 @@ alternation and the arm silently becomes single-role — training fine, reportin
 not being the arm its name claims. An assembly's order is part of its meaning, so state it in the
 class docstring rather than leaving it to MRO trivia.
 
+AutoRSI's tree has moved on since. The instrument now lives in `pipeline/observe/tracing.py`, where
+`TracingDualRoleTrainer(DualRoleTrainer, StateTracingGRPOTrainer)` keeps the role schedule first, and
+the two memory backends sit beside the rewards in `pipeline/rl/reward/`, which is rule 1's kind
+directory.
+
 ## The test to apply
 
 > Would a second pipeline want this part, unchanged?
@@ -308,5 +325,4 @@ class docstring rather than leaving it to MRO trivia.
 Yes -> it is a component; lift it and select it by name.
 No  -> it is an implementation detail; leave it where it is.
 
-Answer this when the second consumer appears, not before. Lifting on the first speculative consumer
-produces a `components/` full of parts with one user and a name chosen for a use case that never came.
+Ask it when the second consumer appears, for the reason the principle above gives.

@@ -100,10 +100,12 @@ job: when a tool's mechanics belong to a skill we do not own, as `.pptx` packagi
   (`claude-auto-research`). The ledger never becomes a second source of truth.
 
 ## How the concerns connect at a launcher
-A single launcher ties three of them together: `naming-config` fixes its **name** and its
-model/pipeline/dataset triple; `platform-run` fills its **`task.yaml`**, the project's ONLY
-run-control file; `layout-workspace` says `launcher/` lives at repo top-level. Output dirs
-derive mechanically under `OUTPUT_DIR_HOME` (never the project dir).
+A single launcher ties five of them together. `naming-config` fixes its **name** and its
+model/pipeline/dataset triple. `config-composition` says what that triple contains and how it
+merges into the frozen config. `config-variants` says how a smoke, a probe or a grid cell varies the
+run without touching the launcher. `platform-run` fills its **`task.yaml`**, the project's only
+run-control file. `layout-workspace` says `launcher/` lives at the repo's top level. Output dirs
+derive mechanically under `OUTPUT_DIR_HOME`, never the project dir.
 
 ## Companions
 Every skill in the family should link back here. Non-family skills (`git-commit`,

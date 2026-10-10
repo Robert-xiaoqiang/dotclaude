@@ -167,6 +167,8 @@ only the control surface differs.
   submitting shell.
 - **One venv per accelerator, selected by the CLUSTER.** A job must never pin its own venv: a task
   pin overrides the cluster's choice and lands one silicon's binaries on another's hardware.
+  A `by_accelerator` map in a task spec is a declaration, not a pin, because the cluster's declared
+  accelerator selects the branch (`platform-run`).
 - **One live agent per mandate; never two writers on one volatile state file.** Sequential handoff
   between boxes is safe and intended; concurrent sessions on one tree are not.
 - **Declare a TOTAL world size, let the platform split it** by the pool's `cards_per_node`, and move

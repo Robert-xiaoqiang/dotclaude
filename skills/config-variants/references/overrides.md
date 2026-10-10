@@ -15,7 +15,7 @@ selecting that same group pass it.
 | **redundant** | value EQUALS the config default | delete, it does nothing |
 | **missing default** | ALL launchers selecting that group pass the same value | move it into the group config |
 | **per-run delta** | SOME launchers pass it, others take the default | correct, leave it |
-| **selector** | it names an owned component (`pipeline.reward=`, `memory.writer=`) | correct, this is the sanctioned swap path |
+| **selector** | it names an owned component (`pipeline.reward=`, `memory.writer=`) | correct, this is the sanctioned swap path (owned components are `config-composition`'s) |
 
 The count is what separates the middle two, and it is the whole diagnostic. **Every launcher of a
 pipeline passing `pipeline.backend=fsdp` means the config's default is simply wrong.** Four of twenty
@@ -25,38 +25,19 @@ Redundant is the most common and the least noticed, because it is invisible: the
 line is just noise, and nobody reads a submit line closely enough to spot a value that matches the
 default it overrides.
 
-## What is ALWAYS an override, however often it appears
+## The exception to the count
 
-A value the (pipeline, model, dataset) triple genuinely cannot express, and that changes per
-submission rather than per configuration. The canonical case is **scoring N checkpoints of one run in
-parallel**: same pipeline, same model, same dataset, same decoding, and only the checkpoint moves.
-
-    pipeline.checkpoint_path=<...>/checkpoint_step_2000
-    pipeline.checkpoint_path=<...>/checkpoint_step_4000
-
-Making that a config would mint a config file per checkpoint step, which is a file per artifact rather
-than per decision. It appears in every launcher of its kind and is still correct, so the
-"all launchers pass it" test does NOT apply to it. Ask instead: *does this name a choice, or an
-instance?* A choice belongs in config, an instance belongs on the command line.
-
-Distinguish these at submit time by deriving the job name from the override, never by minting a
-launcher per checkpoint (`eval-launchers.md`).
+A value that names an instance rather than a choice is an overlay however often it appears, so the
+"all launchers pass it" test does not apply to it. The canonical case is the checkpoint of an eval
+grid, `model.init_kwargs.path=<...>/checkpoint-N`, which every cell passes and which is still correct
+on the command line. The full statement, and how each cell's job is named, is The grid pattern in
+[../SKILL.md](../SKILL.md#the-grid-pattern).
 
 ## Smoke runs
 
-`naming-config` settles this: a pre-flight is the same arm with the dataset `tag` slot set
-(`dataset_name=healthbench_smoke`) and a short schedule passed as ordinary overrides. The subset is a
-named config because it changes WHAT is measured. The schedule stays an override because it changes
-only how long, and because making it a config forces a second coordinated selection.
-
-That coordination is the real argument. "Smoke" spans two groups, small data in `dataset` and short
-schedule in `pipeline`, so a fully-config smoke arm needs `pipeline_name=..._smoke` AND
-`dataset_name=..._smoke` selected together. They can desync, and the dangerous direction is silent:
-the full pipeline on the smoke dataset is a full-length run on 50 examples that reads as real.
-
-Going fully-config is still legitimate, on one condition: add a check that a `_smoke` pipeline may
-only pair with a `_smoke` dataset. With that check the desync is impossible and config wins. Without
-it, overrides are safer.
+A smoke's short schedule is a per-run delta of its smoke launcher or its invocation, never a missing
+default of the pipeline. Where it lives, and when a fully-config smoke is safe, is Smoke in
+[../SKILL.md](../SKILL.md#smoke).
 
 ## Do not audit a submit line by eye
 

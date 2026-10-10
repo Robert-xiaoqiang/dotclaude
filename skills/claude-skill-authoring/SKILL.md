@@ -233,8 +233,10 @@ and the rules that say how to push safely are no longer loaded. `model`, `effort
 11. **The name prefix says what kind of thing a skill governs**, as `conventions` defines it:
     `writing-*` for what a paper says, `drawing-*` for a figure, `docs-*` for a deliverable and its
     tooling, `code-*` for how code is written, `naming-*` for what a thing is called, `layout-*` for
-    where it lives, `config-*` for the configuration of a run. A skill whose prefix disagrees with its job gets
-    renamed, and the audit above is run before the rename is called done.
+    where it lives, `config-*` for the configuration of a run. A skill whose prefix disagrees with its
+    job gets renamed, and the audit above is run before the rename is called done. A name never extends
+    another skill's name to suggest a parent it does not have: a deep-dive gets its own family-subject
+    name, or becomes a `references/` file of its owner.
 12. **A skill we do not own is pointed at, never copied in.** Anthropic's first-party skills are
     licensed for use inside the service only; a repository keeps the part that was written here and
     names the first-party skill for the rest.

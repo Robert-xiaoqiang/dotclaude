@@ -3,7 +3,8 @@
 An eval family grows one config per experiment unless something says where a new one is allowed to
 come from. Without that rule the tree fills with names like `eval_unified`, `eval_sweep`,
 `eval_final_v2` — each naming the author's convenience or budget rather than a property of the
-measurement, and each indistinguishable from the others a month later.
+measurement, and each indistinguishable from the others a month later. That a name says what differs
+and never `_v2` is `naming-config` Hard rule 1. This file says which differences earn a new pipeline.
 
 ## The seven axes
 
@@ -12,7 +13,7 @@ Every evaluation varies along exactly these, and each belongs to a different own
 | # | axis | the question it answers | where it lives |
 |---|---|---|---|
 | 1 | **corpus** | which items are evaluated | `dataset` group |
-| 2 | **policy + decoder** | how tokens come out of the model | `model` group |
+| 2 | **policy + decoder** | how tokens come out of the model | `model` group (the decoding FAMILY is also the pipeline's method slot) |
 | 3 | **sampling** | how many samples, how random | `pipeline.eval.generation` |
 | 4 | **protocol** | what ONE attempt consists of | the pipeline FLAVOUR |
 | 5 | **reduction** | k samples → one verdict | `pipeline.eval.reduce` |
@@ -23,8 +24,8 @@ Every evaluation varies along exactly these, and each belongs to a different own
 
 > A change forks the **pipeline** only if it changes **what one attempt consists of** — its control
 > flow. A change of how an attempt becomes a number is a **scorer**. A change of how many attempts is
-> **sampling**. A change of which rows is a **dataset**. A change of how tokens are produced is a
-> **model**.
+> **sampling**. A change of which rows is a **dataset**. A change of how tokens are produced within
+> one decoding family is a **model**. A change of decoding family is the pipeline's **method slot**.
 
 Applied:
 
@@ -35,13 +36,14 @@ Applied:
 | self-consistency-8 vs pass@8 | same protocol (n=8), different **reduction** |
 | single-turn vs multi-turn with an environment | **different protocol** — new pipeline |
 | pass@k with an execution sandbox | **different protocol** — new pipeline |
-| AR vs MDM vs diffusion policy | model |
+| AR vs MDM decoding | the method slot (`eval_ar`, `eval_mdm`), since the generate loop differs |
+| denoising steps or block length within MDM | model |
 | full bench vs subsampled bench | dataset (the `tag` slot: `mini` / `smoke` / `toy`) |
 
-So the pipeline name should say the **protocol** — and it must also carry the base it derives from.
-If the scorer subfamilies are `eval_ar_choice` / `eval_ar_graded`, a protocol subfamily is
-`eval_ar_single_turn_suite`, later `eval_ar_multi_turn_suite` when there is an environment to talk
-to. Dropping the `ar` makes the one pipeline you actually run the only one whose base you cannot
+So the pipeline name should say the **protocol** — and it must also carry the base it derives from,
+whose method slot is the decoding family. If the scorer subfamilies are `eval_ar_choice` /
+`eval_ar_graded`, a protocol subfamily is `eval_ar_single_turn_suite`, later
+`eval_ar_multi_turn_suite` when there is an environment to talk to. Dropping the `ar` makes the one pipeline you actually run the only one whose base you cannot
 read off its name. The name must not say how much of each bench was scored — that is the corpus, and
 the corpus has a tag slot for exactly this.
 
@@ -55,11 +57,16 @@ be sharded (two ranks would accumulate two histories and report two measurements
 
 ## Three traps
 
-**Decoding is not an eval axis.** AR, MTP, MDM and diffusion are *model classes*. The loop should
-depend on a contract — `policy.generate(records, **sampling) -> completions` — and never on how the
-tokens were produced, or every new decoder forks the eval family for no measurement reason. The one
-thing that would justify an eval-side fork is decoder-specific *instrumentation*, and that is a
-different measurement, not a different decoder.
+**The decoding family is the method slot, and a decoder setting is never an eval axis.** An
+autoregressive and a masked-diffusion policy need different generate loops, which is different code,
+so the family names the eval pipeline's method slot. QDiffMDM keeps `eval_ar` beside `eval_mdm`, and
+every AutoRSI eval config is an `eval_ar_*`. Within one family the loop depends on a contract,
+`policy.generate(records, **sampling) -> completions`, and never on how the decoder is tuned. Denoising
+steps, block length or an extra prediction head belong to the model and never fork an eval pipeline,
+or every retuned decoder forks the eval family for no measurement reason. The one thing that would
+justify an eval-side fork within a family is decoder-specific *instrumentation*, and that is a
+different measurement, not a different decoder. `naming-config` owns the method slot, and
+`config-composition` owns where decoder settings live.
 
 **Latent internal computation is a model property too — and it is the tempting exception.** When a
 model's reasoning steps are not tokens (a looped transformer re-running a block, continuous "latent
@@ -81,7 +88,8 @@ loop, and earns its own name). Two consequences worth stating because both have 
   model emitted token salad. Only the generation protocol sees that.
 * **Name the protocol, never the model family.** `eval_<model-family>_*` reads as an eval that only
   works for one architecture, and the day a baseline needs the same measurement there is no name left
-  for it. The model belongs in the launcher's model slot.
+  for it. The model belongs in the launcher's model slot. The decoding family in the method slot is
+  not a model family, since `eval_ar` runs any autoregressive policy, latent or explicit.
 * **You cannot teacher-force a latent, so say WHICH AXIS a protocol forces.** A latent-reasoning model
   has two recurrences, and forcing is meaningful on only one. On the TOKEN axis (position *t* → *t+1*)
   the next input can be the reference token instead of the model's own argmax — that is teacher
@@ -110,7 +118,8 @@ loop, and earns its own name). Two consequences worth stating because both have 
 * **Which layer's hidden state is fed back is a MODEL property, not a protocol one.** Feeding the final
   layer's state versus an intermediate layer's (as System-1.5 does) changes the model class; both
   protocols call `model(...)` and `model.generate(...)` identically and neither knows the difference.
-  Same rule as the decoder: it changes what the policy IS, not what one attempt consists of.
+  Same rule as a decoder setting within a family: it changes what the policy IS, not what one attempt
+  consists of.
 
 **State carry deserves its own name.** "The sampler accumulates experience" sounds like a loading
 concern; it is not. If item *i* may depend on items before it, the score depends on item ORDER, two
@@ -135,8 +144,8 @@ claim that something happened. The instance that taught this: a `query` componen
 one group table and missing from another, so it built nothing while preflight cheerfully printed
 `query resolved to a component ok`, and four launched arms silently became their own control.
 
-Add `reduce` when the first n>1 arm needs it. Add the multi-turn protocol when there is an
-environment. The abstraction is the deliverable; the rungs are not.
+When each one earns its build is the second-consumer test that `layout-workspace` owns, which here
+means `reduce` with the first n>1 arm and the multi-turn protocol once there is an environment.
 
 **But if you do build a rung ahead of its use, it must run or REFUSE.** Those are the only two honest
 states. A multi-turn protocol with no environment should raise at construction, naming what is
@@ -148,10 +157,12 @@ each one either constructs or refuses with an actionable message; that check is 
 ## Auditing is not a mode of evaluating
 
 "Which benches did this checkpoint actually score?" is a question *about* evaluations, answerable
-from the output tree alone. Making it `pipeline.eval.mode: run | audit | repair` puts a branch in the
-pipeline that selects behaviour, and forces a GPU, a policy load and a judge into answering a
-filesystem question. Write a separate read-only script, and let it emit work into whatever queue the
-submission guard already drains rather than submitting anything itself.
+from the output tree alone. Making it `pipeline.eval.mode: run | audit | repair` would be the mode flag
+`config-variants` bans and the caller branch `code-abstraction` rule 10 forbids, and it forces a GPU, a
+policy load and a judge into answering a filesystem question. Write a separate read-only script, and
+let it emit work into whatever queue the submission guard already drains rather than submitting
+anything itself.
 
-Companions: `naming-config` (the slot grammar and the `tag` slot) · `eval-launchers.md` (naming an
-eval launcher and wiring a judge) · `pipeline-kinds.md` (where a pipeline term belongs).
+Companions: `naming-config` (the slot grammar, the method slot and the `tag` slot) ·
+`config-composition` (where decoder settings and the judge live) · `eval-launchers.md` (the trained
+policy an eval scores, and its judge) · `pipeline-kinds.md` (where a pipeline term belongs).
