@@ -63,7 +63,7 @@ pr-building/             本地，gitignore
 标题                    解放双手！OSCAR让操作系统交互实现自然语言「自由」
 导语 / 副标题           破解操作系统智能交互难题。
 [平台的专栏横幅与说明]   由机器之心加，作者不写
-**作者简介，整段加粗**   **本文作者王晓强，……博士生，师从刘邦教授。……**
+**作者简介，整段加粗**   **本文作者某某，……博士生，师从某某教授。……**
 开头段落
 [论文截图]
 - 论文题目：OSCAR: Operating System Control via State-Aware Reasoning and Re-Planning

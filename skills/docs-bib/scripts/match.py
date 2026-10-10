@@ -187,8 +187,8 @@ def name_forms(raw: str):
 def _initials_ok(a, b) -> bool:
     """Given names agree up to initial format: an initial meets any name with
     that first letter, two spelled-out names must be identical, and a missing
-    trailing middle name is allowed ('John' and 'John D.'). 'Xiao-Qiang' and
-    'Xiaoqiang' agree; 'Chong' and 'Chen' do not, nor 'Jeff' and 'Jeffrey'."""
+    trailing middle name is allowed ('John' and 'John D.'). 'Zi-Han' and
+    'Zihan' agree; 'Chong' and 'Chen' do not, nor 'Jeff' and 'Jeffrey'."""
     if a and b and "".join(a) == "".join(b):
         return True
     for x, y in zip(a, b):
