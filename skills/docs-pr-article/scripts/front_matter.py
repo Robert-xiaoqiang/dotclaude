@@ -7,6 +7,10 @@ bio / opening / screenshot / paper-info block, the first sentence, the shape of
 the paper-info block with URLs masked, and the section headings.
 
     front_matter.py <corpus/source_dir> <out.md> [title]
+
+Redactions come from corpus/_redact.tsv (gitignored, one `original<TAB>replacement`
+per line) and are applied to the whole record, so a name the public repo must not
+carry stays out of it on every regeneration without being written into this script.
 """
 import pathlib, re, sys
 
@@ -63,7 +67,14 @@ def main(argv):
              f"由 `scripts/front_matter.py {src.name}` 从本地全文生成，只记结构与短摘录，全文不进仓库。", ""]
     for f in sorted(src.glob("*.txt")):
         lines += record(f)
-    out.write_text("\n".join(lines))
+    text = "\n".join(lines)
+    redact = src.parent / "_redact.tsv"
+    if redact.exists():
+        for row in redact.read_text(encoding="utf-8").splitlines():
+            if "\t" in row:
+                a, b = row.split("\t", 1)
+                text = text.replace(a, b)
+    out.write_text(text)
     print(f"{out}: {len(list(src.glob('*.txt')))} articles")
 
 

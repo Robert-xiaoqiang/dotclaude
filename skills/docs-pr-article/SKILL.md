@@ -254,6 +254,8 @@ cd pr-building && ./build.sh        # 裁图 → 拼源文件 → 每个版本�
 
 **未发表论文的稿件也不进这个仓库。** 宣传稿里有论文的结果和作者，论文还没上 arXiv 时放进公开仓库就是提前公开。项目自己的稿件留在项目仓库的 `pr-building/` 里。
 
+**作者本人的名字也不进这个仓库。** 示例与派生物里的作者简介写成「本文作者某某，某大学（英文校名）」。派生物由脚本从本地全文重新生成，脚本会把名字带回来，所以替换表放在 gitignore 的 `corpus/_redact.tsv`（每行 `原文<TAB>替换`），`front_matter.py` 每次生成都套用它；名字写进脚本本身等于又提交了一次。
+
 采集用工作流并行：每个来源一个采集者，全文必须用 curl 抓原始 HTML 再抽取，WebFetch 只用来找链接，因为它会转述；最后一个完整性审查逐个文件复查是不是全文、结尾在不在、抽两段对照原网页。每个文件头部记录 `popularity`，找不到真实的阅读数就写 none found，不许编。
 
 ## 平台：公众号与小红书相反
@@ -322,7 +324,7 @@ cd pr-building && ./build.sh        # 裁图 → 拼源文件 → 每个版本�
 | `scripts/crop_paper.py` | 从编译后的论文裁论文截图、图、表、单个面板 | 按图注定位；矢量图标签不是正文；并排浮动体限制在本栏 |
 | `scripts/build_article.py` | 一份源文件出 .docx 与 .pdf，并核对图片数与中文渲染 | AIxiv 前置结构；上下标标记；字体缓存 |
 | `scripts/corpus_stats.py` | 统计语料并给稿件打分 | 所有节奏目标值的来源 |
-| `scripts/front_matter.py` | 从本地全文生成一个来源的前置结构记录（只有结构与短摘录） | `aixiv-front-matter-zh.md` 由它生成 |
+| `scripts/front_matter.py` | 从本地全文生成一个来源的前置结构记录（只有结构与短摘录），套用 `corpus/_redact.tsv` 的替换 | `aixiv-front-matter-zh.md` 由它生成 |
 | `references/style-stats-zh.md` | `corpus_stats.py` 在本地语料上的完整报告 | 各来源的中位数，与初稿和改稿的对比 |
 | `references/aixiv-front-matter-zh.md` | 已发表 AIxiv 稿件前置结构的逐行记录，含标题、导语与开头原文 | 加粗作者简介、论文题目列表、副标题 |
 | `references/title-corpus-zh.md` | 真实标题，按公式分组 | 标题公式与可复用构件 |
